@@ -1,0 +1,39 @@
+/usr/local/bin/pip --version        # python org version
+
+reports:
+
+pip 9.0.1 from /Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages (python 2.7)
+
+
+usr/local/bin/pip list              # python org version
+/usr/local/bin/python -m pip list   # python org version
+
+
+pip (9.0.1)
+setuptools (28.8.0)
+
+python -m site
+/usr/local/bin/python -m site
+
+sys.path = [
+    '/Users/Andy',
+    '/Library/Frameworks/Python.framework/Versions/2.7/lib/python27.zip',
+    '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7',
+    '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-darwin',
+    '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-mac',
+    '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-mac/lib-scriptpackages',
+    '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-tk',
+    '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-old',
+    '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-dynload',
+    '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages',
+]
+USER_BASE: '/Users/Andy/Library/Python/2.7' (doesn't exist)
+USER_SITE: '/Users/Andy/Library/Python/2.7/lib/python/site-packages' (doesn't exist)
+ENABLE_USER_SITE: True
+
+
+Andys-Mac-mini:~ Andy$ /usr/local/bin/easy_install --version
+setuptools 28.8.0 from /Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages (Python 2.7)
+
+Andys-Mac-mini:~ Andy$ /usr/bin/easy_install --version
+setuptools 18.5 from /System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python (Python 2.7)

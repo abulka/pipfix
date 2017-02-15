@@ -1,0 +1,22 @@
+{
+  "name": "pipfix",
+  "version": "1.0.0",
+  "description": "analyse python and pip installations and report or fix ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "ls2": "npm ls --depth=0",
+    "start": "node pipfix.js",
+    "dbg": "node-debug pipfix.js"
+  },
+  "keywords": [
+    "pip",
+    "python",
+    "fix"
+  ],
+  "author": "Andy Bulka",
+  "license": "ISC",
+  "devDependencies": {
+    "node-inspector": "^0.12.8"
+  }
+}
