@@ -48,8 +48,10 @@ if (pip_usr_local_bin.stderr.length == 0) {
   if (match != null) {
     pip_ver = match[1]
     pip_site = match[2]
+    console.log(`${info} is version ${pip_ver} associated with site-packages dir ${pip_site}`)
   }
-  console.log(`${info} version: ${pip_version_str} which decodes to ver ${pip_ver} site pckg ${pip_site}`)
+  else
+    console.log(`${info} is installed but cannot figure out anything about it - the pip command is probably empty or broken: "${pip_version_str}" - should retry with the python -m pip technique`)
 }
 else
   console.log(`${info} not installed in /usr/local/bin`)
@@ -63,30 +65,20 @@ let sys_path
 let chunk = ''
 let stdout = python_usr_bin_site.stdout.toString()
 let lines = stdout.split("\n")
-lines.forEach((line, index, arr) => {
-  if (line == 'sys.path = [') {
-    scan = true
-    return  // continue
-  }
-  if (scan)
-    chunk = chunk + line
-
-  if (line == ']')
-    scan = false
-
-  if (index === arr.length - 1 && line === "") {
-    chunk = 'sys_path = [' + chunk
-    eval(chunk)
-    return  // continue
-  }
-});
 
 // alternatively, pure ECMA6, use the new 'of' syntax
 for (let line of lines) {
+  if (line == 'sys.path = [') {
+    scan = true
+    continue
+  }
+  if (scan)
+    chunk = chunk + line
+  if (line == ']')
+    scan = false
 }
-// or
-for (let [index, value] of lines.entries()) {
-}
+chunk = 'sys_path = [' + chunk
+eval(chunk)
 
 // prt(ls_python_usr_bin)
 // prt(ls_python_usr_local_bin)
@@ -94,6 +86,6 @@ for (let [index, value] of lines.entries()) {
 
 let pip_in_site = sys_path.indexOf(pip_site) >= 0
 // console.log('sys_path', sys_path)
-console.log('pip_in_site is', pip_in_site)
+console.log('Is /usr/local/bin/pip associated with system python?', pip_in_site)
 
 console.log('DONE ')
