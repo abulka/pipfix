@@ -78,7 +78,9 @@ class Python extends Base {
     this.site_package_paths = []
     // this.analyse()
   }
-
+  report() {
+    console.log(`${this.path} - nothing to report`)
+  }
 }
 
 class Pip extends Base {
@@ -131,16 +133,28 @@ class Pip extends Base {
 
   analyse_version() {
     const regex = /pip (.*) from (.*)\/site-packages/
+    // const regex2 = /^\/Library\//
 
     let match = regex.exec(this.result_shell_version.stdout.toString())
     if (match != null) {
       this.version = match[1]
       this.site_package_path = match[2] + '/site-packages'
     }
+
+    // The directory
+    //   /Library/Python/2.7/site-packages
+    // used to be used by both system python AND python org python
+    // but as of python 2.7.13 is only used by mac system python - NOT python org python anymore cos of incompatibilities
+    //
+    // let match2 = regex2.exec(this.site_package_path)
+    // this.site_package_path_is_non_system_python = (match != null) {
   }
 
   report() {
-    console.log(`${this.path} exists: ${this.exists} runs ok: ${this.runs_ok} version: ${this.version} site_package_path: ${this.site_package_path}`)
+    console.log(`${this.path} exists: ${this.exists}`)
+    console.log(`${this.path} runs ok: ${this.runs_ok}`)
+    console.log(`${this.path} version: ${this.version}`)
+    console.log(`${this.path} site_package_path: ${this.site_package_path}`)
     if (this.warnings.length > 0) {
       console.log(`Warnings: ${this.warnings}`)
       // if verbose
@@ -153,7 +167,7 @@ class Pip extends Base {
 let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
 let python_usr_bin = new Python('/usr/bin/python')
 
-// python_usr_bin.report()
+python_usr_bin.report()
 pip_usr_local_bin.report()
 
 // parse the site info
@@ -186,6 +200,6 @@ eval(chunk)
 
 let pip_in_site = sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
 // console.log('sys_path', sys_path)
-console.log(`${pip_usr_local_bin.path} associated with system python? ${pip_in_site}`)
+console.log(`${pip_usr_local_bin.path} associated with mac system python? ${pip_in_site}`)
 
 console.log('DONE ')
