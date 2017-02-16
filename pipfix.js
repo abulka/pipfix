@@ -59,9 +59,10 @@ class Base {
   constructor(path) {
     this.path = path
     this.result_shell_ls
-    this.result_shell_version = 'fred'
+    this.result_shell_version
     this.version
     this.warnings = []
+    this.accept_stderr_msg_as_valid_for_version = false
   }
 
   get exists() {
@@ -87,13 +88,25 @@ class Base {
     //
 
     // return this.result_shell_version.stderr.length == 0
-    return this.valid(this.result_shell_version)
+    return this.valid(this.result_shell_version,
+                      this.accept_stderr_msg_as_valid_for_version)
 
   }
 
-  valid(result_shell_obj) {
-    return (result_shell_obj.stderr != null &&
+  valid(result_shell_obj, accept_stderr_msg_as_valid=false) {
+    if (accept_stderr_msg_as_valid &&
+        result_shell_obj.stderr != null &&
+        result_shell_obj.stderr.length > 0)
+      return true
+
+    if (result_shell_obj.stderr != null &&
       result_shell_obj.stderr.length == 0)
+      return true
+
+    return false
+
+    // return (result_shell_obj.stderr != null &&
+    //   result_shell_obj.stderr.length == 0)
   }
 
   analyse() {
@@ -128,7 +141,8 @@ let sys_path  // can we make this non global?
 
 class Python extends Base {
   constructor(path) {
-    super(path);
+    super(path)
+    this.accept_stderr_msg_as_valid_for_version = true  // cope with python 2 bug which reports python version via stderr rather than stdout
     this.result_shell_site_info
     this.site_package_paths = []
     this.analyse()
@@ -138,6 +152,14 @@ class Python extends Base {
     super.analyse()
     this.result_shell_site_info = spawn( this.path, [ '-m', 'site' ] )
     this.parse_site_info()
+  }
+
+  analyse_version() {
+    const regex = /Python (.*)/
+
+    let match = regex.exec(this.result_shell_version.stderr.toString())  // note: python 2 reports python version via stderr rather than stdout
+    if (match != null)
+      this.version = match[1]
   }
 
   parse_site_info() {
@@ -170,7 +192,7 @@ class Python extends Base {
 
   report() {
     super.report()
-    console.log(`${this.path} - nothing to report except for sys_path with ${sys_path.length} entries`)
+    console.log(`${this.path} sys_path: ${sys_path.length} entries`)
   }
 }
 
