@@ -5,8 +5,8 @@ let spawn = require( 'child_process' ).spawnSync
 let python_usr_bin = spawn( 'ls', [ '-lh', '/usr/bin/python' ] )
 let python_usr_bin_version = spawn( '/usr/bin/python', [ '--version'] )
 let python_usr_local_bin = spawn( 'ls', [ '-lh', '/usr/local/bin/python' ] )
-let pip_usr_local_bin = spawn( 'ls', [ '-lh', '/usr/local/bin/pip' ] )
-let pip_usr_local_bin_version = spawn( '/usr/local/bin/pip', [ '--version' ] )
+// let pip_usr_local_bin = spawn( 'ls', [ '-lh', '/usr/local/bin/pip' ] )
+// let pip_usr_local_bin_version = spawn( '/usr/local/bin/pip', [ '--version' ] )
 let python_usr_bin_site = spawn( '/usr/bin/python', [ '-m', 'site' ] )
 
 let info
@@ -36,33 +36,64 @@ if (python_usr_local_bin.stderr.length == 0)
 else
   console.log(`${info} not installed in /usr/local/bin\n`)
 
-info = 'pip'
-let pip_ver
-let pip_site
-let pip_version_str
 
-// Need to take into account different pip version reporting strings.  The egg bit at the end is not
-// necessarily going to be there.
-// pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)
-// pip 7.1.0 from /Library/Python/2.7/site-packages/pip-7.1.0-py2.7.egg (python 2.7)
-// const rexp1 = /^pip (.*) from (.*)\/pip-.*egg/
-const rexp1 = /pip (.*) from (.*)\/site-packages/
+class Pip {
 
+  constructor(path) {
+    this.path = path
+    this.result_shell_ls
+    this.result_shell_pip_version
+    this.version
+    this.site_package_path
+    this.warnings = []
 
-if (pip_usr_local_bin.stderr.length == 0) {
-  console.log(`${info} installed OK: ${pip_usr_local_bin.stdout.toString()}`)
-  pip_version_str = pip_usr_local_bin_version.stdout.toString()
-  let match = rexp1.exec(pip_version_str)
-  if (match != null) {
-    pip_ver = match[1]
-    pip_site = match[2] + '/site-packages'
-    console.log(`${info} is version ${pip_ver} associated with site-packages dir ${pip_site}`)
+    this.analyse()
   }
-  else
-    console.log(`${info} is installed but cannot figure out anything about it - the pip command is probably empty or broken: "${pip_version_str}" - should retry with the python -m pip technique`)
+
+  get exists() {
+    return this.result_shell_ls.stderr.length == 0
+  }
+  get runs_ok() {
+    return this.result_shell_pip_version.stderr.length == 0
+  }
+
+  analyse() {
+    this.result_shell_ls = spawn( 'ls', [ '-lh', this.path ] )
+    this.result_shell_pip_version = spawn( this.path, [ '--version' ] )
+
+    if (this.exists && this.runs_ok) {
+      this.analyse_version()
+      if (this.version == undefined) this.warnings.push(`${this.path} exists but version could not be determined`)
+    }
+
+    if (! this.exists) this.warnings.push("executable doesn't exist")
+    if (! this.runs_ok) this.warnings.push("doesn't run properly")
+  }
+
+  analyse_version() {
+    const regex = /pip (.*) from (.*)\/site-packages/
+
+    let match = regex.exec(this.result_shell_pip_version.stdout.toString())
+    if (match != null) {
+      this.version = match[1]
+      this.site_package_path = match[2] + '/site-packages'
+    }
+  }
+
+  report() {
+    console.log(`${this.path} exists: ${this.exists} runs ok: ${this.runs_ok} version: ${this.version} site_package_path: ${this.site_package_path}`)
+    if (this.warnings.length > 0) {
+      console.log(`Warnings: ${this.warnings}`)
+      // if verbose
+      prt(this.result_shell_ls)
+      prt(this.result_shell_pip_version)
+    }
+  }
 }
-else
-  console.log(`${info} not installed in /usr/local/bin`)
+
+let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
+pip_usr_local_bin.report()
+
 
 // parse the site info
 // prt(python_usr_bin_site)
@@ -92,8 +123,8 @@ eval(chunk)
 // prt(ls_python_usr_local_bin)
 // prt(pip_usr_local_bin)
 
-let pip_in_site = sys_path.indexOf(pip_site) >= 0
+let pip_in_site = sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
 // console.log('sys_path', sys_path)
-console.log('Is /usr/local/bin/pip associated with system python?', pip_in_site)
+console.log(`${pip_usr_local_bin.path} associated with system python? ${pip_in_site}`)
 
 console.log('DONE ')
