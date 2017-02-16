@@ -1,5 +1,19 @@
 'use strict';
 
+// DEBUG http://stackoverflow.com/questions/27688804/how-do-i-debug-error-spawn-enoent-on-node-js
+//
+// (function() {
+//     var childProcess = require("child_process");
+//     var oldSpawn = childProcess.spawnSync;
+//     function mySpawn() {
+//         console.log('spawn called');
+//         console.log(arguments);
+//         var result = oldSpawn.apply(this, arguments);
+//         return result;
+//     }
+//     childProcess.spawnSync = mySpawn;
+// })();
+
 let spawn = require( 'child_process' ).spawnSync
 
 // let python_usr_bin = spawn( 'ls', [ '-lh', '/usr/bin/python' ] )
@@ -16,9 +30,10 @@ let spawn = require( 'child_process' ).spawnSync
 // let info
 
 function prt(cmd) {
-  if (cmd.stderr.length != 0)
+  if (cmd.stderr != null && cmd.stderr.length != 0)
     console.log(`stderr: ${cmd.stderr.toString()}`)
-  console.log(`stdout: ${cmd.stdout.toString()}`)
+  if (cmd.stdout != null && cmd.stdout.length != 0)
+    console.log(`stdout: ${cmd.stdout.toString()}`)
 }
 
 console.log('--------')
@@ -57,7 +72,9 @@ class Base {
     // prt(this.result_shell_version)
     // console.log('--- exists // --')
     //
-    return this.result_shell_ls.stderr.length == 0
+
+    // return this.result_shell_ls.stderr.length == 0
+    return this.valid(this.result_shell_ls)
   }
 
   get runs_ok() {
@@ -68,12 +85,41 @@ class Base {
     // prt(this.result_shell_version)
     // console.log('--- runs_ok // --')
     //
-    return this.result_shell_version.stderr.length == 0
+
+    // return this.result_shell_version.stderr.length == 0
+    return this.valid(this.result_shell_version)
+
+  }
+
+  valid(result_shell_obj) {
+    return (result_shell_obj.stderr != null &&
+      result_shell_obj.stderr.length == 0)
   }
 
   analyse() {
     this.result_shell_ls = spawn('ls', ['-lh', this.path])
     this.result_shell_version = spawn(this.path, ['--version'])
+
+    if (this.exists && this.runs_ok) {
+      this.analyse_version()
+      if (this.version == undefined) this.warnings.push(`${this.path} exists but version could not be determined`)
+    }
+
+    if (! this.exists) this.warnings.push("executable doesn't exist")
+    if (! this.runs_ok) this.warnings.push("doesn't run properly")
+  }
+
+  report() {
+    console.log(`${this.path} exists: ${this.exists}`)
+    console.log(`${this.path} runs ok: ${this.runs_ok}`)
+    console.log(`${this.path} version: ${this.version}`)
+
+    if (this.warnings.length > 0) {
+      console.log(`Warnings: ${this.warnings}`)
+      // if verbose
+      prt(this.result_shell_ls)
+      prt(this.result_shell_version)
+    }
   }
 
 }
@@ -95,6 +141,12 @@ class Python extends Base {
   }
 
   parse_site_info() {
+    if (! this.valid(this.result_shell_site_info))
+      return
+    // if (this.result_shell_site_info.stderr == null ||
+    //     this.result_shell_site_info.stderr.length > 0)
+    //   return
+
     let line = ''
     let scan = false
     let sys_path_str = 'var sys_path = '
@@ -117,7 +169,8 @@ class Python extends Base {
   }
 
   report() {
-    console.log(`${this.path} - nothing to report except for ${sys_path}`)
+    super.report()
+    console.log(`${this.path} - nothing to report except for sys_path with ${sys_path.length} entries`)
   }
 }
 
@@ -161,13 +214,6 @@ class Pip extends Base {
     // prt(this.result_shell_version)
     // console.log('--- ANALYSE // --')
 
-    if (this.exists && this.runs_ok) {
-      this.analyse_version()
-      if (this.version == undefined) this.warnings.push(`${this.path} exists but version could not be determined`)
-    }
-
-    if (! this.exists) this.warnings.push("executable doesn't exist")
-    if (! this.runs_ok) this.warnings.push("doesn't run properly")
   }
 
   analyse_version() {
@@ -190,16 +236,11 @@ class Pip extends Base {
   }
 
   report() {
-    console.log(`${this.path} exists: ${this.exists}`)
-    console.log(`${this.path} runs ok: ${this.runs_ok}`)
-    console.log(`${this.path} version: ${this.version}`)
+    super.report()
+    // console.log(`${this.path} exists: ${this.exists}`)
+    // console.log(`${this.path} runs ok: ${this.runs_ok}`)
+    // console.log(`${this.path} version: ${this.version}`)
     console.log(`${this.path} site_package_path: ${this.site_package_path}`)
-    if (this.warnings.length > 0) {
-      console.log(`Warnings: ${this.warnings}`)
-      // if verbose
-      prt(this.result_shell_ls)
-      prt(this.result_shell_version)
-    }
   }
 }
 
@@ -216,7 +257,15 @@ pip_usr_local_bin.report()
 // prt(pip_usr_local_bin)
 
 let pip_in_site = sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
-// console.log('sys_path', sys_path)
 console.log(`${pip_usr_local_bin.path} associated with mac system python? ${pip_in_site}`)
+
+// this alters the global 'sys_path' - BAD - need to make sys_path a local to each python instance
+sys_path = []
+let python_usr_local_bin = new Python('/usr/local/bin/python')
+python_usr_local_bin.report()
+if (sys_path.length > 0) {
+  pip_in_site = sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
+  console.log(`${pip_usr_local_bin.path} associated with OTHER python (if any)? ${pip_in_site}`)
+}
 
 console.log('DONE ')
