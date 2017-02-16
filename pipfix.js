@@ -40,14 +40,22 @@ info = 'pip'
 let pip_ver
 let pip_site
 let pip_version_str
-const rexp1 = /^pip (.*) from (.*)\/pip-.*egg/
+
+// Need to take into account different pip version reporting strings.  The egg bit at the end is not
+// necessarily going to be there.
+// pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)
+// pip 7.1.0 from /Library/Python/2.7/site-packages/pip-7.1.0-py2.7.egg (python 2.7)
+// const rexp1 = /^pip (.*) from (.*)\/pip-.*egg/
+const rexp1 = /pip (.*) from (.*)\/site-packages/
+
+
 if (pip_usr_local_bin.stderr.length == 0) {
   console.log(`${info} installed OK: ${pip_usr_local_bin.stdout.toString()}`)
   pip_version_str = pip_usr_local_bin_version.stdout.toString()
   let match = rexp1.exec(pip_version_str)
   if (match != null) {
     pip_ver = match[1]
-    pip_site = match[2]
+    pip_site = match[2] + '/site-packages'
     console.log(`${info} is version ${pip_ver} associated with site-packages dir ${pip_site}`)
   }
   else
