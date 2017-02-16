@@ -118,8 +118,8 @@ class Base {
       if (this.version == undefined) this.warnings.push(`${this.path} exists but version could not be determined`)
     }
 
-    if (! this.exists) this.warnings.push("executable doesn't exist")
-    if (! this.runs_ok) this.warnings.push("doesn't run properly")
+    if (! this.exists) this.warnings.push(`${this.path} executable doesn't exist`)
+    if (this.exists && ! this.runs_ok) this.warnings.push(`${this.path} doesn't run properly`)
   }
 
   report() {
@@ -128,7 +128,8 @@ class Base {
     console.log(`${this.path} version: ${this.version}`)
 
     if (this.warnings.length > 0) {
-      console.log(`Warnings: ${this.warnings}`)
+      for (let warning of this.warnings)
+        console.log(`Warning: ${warning}`)
       // if verbose
       prt(this.result_shell_ls)
       prt(this.result_shell_version)
@@ -192,7 +193,8 @@ class Python extends Base {
 
   report() {
     super.report()
-    console.log(`${this.path} sys_path: ${sys_path.length} entries`)
+    if (this.runs_ok)
+      console.log(`${this.path} sys_path: ${sys_path.length} entries`)
   }
 }
 
@@ -270,7 +272,9 @@ let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
 let python_usr_bin = new Python('/usr/bin/python')
 
 python_usr_bin.report()
+console.log()
 pip_usr_local_bin.report()
+console.log()
 
 
 
@@ -280,6 +284,7 @@ pip_usr_local_bin.report()
 
 let pip_in_site = sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
 console.log(`${pip_usr_local_bin.path} associated with mac system python? ${pip_in_site}`)
+console.log()
 
 // this alters the global 'sys_path' - BAD - need to make sys_path a local to each python instance
 sys_path = []
