@@ -7,13 +7,13 @@ let spawn = require( 'child_process' ).spawnSync
 // let python_usr_local_bin = spawn( 'ls', [ '-lh', '/usr/local/bin/python' ] )
 // let pip_usr_local_bin = spawn( 'ls', [ '-lh', '/usr/local/bin/pip' ] )
 // let pip_usr_local_bin_version = spawn( '/usr/local/bin/pip', [ '--version' ] )
-let python_usr_bin_site = spawn( '/usr/bin/python', [ '-m', 'site' ] )
+// let python_usr_bin_site = spawn( '/usr/bin/python', [ '-m', 'site' ] )
 // prt(python_usr_bin_site)
 //
 // let ppp = spawn( 'ls', [ '-lh', '/usr/local/bin/pip' ] )
 // prt(ppp)
 
-let info
+// let info
 
 function prt(cmd) {
   if (cmd.stderr.length != 0)
@@ -70,16 +70,54 @@ class Base {
     //
     return this.result_shell_version.stderr.length == 0
   }
+
+  analyse() {
+    this.result_shell_ls = spawn('ls', ['-lh', this.path])
+    this.result_shell_version = spawn(this.path, ['--version'])
+  }
+
 }
+
+let sys_path  // can we make this non global?
 
 class Python extends Base {
   constructor(path) {
     super(path);
+    this.result_shell_site_info
     this.site_package_paths = []
-    // this.analyse()
+    this.analyse()
   }
+
+  analyse() {
+    super.analyse()
+    this.result_shell_site_info = spawn( this.path, [ '-m', 'site' ] )
+    this.parse_site_info()
+  }
+
+  parse_site_info() {
+    let line = ''
+    let scan = false
+    let sys_path_str = 'var sys_path = '
+    let chunk = ''
+    let stdout = this.result_shell_site_info.stdout.toString()
+    let lines = stdout.split("\n")
+
+    for (let line of lines) {
+      if (line == 'sys.path = [') {
+        scan = true
+        continue
+      }
+      if (scan)
+        chunk = chunk + line
+      if (line == ']')
+        scan = false
+    }
+    chunk = 'sys_path = [' + chunk
+    eval(chunk)
+  }
+
   report() {
-    console.log(`${this.path} - nothing to report`)
+    console.log(`${this.path} - nothing to report except for ${sys_path}`)
   }
 }
 
@@ -111,8 +149,9 @@ class Pip extends Base {
   // }
 
   analyse() {
-    this.result_shell_ls = spawn( 'ls', [ '-lh', this.path ] )
-    this.result_shell_version = spawn( this.path, [ '--version' ] )
+    super.analyse()
+    // this.result_shell_ls = spawn( 'ls', [ '-lh', this.path ] )
+    // this.result_shell_version = spawn( this.path, [ '--version' ] )
 
     // DEBUG
     // console.log('--- ANALYSE --')
@@ -170,29 +209,7 @@ let python_usr_bin = new Python('/usr/bin/python')
 python_usr_bin.report()
 pip_usr_local_bin.report()
 
-// parse the site info
-// prt(python_usr_bin_site)
-let line = ''
-let scan = false
-let sys_path_str = 'var sys_path = '
-let sys_path
-let chunk = ''
-let stdout = python_usr_bin_site.stdout.toString()
-let lines = stdout.split("\n")
 
-// alternatively, pure ECMA6, use the new 'of' syntax
-for (let line of lines) {
-  if (line == 'sys.path = [') {
-    scan = true
-    continue
-  }
-  if (scan)
-    chunk = chunk + line
-  if (line == ']')
-    scan = false
-}
-chunk = 'sys_path = [' + chunk
-eval(chunk)
 
 // prt(ls_python_usr_bin)
 // prt(ls_python_usr_local_bin)
