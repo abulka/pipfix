@@ -3,16 +3,40 @@
 let spawn = require( 'child_process' ).spawnSync
 const format = require('fmt-obj')  // https://github.com/queckezz/fmt-obj
 
-function prt(cmd) {
+function prt(cmd, verbose=true) {
   let result = {}
-  if (cmd.stderr != null && cmd.stderr.length != 0)
-    result.stderr = cmd.stderr.toString()
-  if (cmd.stdout != null && cmd.stdout.length != 0)
-    result.stdout = cmd.stdout.toString()
+
+  if (cmd.stderr == null) {
+    if (verbose)
+      result.stderr = null
+  }
+  else
+      if (cmd.stderr.length == 0) {
+        if (verbose)
+          result.stderr = cmd.stderr.toString().trim()
+      }
+      else
+        result.stderr = cmd.stderr.toString().trim()
+
+  if (cmd.stdout == null) {
+    if (verbose)
+      result.stdout = null
+  }
+  else
+      if (cmd.stdout.length == 0) {
+        if (verbose)
+          result.stdout = cmd.stdout.toString().trim()
+      }
+      else
+        result.stdout = cmd.stdout.toString().trim()
+
   return result
 }
 
-console.log('--------')
+function cmd_was_run(cmd) {
+  return (cmd.stderr != null &&
+          cmd.stdout != null )
+}
 
 
 class Base {
@@ -20,7 +44,9 @@ class Base {
     this.path = path
     this.result_shell_ls
     this.result_shell_version
+    this.result_shell_file_size
     this.version
+    this.size
     this.warnings = []
     this.accept_stderr_msg_as_valid_for_version = false
     this.report_obj = {}
@@ -48,13 +74,28 @@ class Base {
     return false
   }
 
+  analyse_exe_empty() {
+    const regex = /^\s+(\d+)\s{1}\//
+
+    let match = regex.exec(this.result_shell_file_size.stdout.toString())  // match things like "     281 /usr/local/bin/pip"
+    if (match != null)
+      this.size = parseInt(match[1])
+  }
+
   analyse() {
     this.result_shell_ls = spawn('ls', ['-lh', this.path])
     this.result_shell_version = spawn(this.path, ['--version'])
+    this.result_shell_file_size = spawn('wc', ['-c', this.path])
 
     if (this.exists && this.runs_ok) {
-      this.analyse_version()
-      if (this.version == undefined) this.warnings.push(`${this.path} exists but version could not be determined`)
+      this.analyse_version()  // template pattern - method declared in subclass
+      if (this.version == undefined) this.warnings.push(`version could not be determined`)
+    }
+
+    if (this.exists && ! this.runs_ok) {
+      this.analyse_exe_empty()
+      if (this.size == undefined) this.warnings.push(`could not determine file size`)
+      if (this.size == 0) this.warnings.push(`executable file exists but is empty?`)
     }
 
     // if (! this.exists) this.warnings.push(`${this.path} executable doesn't exist`)
@@ -72,8 +113,13 @@ class Base {
     if (this.warnings.length > 0) {
       this.report_obj.warnings = this.warnings
       // if verbose
-      this.report_obj.result_shell_ls = prt(this.result_shell_ls)
-      this.report_obj.result_shell_version = prt(this.result_shell_version)
+      this.report_obj['shell results'] = {}
+      if (cmd_was_run(this.result_shell_ls))
+        this.report_obj['shell results']['ls -l'] = prt(this.result_shell_ls)
+      if (cmd_was_run(this.result_shell_version))
+        this.report_obj['shell results']['--version'] = prt(this.result_shell_version)
+      if (cmd_was_run(this.result_shell_file_size))
+        this.report_obj['shell results']['wc -c'] = prt(this.result_shell_file_size)
     }
   }
 
