@@ -172,10 +172,12 @@ class Pip extends Base {
     super.report()
     console.log(`${this.path} site_package_path: ${this.site_package_path}`)
     for (let python of this.pythons) {
-      if (python.sys_path.length > 0) {  // should be python.valid() ?
-        let pip_in_site = python.sys_path.indexOf(this.site_package_path) >= 0
-        console.log(`${this.path} associated with ${python.path}? ${pip_in_site}`)
-      }
+      let pip_and_python_share_a_site = false
+      if (! python.exists)
+        pip_and_python_share_a_site = 'N/A'
+      else
+        pip_and_python_share_a_site = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
+      console.log(`${this.path} associated with ${python.path}? ${pip_and_python_share_a_site}`)
     }
   }
 }
