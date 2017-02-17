@@ -73,7 +73,7 @@ class Base {
       return result_shell_obj.stderr.length == 0
   }
 
-  analyse_exe_empty() {
+  analyse_is_exe_empty() {
     const regex = /^\s+(\d+)\s{1}\//
 
     let match = regex.exec(this.result_shell_file_size.stdout.toString())  // match things like "     281 /usr/local/bin/pip"
@@ -86,18 +86,14 @@ class Base {
     this.result_shell_version = spawn(this.path, ['--version'])
     this.result_shell_file_size = spawn('wc', ['-c', this.path])
 
-    if (this.exists && this.runs_ok) {
+    if (this.exists) {
+      this.analyse_is_exe_empty()
       this.analyse_version()  // template pattern - method declared in subclass
-      if (this.version == undefined) this.warnings.push(`version could not be determined`)
-    }
 
-    if (this.exists && ! this.runs_ok) {
-      this.analyse_exe_empty()
+      if (this.version == undefined) this.warnings.push(`version could not be determined`)
       if (this.size == undefined) this.warnings.push(`could not determine file size`)
       if (this.size == 0) this.warnings.push(`executable file exists but is empty?`)
     }
-
-    // if (! this.exists) this.warnings.push(`${this.path} executable doesn't exist`)
     if (this.exists && ! this.runs_ok) this.warnings.push(`${this.path} doesn't run properly`)
   }
 
