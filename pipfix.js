@@ -48,7 +48,7 @@ class Base {
     this.version
     this.size
     this.warnings = []
-    this.accept_stderr_msg_as_valid_for_version = false
+    this.interpret_stderr_as_stdout_for_getting_version_info = false  // subclass to set if needed
     this.report_obj = {}
   }
 
@@ -57,21 +57,20 @@ class Base {
   }
 
   get runs_ok() {
-    return this.valid(this.result_shell_version,
-                      this.accept_stderr_msg_as_valid_for_version)
+    return this.valid(this.result_shell_version)
   }
 
-  valid(result_shell_obj, accept_stderr_msg_as_valid=false) {
-    if (accept_stderr_msg_as_valid &&
-        result_shell_obj.stderr != null &&
-        result_shell_obj.stderr.length > 0)
-      return true
+  valid(result_shell_obj) {
+    if (! cmd_was_run(result_shell_obj))
+      return false
 
-    if (result_shell_obj.stderr != null &&
-      result_shell_obj.stderr.length == 0)
-      return true
+    let accept_stderr_msg_as_valid = result_shell_obj.args[1] == "--version" &&
+                                     this.interpret_stderr_as_stdout_for_getting_version_info
 
-    return false
+    if (accept_stderr_msg_as_valid)
+      return result_shell_obj.stderr.length > 0
+    else
+      return result_shell_obj.stderr.length == 0
   }
 
   analyse_exe_empty() {
@@ -128,7 +127,7 @@ class Base {
 class Python extends Base {
   constructor(path) {
     super(path)
-    this.accept_stderr_msg_as_valid_for_version = true  // cope with python 2 bug which reports python version via stderr rather than stdout
+    this.interpret_stderr_as_stdout_for_getting_version_info = true  // cope with python 2 bug which reports python version via stderr rather than stdout
     this.result_shell_site_info
     this.sys_path = []
     this.analyse()
