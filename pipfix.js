@@ -73,14 +73,12 @@ class Base {
 
 }
 
-let sys_path  // can we make this non global?
-
 class Python extends Base {
   constructor(path) {
     super(path)
     this.accept_stderr_msg_as_valid_for_version = true  // cope with python 2 bug which reports python version via stderr rather than stdout
     this.result_shell_site_info
-    this.site_package_paths = []
+    this.sys_path = []
     this.analyse()
   }
 
@@ -102,31 +100,35 @@ class Python extends Base {
     if (! this.valid(this.result_shell_site_info))
       return
 
-    let line = ''
+    let lines = this.result_shell_site_info.stdout.toString().split("\n")
     let scan = false
-    let sys_path_str = 'var sys_path = '
     let chunk = ''
-    let stdout = this.result_shell_site_info.stdout.toString()
-    let lines = stdout.split("\n")
 
     for (let line of lines) {
       if (line == 'sys.path = [') {
+        chunk = '['
         scan = true
         continue
       }
       if (scan)
-        chunk = chunk + line
+        chunk += line
       if (line == ']')
         scan = false
     }
-    chunk = 'sys_path = [' + chunk
-    eval(chunk)
+
+    function eval_local(chunk){
+      "use strict"
+      let sys_path = eval(`let x = ${chunk} ; x`);
+      return sys_path
+    }
+
+    this.sys_path = eval_local(chunk)  // idea from http://stackoverflow.com/questions/9781285/specify-scope-for-eval-in-javascript
   }
 
   report() {
     super.report()
     if (this.runs_ok)
-      console.log(`${this.path} sys_path: ${sys_path.length} entries`)
+      console.log(`${this.path} sys_path: ${this.sys_path.length} entries`)
   }
 }
 
@@ -174,16 +176,16 @@ console.log()
 pip_usr_local_bin.report()
 console.log()
 
-let pip_in_site = sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
+let pip_in_site = python_usr_bin.sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
 console.log(`${pip_usr_local_bin.path} associated with mac system python? ${pip_in_site}`)
 console.log()
 
 // this alters the global 'sys_path' - BAD - need to make sys_path a local to each python instance
-sys_path = []
+// sys_path = []
 let python_usr_local_bin = new Python('/usr/local/bin/python')
 python_usr_local_bin.report()
-if (sys_path.length > 0) {
-  pip_in_site = sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
+if (python_usr_local_bin.sys_path.length > 0) {
+  pip_in_site = python_usr_local_bin.sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
   console.log(`${pip_usr_local_bin.path} associated with OTHER python (if any)? ${pip_in_site}`)
 }
 
