@@ -53,15 +53,16 @@ class Base {
       if (this.version == undefined) this.warnings.push(`${this.path} exists but version could not be determined`)
     }
 
-    if (! this.exists) this.warnings.push(`${this.path} executable doesn't exist`)
+    // if (! this.exists) this.warnings.push(`${this.path} executable doesn't exist`)
     if (this.exists && ! this.runs_ok) this.warnings.push(`${this.path} doesn't run properly`)
   }
 
   report() {
     console.log(`${this.path} exists: ${this.exists}`)
-    console.log(`${this.path} runs ok: ${this.runs_ok}`)
-    console.log(`${this.path} version: ${this.version}`)
-
+    if (this.exists) {
+      console.log(`${this.path} runs ok: ${this.runs_ok}`)
+      console.log(`${this.path} version: ${this.version}`)
+    }
     if (this.warnings.length > 0) {
       for (let warning of this.warnings)
         console.log(`Warning: ${warning}`)
@@ -136,6 +137,7 @@ class Pip extends Base {
   constructor(path) {
     super(path);
     this.site_package_path
+    this.pythons = []
     this.analyse()
   }
 
@@ -162,31 +164,35 @@ class Pip extends Base {
     // this.site_package_path_is_non_system_python = (match != null) {
   }
 
+  inform_about(python) {
+    this.pythons.push(python)
+  }
+
   report() {
     super.report()
     console.log(`${this.path} site_package_path: ${this.site_package_path}`)
+    for (let python of this.pythons) {
+      if (python.sys_path.length > 0) {  // should be python.valid() ?
+        let pip_in_site = python.sys_path.indexOf(this.site_package_path) >= 0
+        console.log(`${this.path} associated with ${python.path}? ${pip_in_site}`)
+      }
+    }
   }
 }
 
-let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
 let python_usr_bin = new Python('/usr/bin/python')
+let python_usr_local_bin = new Python('/usr/local/bin/python')
+let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
+pip_usr_local_bin.inform_about(python_usr_bin)
+pip_usr_local_bin.inform_about(python_usr_local_bin)
 
 python_usr_bin.report()
 console.log()
+
+python_usr_local_bin.report()
+console.log()
+
 pip_usr_local_bin.report()
 console.log()
-
-let pip_in_site = python_usr_bin.sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
-console.log(`${pip_usr_local_bin.path} associated with mac system python? ${pip_in_site}`)
-console.log()
-
-// this alters the global 'sys_path' - BAD - need to make sys_path a local to each python instance
-// sys_path = []
-let python_usr_local_bin = new Python('/usr/local/bin/python')
-python_usr_local_bin.report()
-if (python_usr_local_bin.sys_path.length > 0) {
-  pip_in_site = python_usr_local_bin.sys_path.indexOf(pip_usr_local_bin.site_package_path) >= 0
-  console.log(`${pip_usr_local_bin.path} associated with OTHER python (if any)? ${pip_in_site}`)
-}
 
 console.log('DONE ')
