@@ -1,12 +1,15 @@
 'use strict';
 
 let spawn = require( 'child_process' ).spawnSync
+const format = require('fmt-obj')  // https://github.com/queckezz/fmt-obj
 
 function prt(cmd) {
+  let result = {}
   if (cmd.stderr != null && cmd.stderr.length != 0)
-    console.log(`stderr: ${cmd.stderr.toString()}`)
+    result.stderr = cmd.stderr.toString()
   if (cmd.stdout != null && cmd.stdout.length != 0)
-    console.log(`stdout: ${cmd.stdout.toString()}`)
+    result.stdout = cmd.stdout.toString()
+  return result
 }
 
 console.log('--------')
@@ -20,6 +23,7 @@ class Base {
     this.version
     this.warnings = []
     this.accept_stderr_msg_as_valid_for_version = false
+    this.report_obj = {}
   }
 
   get exists() {
@@ -58,17 +62,18 @@ class Base {
   }
 
   report() {
-    console.log(`${this.path} exists: ${this.exists}`)
+    this.report_obj = {}
+    this.report_obj.path = this.path
+    this.report_obj['executable exists'] = this.exists
     if (this.exists) {
-      console.log(`${this.path} runs ok: ${this.runs_ok}`)
-      console.log(`${this.path} version: ${this.version}`)
+      this.report_obj.runs_ok = this.runs_ok
+      this.report_obj.version = this.version
     }
     if (this.warnings.length > 0) {
-      for (let warning of this.warnings)
-        console.log(`Warning: ${warning}`)
+      this.report_obj.warnings = this.warnings
       // if verbose
-      prt(this.result_shell_ls)
-      prt(this.result_shell_version)
+      this.report_obj.result_shell_ls = prt(this.result_shell_ls)
+      this.report_obj.result_shell_version = prt(this.result_shell_version)
     }
   }
 
@@ -129,7 +134,7 @@ class Python extends Base {
   report() {
     super.report()
     if (this.runs_ok)
-      console.log(`${this.path} sys_path: ${this.sys_path.length} entries`)
+      this.report_obj['sys.path'] = `${this.sys_path.length} entries`
   }
 }
 
@@ -170,14 +175,16 @@ class Pip extends Base {
 
   report() {
     super.report()
-    console.log(`${this.path} site_package_path: ${this.site_package_path}`)
+    this.report_obj.site = this.site_package_path
+
+    this.report_obj.associations = {}
     for (let python of this.pythons) {
       let pip_and_python_share_a_site = false
       if (! python.exists)
         pip_and_python_share_a_site = 'N/A'
       else
         pip_and_python_share_a_site = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
-      console.log(`${this.path} associated with ${python.path}? ${pip_and_python_share_a_site}`)
+      this.report_obj.associations[python.path] = pip_and_python_share_a_site
     }
   }
 }
@@ -189,12 +196,13 @@ pip_usr_local_bin.inform_about(python_usr_bin)
 pip_usr_local_bin.inform_about(python_usr_local_bin)
 
 python_usr_bin.report()
-console.log()
-
 python_usr_local_bin.report()
-console.log()
-
 pip_usr_local_bin.report()
-console.log()
+let report = {
+  'Python System Mac': python_usr_bin.report_obj,
+  'Python Other': python_usr_local_bin.report_obj,
+  'Pip': pip_usr_local_bin.report_obj
+}
+console.log(format(report))
 
 console.log('DONE ')

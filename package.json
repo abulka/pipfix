@@ -19,5 +19,8 @@
   "license": "ISC",
   "devDependencies": {
     "node-inspector": "^0.12.8"
+  },
+  "dependencies": {
+    "fmt-obj": "^1.0.0"
   }
 }
