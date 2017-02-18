@@ -125,14 +125,22 @@ class Python extends Base {
     super(path)
     this.interpret_stderr_as_stdout_for_getting_version_info = true  // cope with python 2 bug which reports python version via stderr rather than stdout
     this.result_shell_site_info
+    this.result_shell_run_pip_as_module
     this.sys_path = []
+    this.pip_module_version
+    this.pip_module_site_package_path
     this.analyse()
   }
 
   analyse() {
     super.analyse()
+
+    // why run these if this python doesn't exist?
     this.result_shell_site_info = spawn( this.path, [ '-m', 'site' ] )
-    this.parse_site_info()
+    this.result_shell_run_pip_as_module = spawn( this.path, [ '-m', 'pip', '--version' ] )
+    // why analyse these if this python doesn't exist?
+    this.analyse_site_info()
+    this.analyse_pip_version()
   }
 
   analyse_version() {
@@ -143,7 +151,7 @@ class Python extends Base {
       this.version = match[1]
   }
 
-  parse_site_info() {
+  analyse_site_info() {
     if (! this.valid(this.result_shell_site_info))
       return
 
@@ -172,10 +180,55 @@ class Python extends Base {
     this.sys_path = eval_local(chunk)  // idea from http://stackoverflow.com/questions/9781285/specify-scope-for-eval-in-javascript
   }
 
+  analyse_pip_version() {
+    const regex = /pip (.*) from (.*)\/site-packages/   // TODO move to base class - or even this whole method.
+
+    if (! this.exists)
+      return
+
+    if (this.result_shell_run_pip_as_module.stderr.length > 0) {
+      this.warnings.push(`pip module not installed`)
+      return
+    }
+
+    let match = regex.exec(this.result_shell_run_pip_as_module.stdout.toString())
+    if (match != null) {
+      this.pip_module_version = match[1]
+      this.pip_module_site_package_path = match[2] + '/site-packages'
+    }
+    if (this.pip_module_version == undefined) this.warnings.push(`pip module not installed`)
+  }
+
   report() {
     super.report()
-    if (this.runs_ok)
+    if (this.runs_ok) {
       this.report_obj['sys.path'] = `${this.sys_path.length} entries`
+      this.report_obj['pip module'] = {}
+      this.report_obj['pip module'].version = this.pip_module_version
+      this.report_obj['pip module'].site = this.pip_module_site_package_path
+    }
+    if (this.warnings.length > 0) {
+      // if (this.report_obj.warnings == undefined)
+      //   this.report_obj.warnings = this.warnings
+      if (this.report_obj['shell results'] == undefined)
+        this.report_obj['shell results'] = {}
+
+      // Hmmm base class is reporting eveything?
+      // shouldn't we be just reporting shell results for things with errors?
+
+      // if (this.report_obj.warnings == undefined)
+      //   this.report_obj['shell results'] = {}
+      // if (cmd_was_run(this.result_shell_ls))
+      //   this.report_obj['shell results']['ls -l'] = prt(this.result_shell_ls)
+      // if (cmd_was_run(this.result_shell_version))
+      //   this.report_obj['shell results']['--version'] = prt(this.result_shell_version)
+      // if (cmd_was_run(this.result_shell_file_size))
+      //   this.report_obj['shell results']['wc -c'] = prt(this.result_shell_file_size)
+
+      if (cmd_was_run(this.result_shell_run_pip_as_module))
+        this.report_obj['shell results']['python -m pip --version'] = prt(this.result_shell_run_pip_as_module)
+
+    }
   }
 }
 
