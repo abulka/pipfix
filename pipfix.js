@@ -6,6 +6,8 @@ const format = require('fmt-obj')  // https://github.com/queckezz/fmt-obj
 function prt(cmd, verbose=true) {
   let result = {}
 
+  result.command = cmd.args.join(' ')
+
   if (cmd.stderr == null) {
     if (verbose)
       result.stderr = null
@@ -100,7 +102,7 @@ class Base {
   report() {
     this.report_obj = {}
     this.report_obj.path = this.path
-    this.report_obj['executable exists'] = this.exists
+    this.report_obj['exists'] = this.exists
     if (this.exists) {
       this.report_obj.runs_ok = this.runs_ok
       this.report_obj.version = this.version
@@ -110,11 +112,11 @@ class Base {
       // if verbose
       this.report_obj['shell results'] = {}
       if (cmd_was_run(this.result_shell_ls))
-        this.report_obj['shell results']['ls -l'] = prt(this.result_shell_ls)
+        this.report_obj['shell results']['1'] = prt(this.result_shell_ls)
       if (cmd_was_run(this.result_shell_version))
-        this.report_obj['shell results']['--version'] = prt(this.result_shell_version)
+        this.report_obj['shell results']['2'] = prt(this.result_shell_version)
       if (cmd_was_run(this.result_shell_file_size))
-        this.report_obj['shell results']['wc -c'] = prt(this.result_shell_file_size)
+        this.report_obj['shell results']['3'] = prt(this.result_shell_file_size)
     }
   }
 
@@ -203,9 +205,10 @@ class Python extends Base {
     super.report()
     if (this.runs_ok) {
       this.report_obj['sys.path'] = `${this.sys_path.length} entries`
-      this.report_obj['pip module'] = {}
-      this.report_obj['pip module'].version = this.pip_module_version
-      this.report_obj['pip module'].site = this.pip_module_site_package_path
+      this.report_obj.pip = {}
+      this.report_obj.pip.installed = this.pip_module_version != undefined
+      this.report_obj.pip.version = this.pip_module_version
+      this.report_obj.pip.site = this.pip_module_site_package_path
     }
     if (this.warnings.length > 0) {
       // if (this.report_obj.warnings == undefined)
@@ -226,7 +229,7 @@ class Python extends Base {
       //   this.report_obj['shell results']['wc -c'] = prt(this.result_shell_file_size)
 
       if (cmd_was_run(this.result_shell_run_pip_as_module))
-        this.report_obj['shell results']['python -m pip --version'] = prt(this.result_shell_run_pip_as_module)
+        this.report_obj['shell results']['4'] = prt(this.result_shell_run_pip_as_module)
 
     }
   }
@@ -293,10 +296,20 @@ python_usr_bin.report()
 python_usr_local_bin.report()
 pip_usr_local_bin.report()
 let report = {
-  'Python System Mac': python_usr_bin.report_obj,
-  'Python Other': python_usr_local_bin.report_obj,
+  '1st Python': python_usr_bin.report_obj,
+  '2nd Python': python_usr_local_bin.report_obj,
   'Pip': pip_usr_local_bin.report_obj
 }
-console.log(format(report))
+// console.log(format(report))
+
+console.log('1st Python')
+console.log('----------')
+console.log(format(python_usr_bin.report_obj))
+console.log('2nd Python')
+console.log('----------')
+console.log(format(python_usr_local_bin.report_obj))
+console.log('Pip')
+console.log('---')
+console.log(format(pip_usr_local_bin.report_obj))
 
 console.log('DONE ')
