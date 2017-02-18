@@ -292,8 +292,28 @@ let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
 pip_usr_local_bin.inform_about(python_usr_bin)
 pip_usr_local_bin.inform_about(python_usr_local_bin)
 
+// TODO need default pip, too
+function which_python() {
+  let result_shell_which_python = spawn('which', ['python'])
+  if (result_shell_which_python.stderr.length == 0) {
+    let path = result_shell_which_python.stdout.toString()
+    if (path != python_usr_bin.path && path != python_usr_local_bin.path)
+      return path.trim()
+  }
+  return null
+}
+
+let path_python_default = which_python()
+let python_default
+if (path_python_default != null &&
+    path_python_default != python_usr_bin.path &&
+    path_python_default != python_usr_local_bin.path)
+  python_default = new Python(path_python_default)
+
 python_usr_bin.report()
 python_usr_local_bin.report()
+if (python_default != undefined)
+  python_default.report()
 pip_usr_local_bin.report()
 let report = {
   '1st Python': python_usr_bin.report_obj,
@@ -310,6 +330,12 @@ console.log('2nd Python')
 console.log('----------', format(python_usr_local_bin.report_obj))
 // console.log(format(python_usr_local_bin.report_obj))
 console.log('')
+
+if (python_default != undefined) {
+  console.log('Default Python')
+  console.log('----------', format(python_default.report_obj))
+}
+
 console.log('Pip')
 console.log('---', format(pip_usr_local_bin.report_obj))
 // console.log(format(pip_usr_local_bin.report_obj))
