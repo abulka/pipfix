@@ -275,6 +275,24 @@ let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
 pip_usr_local_bin.inform_about(python_usr_bin)
 pip_usr_local_bin.inform_about(python_usr_local_bin)
 
+class Which {
+  constructor(binary, excluded_binary_paths) {
+    this.binary = binary
+    this.excluded_binary_paths = excluded_binary_paths
+  }
+  path() {
+    let result_shell_which = spawn('which', [this.binary])
+    if (result_shell_which.stderr.length == 0) {
+      let path = result_shell_which.stdout.toString()
+      for (let excluded_path of this.excluded_binary_paths)
+        if (path == excluded_path)
+          return null
+        return path.trim()
+    }
+    return null
+  }
+}
+
 // TODO need default pip, too
 function which_python() {
   let result_shell_which_python = spawn('which', ['python'])
@@ -286,7 +304,18 @@ function which_python() {
   return null
 }
 
-let path_python_default = which_python()
+function which_pip() {
+  let result_shell_which_python = spawn('which', ['pip'])
+  if (result_shell_which_python.stderr.length == 0) {
+    let path = result_shell_which_python.stdout.toString()
+    if (path != python_usr_bin.path && path != python_usr_local_bin.path)
+      return path.trim()
+  }
+  return null
+}
+
+let path_python_default = new Which('python', [python_usr_bin.path, python_usr_local_bin.path]).path()
+// let path_python_default = which_python()
 let python_default
 if (path_python_default != null &&
     path_python_default != python_usr_bin.path &&
