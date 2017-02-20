@@ -269,12 +269,6 @@ class Pip extends Base {
   }
 }
 
-let python_usr_bin = new Python('/usr/bin/python')
-let python_usr_local_bin = new Python('/usr/local/bin/python')
-let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
-pip_usr_local_bin.inform_about(python_usr_bin)
-pip_usr_local_bin.inform_about(python_usr_local_bin)
-
 class Which {
   constructor(binary, excluded_binary_paths) {
     this.binary = binary
@@ -293,43 +287,43 @@ class Which {
   }
 }
 
-// TODO need default pip, too
-function which_python() {
-  let result_shell_which_python = spawn('which', ['python'])
-  if (result_shell_which_python.stderr.length == 0) {
-    let path = result_shell_which_python.stdout.toString()
-    if (path != python_usr_bin.path && path != python_usr_local_bin.path)
-      return path.trim()
-  }
-  return null
-}
 
-function which_pip() {
-  let result_shell_which_python = spawn('which', ['pip'])
-  if (result_shell_which_python.stderr.length == 0) {
-    let path = result_shell_which_python.stdout.toString()
-    if (path != python_usr_bin.path && path != python_usr_local_bin.path)
-      return path.trim()
-  }
-  return null
-}
+// standard pythons and pip
 
-let path_python_default = new Which('python', [python_usr_bin.path, python_usr_local_bin.path]).path()
-// let path_python_default = which_python()
+let python_usr_bin = new Python('/usr/bin/python')
+let python_usr_local_bin = new Python('/usr/local/bin/python')
+let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
+
+// look for defaults
+
 let python_default
-if (path_python_default != null &&
-    path_python_default != python_usr_bin.path &&
-    path_python_default != python_usr_local_bin.path)
+let path_python_default = new Which('python', [python_usr_bin.path, python_usr_local_bin.path]).path()
+if (path_python_default != null)
   python_default = new Python(path_python_default)
-
 if (python_default != undefined)
   pip_usr_local_bin.inform_about(python_default)
+
+let pip_default
+let path_pip_default = new Which('pip', [pip_usr_local_bin.path]).path()
+if (path_pip_default != null)
+  pip_default = new Pip(path_pip_default)
+
+// construct list of all pythons and pips
 
 let pythons = []
 pythons.push(python_usr_bin)
 pythons.push(python_usr_local_bin)
 if (python_default != undefined)
   pythons.push(python_default)
+
+let pips = []
+pips.push(pip_usr_local_bin)
+if (pip_default != undefined)
+  pips.push(pip_default)
+
+// inform pip of others pythons
+pip_usr_local_bin.inform_about(python_usr_bin)
+pip_usr_local_bin.inform_about(python_usr_local_bin)
 
 // report
 
@@ -338,12 +332,15 @@ python_usr_local_bin.report()
 if (python_default != undefined)
   python_default.report()
 pip_usr_local_bin.report()
-let report = {
-  '1st Python': python_usr_bin.report_obj,
-  '2nd Python': python_usr_local_bin.report_obj,
-  'Pip': pip_usr_local_bin.report_obj
-}
-// console.log(format(report))
+if (pip_default != undefined)
+  pip_default.report()
+//
+// let report = {
+//   '1st Python': python_usr_bin.report_obj,
+//   '2nd Python': python_usr_local_bin.report_obj,
+//   'Pip': pip_usr_local_bin.report_obj
+// }
+// // console.log(format(report))
 
 console.log('1st Python')
 console.log('----------', format(python_usr_bin.report_obj))
@@ -364,6 +361,12 @@ console.log('Pip')
 console.log('---', format(pip_usr_local_bin.report_obj))
 // console.log(format(pip_usr_local_bin.report_obj))
 console.log('')
+
+if (pip_default != undefined) {
+  console.log('Default Pip')
+  console.log('----------', format(pip_default.report_obj))
+  console.log('')
+}
 
 function advice() {
   console.log('Recommendations', `(${pythons.length} pythons found)`)
@@ -393,7 +396,7 @@ function advice() {
   console.log('')
   }
 
-  for (let pip of [pip_usr_local_bin]) {
+  for (let pip of pips) {
     console.log(`${pip.path}`)
     if (pip.runs_ok && pip.size == 0) {
       console.log(`${tab}pip exists but somehow is 0 bytes !?, try to uninstall and reinstall ${pip_usr_local_bin.path}.`)
