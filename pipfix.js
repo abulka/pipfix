@@ -293,6 +293,17 @@ if (path_python_default != null &&
     path_python_default != python_usr_local_bin.path)
   python_default = new Python(path_python_default)
 
+if (python_default != undefined)
+  pip_usr_local_bin.inform_about(python_default)
+
+let pythons = []
+pythons.push(python_usr_bin)
+pythons.push(python_usr_local_bin)
+if (python_default != undefined)
+  pythons.push(python_default)
+
+// report
+
 python_usr_bin.report()
 python_usr_local_bin.report()
 if (python_default != undefined)
@@ -317,6 +328,7 @@ console.log('')
 if (python_default != undefined) {
   console.log('Default Python')
   console.log('----------', format(python_default.report_obj))
+  console.log('')
 }
 
 console.log('Pip')
@@ -325,10 +337,10 @@ console.log('---', format(pip_usr_local_bin.report_obj))
 console.log('')
 
 function advice() {
-  console.log('Recommendations')
+  console.log('Recommendations', `(${pythons.length} pythons found)`)
   console.log('---------------')
   const tab = '   - '
-  for (let python of [python_usr_bin, python_usr_local_bin]) {
+  for (let python of pythons) {
     console.log(`${python.path}`)
     if (! python.exists) {
       console.log(`${tab}not installed, install via brew or python.org installer`)
