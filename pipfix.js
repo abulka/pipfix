@@ -1,43 +1,28 @@
 'use strict';
 
 let spawn = require( 'child_process' ).spawnSync
-const format = require('fmt-obj')  // https://github.com/queckezz/fmt-obj
+// const format = require('fmt-obj')  // https://github.com/queckezz/fmt-obj
+const format = require('pretty-format')  // https://github.com/facebook/jest/tree/master/packages/pretty-format
+const SIMPLE_WARNINGS = true
+
+function cmd_was_run(cmd) {
+  return (cmd.stderr != null &&
+          cmd.stdout != null )
+}
 
 function prt(cmd, verbose=true) {
   let result = {}
 
   result.command = cmd.args.join(' ')
 
-  if (cmd.stderr == null) {
-    if (verbose)
-      result.stderr = null
+  if (cmd_was_run(cmd)) {
+    result.stderr = cmd.stderr.toString().trim()
+    result.stdout = cmd.stdout.toString().trim()
   }
-  else
-      if (cmd.stderr.length == 0) {
-        if (verbose)
-          result.stderr = cmd.stderr.toString().trim()
-      }
-      else
-        result.stderr = cmd.stderr.toString().trim()
-
-  if (cmd.stdout == null) {
-    if (verbose)
-      result.stdout = null
+  else {
+    result.note = 'not run'
   }
-  else
-      if (cmd.stdout.length == 0) {
-        if (verbose)
-          result.stdout = cmd.stdout.toString().trim()
-      }
-      else
-        result.stdout = cmd.stdout.toString().trim()
-
   return result
-}
-
-function cmd_was_run(cmd) {
-  return (cmd.stderr != null &&
-          cmd.stdout != null )
 }
 
 
@@ -92,11 +77,40 @@ class Base {
       this.analyse_is_exe_empty()
       this.analyse_version()  // template pattern - method declared in subclass
 
-      if (this.version == undefined) this.warnings.push(`version could not be determined`)
-      if (this.size == undefined) this.warnings.push(`could not determine file size`)
-      if (this.size == 0) this.warnings.push(`executable file exists but is empty?`)
+      if (this.version == undefined) this.add_warning(`version could not be determined`, this.result_shell_version)
+      if (this.size == undefined) this.add_warning(`could not determine file size`, this.result_shell_file_size)
+      if (this.size == 0) this.add_warning(`executable file exists but is empty?`,
+                                              [this.result_shell_ls, this.result_shell_file_size])
     }
-    if (this.exists && ! this.runs_ok) this.warnings.push(`${this.path} doesn't run properly`)
+    if (this.exists && ! this.runs_ok) this.add_warning(`${this.path} doesn't run properly`,
+                                              [this.result_shell_ls, this.result_shell_version])
+  }
+
+  add_warning(message, shell_results=[]) {
+    // console.log('adding warning', message, 'this.report_line=', this.report_line)
+    if (SIMPLE_WARNINGS) {
+      this.warnings.push(message)
+    }
+    else {
+      let warning = {}
+
+      if (! Array.isArray(shell_results))
+        shell_results = [shell_results]
+
+      warning.reason = message
+
+      if (shell_results.length > 0) {
+        if (warning['shell results'] == undefined)
+          warning['shell results'] = []
+
+        for (let result of shell_results) {
+          let shell_result = prt(result)
+          warning['shell results'].push(shell_result)
+        }
+
+      this.warnings.push(warning)
+      }
+    }
   }
 
   report() {
@@ -107,19 +121,9 @@ class Base {
       this.report_obj.runs_ok = this.runs_ok
       this.report_obj.version = this.version
     }
-    if (this.warnings.length > 0) {
+    if (this.warnings.length > 0)
       this.report_obj.warnings = this.warnings
-      // if verbose
-      this.report_obj['shell results'] = {}
-      if (cmd_was_run(this.result_shell_ls))
-        this.report_obj['shell results']['1'] = prt(this.result_shell_ls)
-      if (cmd_was_run(this.result_shell_version))
-        this.report_obj['shell results']['2'] = prt(this.result_shell_version)
-      if (cmd_was_run(this.result_shell_file_size))
-        this.report_obj['shell results']['3'] = prt(this.result_shell_file_size)
-    }
   }
-
 }
 
 class Python extends Base {
@@ -189,7 +193,7 @@ class Python extends Base {
       return
 
     if (this.result_shell_run_pip_as_module.stderr.length > 0) {
-      this.warnings.push(`pip module not installed`)
+      this.add_warning(`pip module not installed`, this.result_shell_run_pip_as_module)
       return
     }
 
@@ -198,39 +202,18 @@ class Python extends Base {
       this.pip_module_version = match[1]
       this.pip_module_site_package_path = match[2] + '/site-packages'
     }
-    if (this.pip_module_version == undefined) this.warnings.push(`pip module not installed`)
+    if (this.pip_module_version == undefined) this.add_warning(`pip module not installed`, this.result_shell_run_pip_as_module)
   }
 
   report() {
     super.report()
     if (this.runs_ok) {
       this.report_obj['sys.path'] = `${this.sys_path.length} entries`
+
       this.report_obj.pip = {}
       this.report_obj.pip.installed = this.pip_module_version != undefined
       this.report_obj.pip.version = this.pip_module_version
       this.report_obj.pip.site = this.pip_module_site_package_path
-    }
-    if (this.warnings.length > 0) {
-      // if (this.report_obj.warnings == undefined)
-      //   this.report_obj.warnings = this.warnings
-      if (this.report_obj['shell results'] == undefined)
-        this.report_obj['shell results'] = {}
-
-      // Hmmm base class is reporting eveything?
-      // shouldn't we be just reporting shell results for things with errors?
-
-      // if (this.report_obj.warnings == undefined)
-      //   this.report_obj['shell results'] = {}
-      // if (cmd_was_run(this.result_shell_ls))
-      //   this.report_obj['shell results']['ls -l'] = prt(this.result_shell_ls)
-      // if (cmd_was_run(this.result_shell_version))
-      //   this.report_obj['shell results']['--version'] = prt(this.result_shell_version)
-      // if (cmd_was_run(this.result_shell_file_size))
-      //   this.report_obj['shell results']['wc -c'] = prt(this.result_shell_file_size)
-
-      if (cmd_was_run(this.result_shell_run_pip_as_module))
-        this.report_obj['shell results']['4'] = prt(this.result_shell_run_pip_as_module)
-
     }
   }
 }
@@ -325,7 +308,7 @@ function advice() {
         if (python.path == '/usr/bin/python') {
           console.log(`${tab}try "sudo easy_install pip" which puts pip into "/usr/local/bin"`)
           if (pip_usr_local_bin.exists)
-            console.log(`${tab}warning: another pip already exists there, so perhaps rename the old ${pip_usr_local_bin.path}`)
+            console.log(`${tab}warning: another pip already exists there, so perhaps rename the old ${pip_usr_local_bin.path}sys`)
         }
       }
     }
