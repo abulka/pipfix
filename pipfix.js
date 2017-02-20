@@ -321,9 +321,10 @@ pips.push(pip_usr_local_bin)
 if (pip_default != undefined)
   pips.push(pip_default)
 
-// inform pip of others pythons
-pip_usr_local_bin.inform_about(python_usr_bin)
-pip_usr_local_bin.inform_about(python_usr_local_bin)
+// inform all pips of all other pythons
+for (let pip of pips)
+  for (let python of pythons)
+    pip.inform_about(python)
 
 // report
 
