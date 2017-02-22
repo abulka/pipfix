@@ -297,32 +297,35 @@ let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
 // look for defaults
 
 let python_default = which_python()
+let pip_default = which_pip()
 
 function which_python() {
   let python
   let path = new Which('python', [python_usr_bin.path, python_usr_local_bin.path]).path()
   console.log('default python path', path)
-  if (path != undefined) {
+  if (path != null)
     python = new Python(path)
-    pip_usr_local_bin.inform_about(python)
-  }
   return python
 }
 
-let pip_default
-let path_pip_default = new Which('pip', [pip_usr_local_bin.path]).path()
-if (path_pip_default != null)
-  pip_default = new Pip(path_pip_default)
+function which_pip() {
+  let pip
+  let path = new Which('pip', [pip_usr_local_bin.path]).path()
+  if (path != null)
+    pip = new Pip(path)
+  return pip
+}
 
 // construct list of all pythons and pips
 
 let pythons = []
+let pips = []
+
 pythons.push(python_usr_bin)
 pythons.push(python_usr_local_bin)
 if (python_default != undefined)
   pythons.push(python_default)
 
-let pips = []
 pips.push(pip_usr_local_bin)
 if (pip_default != undefined)
   pips.push(pip_default)
@@ -331,6 +334,7 @@ if (pip_default != undefined)
 for (let pip of pips)
   for (let python of pythons)
     pip.inform_about(python)
+
 
 // report
 
