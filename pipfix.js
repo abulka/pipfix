@@ -257,13 +257,19 @@ class Pip extends Base {
     super.report()
     this.report_obj.site = this.site_package_path
 
+    // TODO
+    // this is analysis work - so put it into a method e.g. 'analuse_associations()'
+    // TODO - BUG
+    // why is this.site_package_path always undefined ?
     this.report_obj.associations = {}
+    console.log('scanning', this.pythons.length, 'python associations')
     for (let python of this.pythons) {
       let pip_and_python_share_a_site = false
       if (! python.exists)
         pip_and_python_share_a_site = 'N/A'
       else
         pip_and_python_share_a_site = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
+      console.log('pip_and_python_share_a_site', pip_and_python_share_a_site, 'python.sys_path', python.sys_path, 'this.site_package_path', this.site_package_path)
       this.report_obj.associations[python.path] = pip_and_python_share_a_site
     }
   }
