@@ -296,12 +296,18 @@ let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
 
 // look for defaults
 
-let python_default
-let path_python_default = new Which('python', [python_usr_bin.path, python_usr_local_bin.path]).path()
-if (path_python_default != null)
-  python_default = new Python(path_python_default)
-if (python_default != undefined)
-  pip_usr_local_bin.inform_about(python_default)
+let python_default = which_python()
+
+function which_python() {
+  let python
+  let path = new Which('python', [python_usr_bin.path, python_usr_local_bin.path]).path()
+  console.log('default python path', path)
+  if (path != undefined) {
+    python = new Python(path)
+    pip_usr_local_bin.inform_about(python)
+  }
+  return python
+}
 
 let pip_default
 let path_pip_default = new Which('pip', [pip_usr_local_bin.path]).path()
