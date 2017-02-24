@@ -40,9 +40,15 @@ describe('python existence', function() {
     let spawn_results = {
       'ls_1': {
         'cmd': 'ls',
-        'params': ['param1', 'param2'],
+        'params': ['-lh'],
+        'stdout': '     281 /path/cmd',
+        'stderr': ''
+      },
+      'ls_2': {
+        'cmd': 'ls',
+        'params': ['-lh'],
         'stdout': '',
-        'stderr': 'no such file'
+        'stderr': 'ls: /path/cmd: No such file or directory'
       },
       'wc_1': {
         'cmd': 'wc',
@@ -120,9 +126,10 @@ sys.path = [
       let python_usr_bin = new Python('/usr/bin/python')
 
       assert.equal(python_usr_bin.path, '/usr/bin/python');
+      assert.equal(python_usr_bin.exists, true);
 
-      console.log(analyseSpy.callCount)
-      console.log(validSpy.callCount)
+      // console.log(analyseSpy.callCount)
+      // console.log(validSpy.callCount)
 
       sinon.assert.callCount(analyseSpy, 1);
       sinon.assert.called(validSpy);
@@ -134,7 +141,23 @@ sys.path = [
     });
 
     it('python_usr_bin does not exist', function() {
-      // TODO
+      let child_process_Mock = {
+        spawnSync: function(cmd, param_array) {
+          // console.log('cmd, param_array', cmd, param_array)
+          if (is_ls(cmd, param_array))                     return spawn_result(spawn_results['ls_2'])
+          if (is_wc(cmd, param_array))                     return spawn_result(spawn_results['wc_1'])
+          if (is_version(cmd, param_array))                return spawn_result(spawn_results['python_version_1'])
+          if (is_python_m_site(cmd, param_array))          return spawn_result(spawn_results['python_m_site_1'])
+          if (is_pip_version_via_python(cmd, param_array)) return spawn_result(spawn_results['python_m_pip_version_1'])
+          throw new UserException(`unknown case not sure how to mock "${cmd}" with params "${param_array}"`)
+        }
+      }
+      mockery.registerMock('child_process', child_process_Mock);
+      let {Python, Pip, Which} = require('../lib.js')
+
+      let python_usr_bin = new Python('/usr/bin/python')
+
+      assert.equal(python_usr_bin.exists, false);
     });
 
   });
