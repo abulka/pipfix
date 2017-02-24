@@ -49,7 +49,14 @@ describe('python existence', function() {
 
     before(function() {
       // runs before all tests in this block
-      mockery.enable();
+
+      // mockery.enable();
+
+      mockery.enable({
+          warnOnReplace: false,
+          warnOnUnregistered: false
+      });
+
     });
 
     after(function() {
@@ -76,6 +83,39 @@ describe('python existence', function() {
       mockery.deregisterMock('fs');
 
     });
+
+    it('fs_play mock entire module', function() {
+      var fs_playMock = {
+          // stat: function (path, callback) { console.log('fs stat mock callback called!') /* your mock code */ }
+          fs_play: function () { console.log('fs_play mock called!') }
+      };
+      mockery.registerMock('../fs_play.js', fs_playMock)  // needs to be first, before you use the require()
+      fs_play = require('../fs_play.js')
+
+      fs_play.fs_play()
+
+      mockery.deregisterMock('../fs_play.js');
+
+    });
+
+    it('fs_play mock attempt of just the fs import within the module', function() {
+      var fsMock = {
+          stat: function (path, cb) { /* your mock code */
+                                      console.log('fake stat called');
+                                      let stats = 'some mock stats....'
+                                      cb(0, stats)
+                                    }
+      };
+      mockery.registerMock('fs', fsMock);
+      fs_play = require('../fs_play.js')
+
+      fs_play.fs_play()
+
+      mockery.deregisterMock('fs');
+
+    });
+
+
   });
 
 
