@@ -22,7 +22,8 @@
   "devDependencies": {
     "mocha": "^3.2.0",
     "node-inspector": "^0.12.8",
-    "should": "^11.2.0"
+    "should": "^11.2.0",
+    "sinon": "^1.17.7"
   },
   "dependencies": {
     "fmt-obj": "^1.0.0",
