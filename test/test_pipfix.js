@@ -1,15 +1,24 @@
 let {Python, Pip, Which} = require('../lib.js')
 
-var assert = require('assert');  // https://nodejs.org/api/assert.html
-var should = require('should');  // https://github.com/shouldjs/should.js
-var sinon = require('sinon');    // https://www.sitepoint.com/sinon-tutorial-javascript-testing-mocks-spies-stubs/
-                                 // http://sinonjs.org/docs/#assertions
-// to run
-// ./node_modules/mocha/bin/mocha
+var assert = require('assert');     // https://nodejs.org/api/assert.html
+var should = require('should');     // https://github.com/shouldjs/should.js
+var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-javascript-testing-mocks-spies-stubs/
+                                    // http://sinonjs.org/docs/#assertions
+var mockery = require('mockery');   // https://github.com/mfncooper/mockery
 
-describe('python existence', function() {  // npm install --save-dev mocha
+// npm install --save-dev mocha
+// npm install --save-dev sinon
+// npm install --save-dev mockery
+
+// To run tests don't run node, just run mocha and it will scan for stuff in the 'test' dir
+// ./node_modules/mocha/bin/mocha
+// ./node_modules/mocha/bin/mocha --fgrep system
+// etc.
+
+describe('python existence', function() {
 
   describe('one system python only', function() {
+
     it('should return true', function() {
 
       let validSpy = sinon.spy(Python.prototype, 'valid');
@@ -32,6 +41,39 @@ describe('python existence', function() {  // npm install --save-dev mocha
 
       analyseSpy.restore();
       validSpy.restore();
+
+    });
+  });
+
+  describe('mockery experiments', function() {
+
+    before(function() {
+      // runs before all tests in this block
+      mockery.enable();
+    });
+
+    after(function() {
+      // runs after all tests in this block
+      mockery.disable();
+    });
+
+    beforeEach(function() {
+      // runs before each test in this block
+    });
+
+    afterEach(function() {
+      // runs after each test in this block
+    });
+
+    it('should mock fs', function() {
+
+      var fsMock = {
+          stat: function (path, cb) { /* your mock code */ }
+      };
+      mockery.registerMock('fs', fsMock);
+      // mockery.registerMock('../some-other-module', stubbedModule);
+
+      mockery.deregisterMock('fs');
 
     });
   });
