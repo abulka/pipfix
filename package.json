@@ -4,7 +4,9 @@
   "description": "analyse python and pip installations and report or fix ",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test_ori": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/mocha/bin/mocha",
+    "test_fred": "./node_modules/mocha/bin/mocha --fgrep fred",
     "ls2": "npm ls --depth=0",
     "start": "node pipfix.js",
     "dbg_not_working_cos_nodejs_bug_wait_for_future_fix": "node-debug pipfix.js",
@@ -18,7 +20,9 @@
   "author": "Andy Bulka",
   "license": "ISC",
   "devDependencies": {
-    "node-inspector": "^0.12.8"
+    "mocha": "^3.2.0",
+    "node-inspector": "^0.12.8",
+    "should": "^11.2.0"
   },
   "dependencies": {
     "fmt-obj": "^1.0.0",
