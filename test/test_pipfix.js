@@ -12,20 +12,12 @@ describe('python existence', function() {
 
   describe('system python', function() {
 
-    before(function() {
-      // runs before all tests in this block
-    });
-
-    after(function() {
-      // runs after all tests in this block
-    });
-
     beforeEach(function() {
       // runs before each test in this block
       mockery.enable({
           warnOnReplace: false,
           warnOnUnregistered: false,
-          useCleanCache: true  // ensure we clear old requires() between tests - works!
+          useCleanCache: true  // ensure we clear old requires() between tests
       });
     });
 
@@ -34,12 +26,73 @@ describe('python existence', function() {
       mockery.disable();
     });
 
-    function build_spawn_result(stdout, stderr, arg, params_array) {
+    function spawn_result(spawn_result_data) {
+      if (spawn_result_data == undefined)
+        throw new UserException('trying to build a mock spawn result from undefined data, test data lookup failed?')
       return {
-        stdout: stdout,
-        stderr: stderr,
-        args: [arg, 'param1', 'param2']  // TODO convert 'params_array' into array within 'args' array
+        stdout: spawn_result_data['stdout'],
+        stderr: spawn_result_data['stderr'],
+        args: [spawn_result_data['cmd'],
+               ...spawn_result_data['params']]
       }
+    }
+
+    let spawn_results = {
+      'ls_1': {
+        'cmd': 'ls',
+        'params': ['param1', 'param2'],
+        'stdout': '',
+        'stderr': 'no such file'
+      },
+      'wc_1': {
+        'cmd': 'wc',
+        'params': ['param1', 'param2'],
+        'stdout': '',
+        'stderr': 'wc err blah blah'
+      },
+      'python_version_1': {
+        'cmd': 'some/python',
+        'params': ['--version'],
+        'stdout': '',
+        'stderr': '--version err blah blah'
+      },
+      'python_m_site_1': {
+        'cmd': 'some/python',
+        'params': ['-m', 'site'],
+        'stdout': `
+sys.path = [
+    'path1', 
+    'path2', 
+    '/Users/Andy/miniconda/lib/python2.7/site-packages',
+]`,
+        'stderr': ''
+      },
+      'python_m_pip_version_1': {
+        'cmd': 'some/python',
+        'params': ['-m', 'pip', '--version'],
+        'stdout': 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)',
+        'stderr': ''
+      },
+    }
+
+    function is_ls(cmd, param_array) {
+      return cmd == 'ls'
+    }
+
+    function is_wc(cmd, param_array) {
+      return cmd == 'wc'
+    }
+
+    function is_version(cmd, param_array) {
+      return (param_array[0] == '--version')  // cmd could be 'python' or 'pip'
+    }
+
+    function is_pip_version_via_python(cmd, param_array) {
+      return (param_array[0] == '-m' && param_array[1] == 'pip' && param_array[2] == '--version')
+    }
+
+    function is_python_m_site(cmd, param_array) {
+      return (param_array[0] == '-m' && param_array[1] == 'site')
     }
 
     // TESTS BEGIN
@@ -48,28 +101,13 @@ describe('python existence', function() {
 
       let child_process_Mock = {
         spawnSync: function(cmd, param_array) {
-          switch (cmd) {
-            case 'ls':
-              return build_spawn_result('', 'no such file', 'ls', ['param1', 'param2'])
-            case 'wc':
-              return build_spawn_result('', 'wc err blah blah', 'wc', ['param1', 'param2'])
-          }
-          if (param_array[0] == '--version')
-              return build_spawn_result('', '--version err blah blah', '??', ['--version', 'param2'])
-          else if (param_array[0] == '-m' && param_array[1] == 'site') {
-            let sys_path = `
-sys.path = [
-      'path1', 
-      'path2', 
-      '/Users/Andy/miniconda/lib/python2.7/site-packages',
-]`
-            return build_spawn_result(sys_path, '', '??', ['-m', 'site'])
-          }
-          else if (param_array[0] == '-m' && param_array[1] == 'pip' && param_array[2] == '--version') {
-            let stdout = 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)'
-            return build_spawn_result(stdout, '', '??', ['-m', 'pip', '--version'])
-          }
-          throw new UserException(`unknown case not sure how to mock ${cmd} with params ${param_array}`)
+          // console.log('cmd, param_array', cmd, param_array)
+          if (is_ls(cmd, param_array))                     return spawn_result(spawn_results['ls_1'])
+          if (is_wc(cmd, param_array))                     return spawn_result(spawn_results['wc_1'])
+          if (is_version(cmd, param_array))                return spawn_result(spawn_results['python_version_1'])
+          if (is_python_m_site(cmd, param_array))          return spawn_result(spawn_results['python_m_site_1'])
+          if (is_pip_version_via_python(cmd, param_array)) return spawn_result(spawn_results['python_m_pip_version_1'])
+          throw new UserException(`unknown case not sure how to mock "${cmd}" with params "${param_array}"`)
         }
       }
       mockery.registerMock('child_process', child_process_Mock);
