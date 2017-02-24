@@ -178,6 +178,7 @@ class Python extends Base {
 
     function eval_local(chunk){
       "use strict"
+      // console.log(`chunk is "${chunk}"`)
       let sys_path = eval(`let x = ${chunk} ; x`);
       return sys_path
     }
