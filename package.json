@@ -6,7 +6,7 @@
   "scripts": {
     "test_ori": "echo \"Error: no test specified\" && exit 1",
     "test": "./node_modules/mocha/bin/mocha",
-    "test_fred": "./node_modules/mocha/bin/mocha --fgrep fred",
+    "test_fred": "./node_modules/mocha/bin/mocha --fgrep fredªª",
     "ls2": "npm ls --depth=0",
     "start": "node pipfix.js",
     "dbg_not_working_cos_nodejs_bug_wait_for_future_fix": "node-debug pipfix.js",
