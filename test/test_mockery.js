@@ -10,42 +10,42 @@ var mockery = require('mockery');   // https://github.com/mfncooper/mockery
 
 // To run tests don't run node, just run mocha and it will scan for stuff in the 'test' dir
 // ./node_modules/mocha/bin/mocha
-// ./node_modules/mocha/bin/mocha --fgrep system
+// ./node_modules/mocha/bin/mocha --fgrep "some text to match"
 // etc.
 
 describe('mockery experiments', function() {
 
-  describe('no mockery just real scan for one system python', function() {
-
-    it('real call checking for python_usr_bin', function() {
-
-      let {Python, Pip, Which} = require('../lib.js')  // CAREFUL - letting in one real require subverts the mocking later....
-                                                       // even when its done within an inner scope like this
-                                                       // UNLESS you call mockery.enable({ useCleanCache: true }) before() each test.
-
-      let validSpy = sinon.spy(Python.prototype, 'valid');
-      let analyseSpy = sinon.spy(Python.prototype, 'analyse');
-
-      let python_usr_bin = new Python('/usr/bin/python')
-
-
-      assert.equal(python_usr_bin.path, '/usr/bin/python');
-
-      // console.log(analyseSpy.callCount)
-      // console.log(validSpy.callCount)
-
-      sinon.assert.called(validSpy);
-      sinon.assert.callCount(validSpy, 5);
-
-      sinon.assert.callCount(Python.prototype.analyse, 1);
-      sinon.assert.callCount(analyseSpy, 1);
-      assert.equal(analyseSpy, Python.prototype.analyse)
-
-      analyseSpy.restore();
-      validSpy.restore();
-
-    });
-  });
+  // describe('disabled cos accesses real file system for python - uses no mockery just sinon', function() {
+  //
+  //   it('real call checking for python_usr_bin', function() {
+  //
+  //     let {Python, Pip, Which} = require('../lib.js')  // CAREFUL - letting in one real require subverts the mocking later....
+  //                                                      // even when its done within an inner scope like this
+  //                                                      // UNLESS you call mockery.enable({ useCleanCache: true }) before() each test.
+  //
+  //     let validSpy = sinon.spy(Python.prototype, 'valid');
+  //     let analyseSpy = sinon.spy(Python.prototype, 'analyse');
+  //
+  //     let python_usr_bin = new Python('/usr/bin/python')
+  //
+  //
+  //     assert.equal(python_usr_bin.path, '/usr/bin/python');
+  //
+  //     // console.log(analyseSpy.callCount)
+  //     // console.log(validSpy.callCount)
+  //
+  //     sinon.assert.called(validSpy);
+  //     sinon.assert.callCount(validSpy, 5);
+  //
+  //     sinon.assert.callCount(Python.prototype.analyse, 1);
+  //     sinon.assert.callCount(analyseSpy, 1);
+  //     assert.equal(analyseSpy, Python.prototype.analyse)
+  //
+  //     analyseSpy.restore();
+  //     validSpy.restore();
+  //
+  //   });
+  // });
 
   describe('deeper mockery experiments', function() {
 

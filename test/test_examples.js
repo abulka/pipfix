@@ -1,10 +1,15 @@
 var assert = require('assert');  // https://nodejs.org/api/assert.html
 var should = require('should');  // https://github.com/shouldjs/should.js
+var mockery = require('mockery');   // https://github.com/mfncooper/mockery
 
-// to run
+// npm install --save-dev mocha
+
+// To run tests don't run node, just run mocha and it will scan for stuff in the 'test' dir
 // ./node_modules/mocha/bin/mocha
+// ./node_modules/mocha/bin/mocha --fgrep "some text to match"
+// etc.
 
-describe('TestingPlay', function() {  // npm install --save-dev mocha
+describe('test examples', function() {  // npm install --save-dev mocha
 
   function fred() { return true }
   class User {
