@@ -140,6 +140,14 @@ class BaseSpawnMockBehaviour{
   }
 }
 
+class SpawnMockBehaviourNonExistence extends BaseSpawnMockBehaviour {
+  ls() {
+    if (this.is_ls)
+      return spawn_result(spawn_results['ls_2'])
+  }
+}
+
 exports.BaseSpawnMockBehaviour = BaseSpawnMockBehaviour
+exports.SpawnMockBehaviourNonExistence = SpawnMockBehaviourNonExistence
 exports.spawn_result = spawn_result
 exports.spawn_results = spawn_results
