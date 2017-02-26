@@ -81,39 +81,99 @@ sys.path = [
       },
     }
 
-    function is_ls(cmd, param_array) {
-      return cmd == 'ls'
-    }
+    class BaseSpawnMockBehaviour{
 
-    function is_wc(cmd, param_array) {
-      return cmd == 'wc'
-    }
+      constructor(cmd, param_array) {
+        this.cmd = cmd
+        this.param_array = param_array
+      }
 
-    function is_version(cmd, param_array) {
-      return (param_array[0] == '--version')  // cmd could be 'python' or 'pip'
-    }
+      // Template Pattern - Design Pattern - override any step you want in a sub class e.g. this.ls()
 
-    function is_pip_version_via_python(cmd, param_array) {
-      return (param_array[0] == '-m' && param_array[1] == 'pip' && param_array[2] == '--version')
-    }
+      process_possible_commands() {
+        let result
 
-    function is_python_m_site(cmd, param_array) {
-      return (param_array[0] == '-m' && param_array[1] == 'site')
-    }
+        // console.log(`Mocking "${this.cmd}" with params "${this.param_array}"`)
 
+        result = this.ls()
+        if (result != undefined)
+          return result
+
+        result = this.wc()
+        if (result != undefined)
+          return result
+
+        result = this.version()
+        if (result != undefined)
+          return result
+
+        result = this.python_m_site()
+        if (result != undefined)
+          return result
+
+        result = this.pip_version_via_python()
+        if (result != undefined)
+          return result
+
+        throw new UserException(`Unknown case, not sure how to mock "${this.cmd}" with params "${this.param_array}"`)
+      }
+
+      // Util
+
+      get is_ls() {
+        return this.cmd == 'ls'
+      }
+
+      get is_wc() {
+        return this.cmd == 'wc'
+      }
+
+      get is_version() {
+        return (this.param_array[0] == '--version')  // cmd could be 'python' or 'pip'
+      }
+
+      get is_pip_version_via_python() {
+        return (this.param_array[0] == '-m' && this.param_array[1] == 'pip' && this.param_array[2] == '--version')
+      }
+
+      get is_python_m_site() {
+        return (this.param_array[0] == '-m' && this.param_array[1] == 'site')
+      }
+
+      // Overridable steps
+
+      ls() {
+        if (this.is_ls)
+          return spawn_result(spawn_results['ls_1'])
+      }
+
+      wc() {
+        if (this.is_wc)
+          return spawn_result(spawn_results['wc_1'])
+      }
+
+      version() {
+        if (this.is_version)
+          return spawn_result(spawn_results['python_version_1'])
+      }
+
+      python_m_site() {
+        if (this.is_python_m_site)
+          return spawn_result(spawn_results['python_m_site_1'])
+      }
+
+      pip_version_via_python() {
+        if (this.is_pip_version_via_python)
+          return spawn_result(spawn_results['python_m_pip_version_1'])
+      }
+    }
     // TESTS BEGIN
 
     it('python_usr_bin exists', function() {
 
       let child_process_Mock = {
         spawnSync: function(cmd, param_array) {
-          // console.log('cmd, param_array', cmd, param_array)
-          if (is_ls(cmd, param_array))                     return spawn_result(spawn_results['ls_1'])
-          if (is_wc(cmd, param_array))                     return spawn_result(spawn_results['wc_1'])
-          if (is_version(cmd, param_array))                return spawn_result(spawn_results['python_version_1'])
-          if (is_python_m_site(cmd, param_array))          return spawn_result(spawn_results['python_m_site_1'])
-          if (is_pip_version_via_python(cmd, param_array)) return spawn_result(spawn_results['python_m_pip_version_1'])
-          throw new UserException(`unknown case not sure how to mock "${cmd}" with params "${param_array}"`)
+          return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
         }
       }
       mockery.registerMock('child_process', child_process_Mock);
@@ -141,15 +201,15 @@ sys.path = [
     });
 
     it('python_usr_bin does not exist', function() {
+      class SpawnMockBehaviourLs2 extends BaseSpawnMockBehaviour {
+        ls() {
+          if (this.is_ls)
+            return spawn_result(spawn_results['ls_2'])
+        }
+      }
       let child_process_Mock = {
         spawnSync: function(cmd, param_array) {
-          // console.log('cmd, param_array', cmd, param_array)
-          if (is_ls(cmd, param_array))                     return spawn_result(spawn_results['ls_2'])
-          if (is_wc(cmd, param_array))                     return spawn_result(spawn_results['wc_1'])
-          if (is_version(cmd, param_array))                return spawn_result(spawn_results['python_version_1'])
-          if (is_python_m_site(cmd, param_array))          return spawn_result(spawn_results['python_m_site_1'])
-          if (is_pip_version_via_python(cmd, param_array)) return spawn_result(spawn_results['python_m_pip_version_1'])
-          throw new UserException(`unknown case not sure how to mock "${cmd}" with params "${param_array}"`)
+          return (new SpawnMockBehaviourLs2(cmd, param_array)).process_possible_commands()
         }
       }
       mockery.registerMock('child_process', child_process_Mock);
