@@ -270,25 +270,27 @@ class Pip extends Base {
 }
 
 class Which {
-  constructor(binary, excluded_binary_paths) {
-    this.binary = binary
+  constructor(binary_name, excluded_binary_paths) {  // TODO should pass in Python class objects, not just a binary name, allowing wiring and updates of into
+    this.binary_name = binary_name
     this.excluded_binary_paths = excluded_binary_paths
   }
   path() {
-    let result_shell_which = spawn('which', [this.binary])
+    let result_shell_which = spawn('which', [this.binary_name])
     if (result_shell_which.stderr.length == 0) {
       let path = result_shell_which.stdout.toString()
+      console.log(`Default ${this.binary_name} is ${path}`)
+
       for (let excluded_path of this.excluded_binary_paths) {
         if (path == excluded_path)
           return null
 
         // The excluded path could in reality be a symbolic link to the same default python
-        let result_shell_stat = spawn('stat', ['-F', this.binary])
-        if (result_shell_which.stderr.length == 0) {
-          let real_excluded_path = result_shell_which.stdout.toString()
-          // console.log(real_excluded_path, path)
+        let result_shell_stat = spawn('stat', ['-F', excluded_path])
+        if (result_shell_stat.stderr.length == 0) {
+          let real_excluded_path = result_shell_stat.stdout.toString()
+          // console.log('real_excluded_path', real_excluded_path, path)
           if (real_excluded_path.indexOf(path) != -1) {
-            console.log(`Default ${path} is actually same as ${excluded_path}`)
+            console.log(`Default ${this.binary_name} at ${path} is actually same as ${excluded_path}, thus no need to report`)
             return null
           }
         }
