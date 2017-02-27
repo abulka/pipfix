@@ -1,3 +1,8 @@
+function UserException(message) {
+   this.message = message;
+   this.name = 'UserException';
+}
+
 function spawn_result(spawn_result_data) {
   if (spawn_result_data == undefined)
     throw new UserException('trying to build a mock spawn result from undefined data, test data lookup failed?')
@@ -51,6 +56,12 @@ sys.path = [
     'stdout': 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)',
     'stderr': ''
   },
+  'which_python_1': {
+    'cmd': 'which',
+    'params': ['python'],
+    'stdout': '/usr/bin/python',
+    'stderr': ''
+  },
 }
 
 class BaseSpawnMockBehaviour{
@@ -87,6 +98,10 @@ class BaseSpawnMockBehaviour{
     if (result != undefined)
       return result
 
+    result = this.which_python()
+    if (result != undefined)
+      return result
+
     throw new UserException(`Unknown case, not sure how to mock "${this.cmd}" with params "${this.param_array}"`)
   }
 
@@ -110,6 +125,10 @@ class BaseSpawnMockBehaviour{
 
   get is_python_m_site() {
     return (this.param_array[0] == '-m' && this.param_array[1] == 'site')
+  }
+
+  get is_which_python() {
+    return (this.cmd == 'which' && this.param_array[0] == 'python')
   }
 
   // Overridable steps
@@ -138,6 +157,11 @@ class BaseSpawnMockBehaviour{
     if (this.is_pip_version_via_python)
       return spawn_result(spawn_results['python_m_pip_version_1'])
   }
+
+  which_python() {
+    if (this.is_which_python)
+      return spawn_result(spawn_results['which_python_1'])
+  }
 }
 
 class SpawnMockBehaviourNonExistence extends BaseSpawnMockBehaviour {
@@ -151,3 +175,4 @@ exports.BaseSpawnMockBehaviour = BaseSpawnMockBehaviour
 exports.SpawnMockBehaviourNonExistence = SpawnMockBehaviourNonExistence
 exports.spawn_result = spawn_result
 exports.spawn_results = spawn_results
+exports.UserException = UserException

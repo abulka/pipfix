@@ -274,6 +274,7 @@ class Which {
     this.binary_name = binary_name
     this.excluded_binary_paths = excluded_binary_paths
   }
+
   path() {
     let result_shell_which = spawn('which', [this.binary_name])
     if (result_shell_which.stderr.length == 0) {
@@ -294,14 +295,33 @@ class Which {
             return null
           }
         }
-        // else {
-        //   console.log(`Warning running stat on ${excluded_path}: "${result_shell_which.stderr.toString()}"`)
-        // }
+
       }
       return path.trim()
     }
     return null
   }
+
+  static default_python(existing_pythons) {
+    let python
+    let existing_python_paths = existing_pythons.map(p => p.path)
+    let path = new Which('python', existing_python_paths).path()
+    // console.log('default python path', path)
+    if (path != null)
+      python = new Python(path)
+    return python
+  }
+
+  static default_pip(existing_pips) {
+    let pip
+    let existing_pip_paths = existing_pips.map(p => p.path)
+    let path = new Which('pip', existing_pip_paths).path()
+    if (path != null)
+      pip = new Pip(path)
+    return pip
+  }
+
+
 }
 
 

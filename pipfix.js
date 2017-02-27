@@ -13,28 +13,6 @@ let python_usr_bin = new Python('/usr/bin/python')
 let python_usr_local_bin = new Python('/usr/local/bin/python')
 let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
 
-// look for defaults
-
-let python_default = which_python()
-let pip_default = which_pip()
-
-function which_python() {
-  let python
-  let path = new Which('python', [python_usr_bin.path, python_usr_local_bin.path]).path()
-  // console.log('default python path', path)
-  if (path != null)
-    python = new Python(path)
-  return python
-}
-
-function which_pip() {
-  let pip
-  let path = new Which('pip', [pip_usr_local_bin.path]).path()
-  if (path != null)
-    pip = new Pip(path)
-  return pip
-}
-
 // construct list of all pythons and pips
 
 let pythons = []
@@ -42,10 +20,18 @@ let pips = []
 
 pythons.push(python_usr_bin)
 pythons.push(python_usr_local_bin)
+pips.push(pip_usr_local_bin)
+
+// look for defaults
+
+let python_default = Which.default_python(pythons)
+let pip_default = Which.default_pip(pips)
+
+// update full list
+
 if (python_default != undefined)
   pythons.push(python_default)
 
-pips.push(pip_usr_local_bin)
 if (pip_default != undefined)
   pips.push(pip_default)
 
