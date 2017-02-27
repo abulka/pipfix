@@ -278,10 +278,25 @@ class Which {
     let result_shell_which = spawn('which', [this.binary])
     if (result_shell_which.stderr.length == 0) {
       let path = result_shell_which.stdout.toString()
-      for (let excluded_path of this.excluded_binary_paths)
+      for (let excluded_path of this.excluded_binary_paths) {
         if (path == excluded_path)
           return null
-        return path.trim()
+
+        // The excluded path could in reality be a symbolic link to the same default python
+        let result_shell_stat = spawn('stat', ['-F', this.binary])
+        if (result_shell_which.stderr.length == 0) {
+          let real_excluded_path = result_shell_which.stdout.toString()
+          // console.log(real_excluded_path, path)
+          if (real_excluded_path.indexOf(path) != -1) {
+            console.log(`Default ${path} is actually same as ${excluded_path}`)
+            return null
+          }
+        }
+        // else {
+        //   console.log(`Warning running stat on ${excluded_path}: "${result_shell_which.stderr.toString()}"`)
+        // }
+      }
+      return path.trim()
     }
     return null
   }
@@ -291,4 +306,3 @@ class Which {
 exports.Which = Which
 exports.Python = Python
 exports.Pip = Pip
-
