@@ -10,6 +10,7 @@
     "test_dbg": "./node_modules/mocha/bin/mocha --inspect --debug-brk --fgrep \"python existence\"",
     "test_python_existence": "./node_modules/mocha/bin/mocha --fgrep \"python existence\"",
     "test_python_default": "./node_modules/mocha/bin/mocha --fgrep \"default pip and python detection\"",
+    "test_python_default_dbg": "./node_modules/mocha/bin/mocha  --inspect --debug-brk --fgrep \"default pip and python detection\"",
     "ls2": "npm ls --depth=0",
     "start": "node pipfix.js",
     "dbg_not_working_cos_nodejs_bug_wait_for_future_fix": "node-debug pipfix.js",

@@ -28,6 +28,7 @@ function prt(cmd, verbose=true) {
 class Base {
   constructor(path) {
     this.path = path
+    this.is_default = false
     this.result_shell_ls
     this.result_shell_version
     this.result_shell_file_size
@@ -324,7 +325,73 @@ class Which {
 
 }
 
+class Brain {
+  constructor() {
+    this.pythons = []
+    this.python_default
+
+    this.find_python('/usr/bin/python')
+    this.find_python('/usr/local/bin/python')
+    this.find_python_default()
+  }
+
+  find_python(path) {
+    let python = new Python(path)
+    if (python.exists)
+      this.pythons.push(python)
+  }
+
+  find_python_default() {
+    let result_shell_which = spawn('which', ['python'])
+    if (result_shell_which.stderr.length != 0)
+      throw new UserException(`which python failed with error "${result_shell_which.stderr.toString()}" thus cannot determine default python`)
+    let path_default_python = result_shell_which.stdout.toString()
+
+    for (let python of this.pythons)
+      if (this.paths_same(path_default_python, python.path))
+        this.python_default = python  // default python is an existing python
+        this.python_default.is_default = true
+        return
+    let another_python = new Python(path_default_python)
+    this.pythons.push(another_python)  // default python is a totally new python we found e.g. miniconda
+    this.python_default = another_python
+    this.python_default.is_default = true
+  }
+
+  paths_same(path1, path2) {
+    // See if the paths are the same.
+    // Also check against the 'stat' version of path2, just in case its a symbolic link
+
+    if (path1 == path2)
+      return true
+
+    let path2_symbolic = this.symbolic_path(path2)
+    if (path2_symbolic != undefined && (path2_symbolic.indexOf(path1) != -1))
+      return true
+
+    return false
+  }
+
+  symbolic_path(path) {
+    // get the real underlying path
+    let result_shell_stat = spawn('stat', ['-F', path])
+    if (result_shell_stat.stderr.length != 0)
+      throw new UserException(`"stat" failed with error "${result_shell_stat.stderr.toString()}" thus cannot determine symbolic link behind "${path}"`)
+
+    let symbolic_path = result_shell_stat.stdout.toString()  // TODO parse this properly and get the pure absolute path
+    return symbolic_path
+  }
+
+  get_python(path) {
+    for (let python of this.pythons)
+      if (path == python.path)
+        return python
+    return undefined
+  }
+
+}
 
 exports.Which = Which
 exports.Python = Python
 exports.Pip = Pip
+exports.Brain = Brain

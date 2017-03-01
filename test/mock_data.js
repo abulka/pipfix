@@ -62,6 +62,12 @@ sys.path = [
     'stdout': '/usr/bin/python',
     'stderr': ''
   },
+  'stat_1': {
+    'cmd': 'stat',
+    'params': ['-F', 'some/path'],
+    'stdout': '/usr/bin/python',
+    'stderr': ''
+  },
 }
 
 class BaseSpawnMockBehaviour{
@@ -102,12 +108,16 @@ class BaseSpawnMockBehaviour{
     if (result != undefined)
       return result
 
+    result = this.stat()
+    if (result != undefined)
+      return result
+
     throw new UserException(`Unknown case, not sure how to mock "${this.cmd}" with params "${this.param_array}"`)
   }
 
   // Util
 
-  get is_ls() {
+  get is_ls() {  // TODO need more flexibility to check the parameter too, and give different results for each
     return this.cmd == 'ls'
   }
 
@@ -129,6 +139,10 @@ class BaseSpawnMockBehaviour{
 
   get is_which_python() {
     return (this.cmd == 'which' && this.param_array[0] == 'python')
+  }
+
+  get is_stat() {  // TODO need more flexibility to check the parameter too, and give different results for each
+    return (this.cmd == 'stat' && this.param_array[0] == '-F')
   }
 
   // Overridable steps
@@ -161,6 +175,15 @@ class BaseSpawnMockBehaviour{
   which_python() {
     if (this.is_which_python)
       return spawn_result(spawn_results['which_python_1'])
+  }
+
+  stat() {
+    if (this.is_stat) {
+      let result = spawn_results['stat_1']
+      result['params'] = this.param_array
+      result['stdout'] = '-rwxr-xr-x 1 root wheel 66576 Dec 13 22:22:22 2017 ' + this.param_array[1]  // for now just make stat path the exact same as path
+      return spawn_result(result)
+    }
   }
 }
 
