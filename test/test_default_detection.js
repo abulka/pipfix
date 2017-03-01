@@ -30,6 +30,7 @@ describe('default pip and python detection', function() {
 
     let python_usr_bin = new Python('/usr/bin/python')
     let python_default = Which.default_python([python_usr_bin])
+    console.log('python_default', python_default)
 
     python_usr_bin.report()
     // python_default.report()
@@ -43,4 +44,3 @@ describe('default pip and python detection', function() {
   });
 
 });
-
