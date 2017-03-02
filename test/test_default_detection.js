@@ -40,7 +40,7 @@ describe('default pip and python detection', function() {
             case '/usr/bin/python':
               return spawn_result(spawn_results['ls_1'])
             case '/usr/local/bin/python':
-              return spawn_result(spawn_results['ls_2'])  // mock a failed ls
+              return spawn_result(spawn_results['ls_fail'])
           }
       }
     }

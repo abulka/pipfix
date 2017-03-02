@@ -21,7 +21,7 @@ let spawn_results = {
     'stdout': '     281 /path/cmd',
     'stderr': ''
   },
-  'ls_2': {
+  'ls_fail': {
     'cmd': 'ls',
     'params': ['-lh'],
     'stdout': '',
@@ -190,7 +190,7 @@ class BaseSpawnMockBehaviour{
 class SpawnMockBehaviourNonExistence extends BaseSpawnMockBehaviour {
   ls() {
     if (this.is_ls)
-      return spawn_result(spawn_results['ls_2'])
+      return spawn_result(spawn_results['ls_fail'])
   }
 }
 
