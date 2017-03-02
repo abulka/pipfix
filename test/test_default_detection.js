@@ -44,14 +44,11 @@ describe('default pip and python detection', function() {
     let python_usr_bin = brain.get_python('/usr/bin/python')
     let python_default = brain.python_default
 
-    // let python_usr_bin = new Python('/usr/bin/python')
-    // let python_default = Which.default_python([python_usr_bin])
-    // console.log('python_default', python_default)
+    brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
+    // brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.equal(-1)
 
-    // assert.equal(brain.pythons.indexOf(python_usr_bin) != -1, true)
-
-    assert.equal(python_usr_bin.exists, true)
-    assert.equal(python_default.exists, true)
+    python_usr_bin.exists.should.be.true()
+    python_default.exists.should.be.true()
 
     python_usr_bin.should.equal(python_default)
     python_usr_bin.is_default.should.equal(true)
