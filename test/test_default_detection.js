@@ -2,9 +2,9 @@ var assert = require('assert');     // https://nodejs.org/api/assert.html
 var should = require('should');     // https://github.com/shouldjs/should.js
 var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-javascript-testing-mocks-spies-stubs/
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
-var {BaseSpawnMockBehaviour, SpawnMockBehaviourNonExistence, spawn_result, spawn_results} = require('./mock_data.js')
+var {BaseSpawnMockBehaviour, SpawnMockBehaviourOnePythonUsrBin, spawn_result, spawn_results} = require('./mock_data.js')
 
-describe('default pip and python detection', function() {
+describe('default python detection', function() {
 
   beforeEach(function() {
     // runs before each test in this block
@@ -29,24 +29,25 @@ describe('default pip and python detection', function() {
     let {Python, Pip, Which, Brain} = require('../lib.js')
 
     let brain = new Brain()
-    brain.pythons.length.should.equal(2)  // TODO need to be able to test that just one python exists - mock ls needs to be smarter
+    brain.pythons.length.should.equal(2)
   });
 
-  it('default python is python_usr_bin', function() {
-    class SpawnMockBehaviourOnePython extends BaseSpawnMockBehaviour {
-      ls() {
-        if (this.is_ls)
-          switch (this.param_array[1]) {
-            case '/usr/bin/python':
-              return spawn_result(spawn_results['ls_1'])
-            case '/usr/local/bin/python':
-              return spawn_result(spawn_results['ls_fail'])
-          }
-      }
-    }
+  it('brain finds /usr/bin python only', function() {
     mockery.registerMock('child_process', {
       spawnSync: function(cmd, param_array) {
-        return (new SpawnMockBehaviourOnePython(cmd, param_array)).process_possible_commands()
+        return (new SpawnMockBehaviourOnePythonUsrBin(cmd, param_array)).process_possible_commands()
+      }
+    })
+    let {Python, Pip, Which, Brain} = require('../lib.js')
+
+    let brain = new Brain()
+    brain.pythons.length.should.equal(1)
+  });
+
+  it('one default python is usr_bin', function() {
+    mockery.registerMock('child_process', {
+      spawnSync: function(cmd, param_array) {
+        return (new SpawnMockBehaviourOnePythonUsrBin(cmd, param_array)).process_possible_commands()
       }
     })
     let {Python, Pip, Which, Brain} = require('../lib.js')
@@ -66,6 +67,75 @@ describe('default pip and python detection', function() {
     python_usr_bin.should.equal(python_default)
     python_usr_bin.is_default.should.equal(true)
     python_default.is_default.should.equal(true)
+
+    python_usr_bin.report()
+
+  });
+
+  it('two pythons default python is usr_bin', function() {
+    mockery.registerMock('child_process', {
+      spawnSync: function(cmd, param_array) {
+        return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
+      }
+    })
+    let {Python, Pip, Which, Brain} = require('../lib.js')
+
+    let brain = new Brain()
+    let python_usr_bin = brain.get_python('/usr/bin/python')
+    let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
+    let python_default = brain.python_default
+
+    brain.pythons.length.should.be.equal(2)
+
+    brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
+    brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.aboveOrEqual(0)
+
+    python_usr_bin.exists.should.be.true()
+    python_usr_local_bin.exists.should.be.true()
+    python_default.exists.should.be.true()
+
+    python_usr_bin.should.equal(python_default)
+    python_usr_bin.is_default.should.equal(true)
+    python_default.is_default.should.equal(true)
+    python_usr_local_bin.is_default.should.equal(false)
+
+    python_usr_bin.report()
+
+  });
+
+  it('two pythons default python is usr_local_bin', function() {
+    class SpawnMockBehaviourDefaultPythonUsrLocalBin extends BaseSpawnMockBehaviour {
+      which_python() {
+        if (this.is_which_python)
+          return spawn_result(spawn_results['which_python_2'])  // stdout will be '/usr/local/bin/python'
+      }
+    }
+    mockery.registerMock('child_process', {
+      spawnSync: function(cmd, param_array) {
+        return (new SpawnMockBehaviourDefaultPythonUsrLocalBin(cmd, param_array)).process_possible_commands()
+      }
+    })
+    let {Python, Pip, Which, Brain} = require('../lib.js')
+
+    let brain = new Brain()
+    let python_usr_bin = brain.get_python('/usr/bin/python')
+    let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
+    let python_default = brain.python_default
+
+    brain.pythons.length.should.be.equal(2)
+
+    brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
+    brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.aboveOrEqual(0)
+
+    python_usr_bin.exists.should.be.true()
+    python_usr_local_bin.exists.should.be.true()
+    python_default.exists.should.be.true()
+
+    python_usr_bin.should.not.equal(python_default)
+    python_usr_local_bin.should.equal(python_default)
+    python_usr_bin.is_default.should.equal(false)
+    python_default.is_default.should.equal(true)
+    python_usr_local_bin.is_default.should.equal(true)
 
     python_usr_bin.report()
 

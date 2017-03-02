@@ -62,6 +62,12 @@ sys.path = [
     'stdout': '/usr/bin/python',
     'stderr': ''
   },
+  'which_python_2': {
+    'cmd': 'which',
+    'params': ['python'],
+    'stdout': '/usr/local/bin/python',
+    'stderr': ''
+  },
   'stat_1': {
     'cmd': 'stat',
     'params': ['-F', 'some/path'],
@@ -194,8 +200,21 @@ class SpawnMockBehaviourNonExistence extends BaseSpawnMockBehaviour {
   }
 }
 
+class SpawnMockBehaviourOnePythonUsrBin extends BaseSpawnMockBehaviour {
+  ls() {
+    if (this.is_ls)
+      switch (this.param_array[1]) {
+        case '/usr/bin/python':
+          return spawn_result(spawn_results['ls_1'])
+        case '/usr/local/bin/python':
+          return spawn_result(spawn_results['ls_fail'])
+      }
+  }
+}
+
 exports.BaseSpawnMockBehaviour = BaseSpawnMockBehaviour
 exports.SpawnMockBehaviourNonExistence = SpawnMockBehaviourNonExistence
+exports.SpawnMockBehaviourOnePythonUsrBin = SpawnMockBehaviourOnePythonUsrBin
 exports.spawn_result = spawn_result
 exports.spawn_results = spawn_results
 exports.UserException = UserException
