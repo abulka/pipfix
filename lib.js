@@ -117,7 +117,8 @@ class Base {
   report() {
     this.report_obj = {}
     this.report_obj.path = this.path
-    this.report_obj['exists'] = this.exists
+    // this.report_obj['exists'] = this.exists
+    this.report_obj.is_default = this.is_default
     if (this.exists) {
       this.report_obj.runs_ok = this.runs_ok
       this.report_obj.version = this.version
