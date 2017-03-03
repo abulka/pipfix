@@ -81,6 +81,13 @@ class BaseSpawnMockBehaviour{
   constructor(cmd, param_array) {
     this.cmd = cmd
     this.param_array = param_array
+    this.result
+  }
+
+  select_result(key) {
+    this.result = Object.assign({}, spawn_results[key])  // clone
+    this.result['cmd'] = this.cmd
+    this.result['params'] = this.param_array
   }
 
   // Template Pattern - Design Pattern - override any step you want in a sub class e.g. this.ls()
@@ -90,9 +97,14 @@ class BaseSpawnMockBehaviour{
 
     // console.log(`Mocking "${this.cmd}" with params "${this.param_array}"`)
 
-    result = this.ls()
-    if (result != undefined)
-      return result
+    if (this.cmd == 'ls' && this.param_array[0] == '-lh') {
+      this.ls()  // allow sub classes to modify result
+      return spawn_result(this.result)  // TODO move 'spawn_result' to be private and part of this class
+    }
+    // result = this.ls()
+    // if (result != undefined)
+    //   return result
+    //
 
     result = this.wc()
     if (result != undefined)
@@ -123,9 +135,9 @@ class BaseSpawnMockBehaviour{
 
   // Util
 
-  get is_ls() {  // TODO need more flexibility to check the parameter too, and give different results for each
-    return this.cmd == 'ls'
-  }
+  // get is_ls() {  // TODO need more flexibility to check the parameter too, and give different results for each
+  //   return this.cmd == 'ls'
+  // }
 
   get is_wc() {
     return this.cmd == 'wc'
@@ -154,8 +166,7 @@ class BaseSpawnMockBehaviour{
   // Overridable steps
 
   ls() {
-    if (this.is_ls)
-      return spawn_result(spawn_results['ls_1'])
+    this.select_result('ls_1')
   }
 
   wc() {
@@ -195,21 +206,22 @@ class BaseSpawnMockBehaviour{
 
 class SpawnMockBehaviourNonExistence extends BaseSpawnMockBehaviour {
   ls() {
-    if (this.is_ls)
-      return spawn_result(spawn_results['ls_fail'])
+    this.select_result('ls_fail')
   }
 }
 
 class SpawnMockBehaviourOnePythonUsrBin extends BaseSpawnMockBehaviour {
   ls() {
-    if (this.is_ls)
-      switch (this.param_array[1]) {
-        case '/usr/bin/python':
-          return spawn_result(spawn_results['ls_1'])
-        case '/usr/local/bin/python':
-          return spawn_result(spawn_results['ls_fail'])
-      }
+    switch (this.param_array[1]) {
+      case '/usr/bin/python':
+        this.select_result('ls_1')
+        break
+      case '/usr/local/bin/python':
+        this.select_result('ls_fail')
+        break
+    }
   }
+
 }
 
 exports.BaseSpawnMockBehaviour = BaseSpawnMockBehaviour
