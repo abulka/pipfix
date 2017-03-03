@@ -2,7 +2,7 @@ var assert = require('assert');     // https://nodejs.org/api/assert.html
 var should = require('should');     // https://github.com/shouldjs/should.js
 var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-javascript-testing-mocks-spies-stubs/
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
-var {BaseSpawnMockBehaviour, SpawnMockBehaviourNonExistence, SPAWN_RESULTS} = require('./mock_data.js')
+var {BaseSpawnMockBehaviour, SPAWN_RESULTS} = require('./mock_data.js')
 
 describe('pip python site relationships', function() {
 

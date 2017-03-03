@@ -160,30 +160,5 @@ class BaseSpawnMockBehaviour{
   }
 }
 
-// Common scenarios
-
-class SpawnMockBehaviourNonExistence extends BaseSpawnMockBehaviour {
-  ls() {
-    this.select('ls_fail')
-  }
-}
-
-class SpawnMockBehaviourOnePythonUsrBin extends BaseSpawnMockBehaviour {
-  ls() {
-    switch (this.params[1]) {
-      case '/usr/bin/python':
-        this.select('ls_success')
-        break
-      case '/usr/local/bin/python':
-        this.select('ls_fail')
-        break
-    }
-  }
-
-}
-
 exports.BaseSpawnMockBehaviour = BaseSpawnMockBehaviour
-exports.SpawnMockBehaviourNonExistence = SpawnMockBehaviourNonExistence
-exports.SpawnMockBehaviourOnePythonUsrBin = SpawnMockBehaviourOnePythonUsrBin
 exports.SPAWN_RESULTS = SPAWN_RESULTS
-exports.UserException = UserException
