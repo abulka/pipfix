@@ -30,6 +30,7 @@
   which looks like a complex thing, but it simply creates a class and calls '.process_possible_commands()'
  */
 
+var assert = require('assert');     // https://nodejs.org/api/assert.html
 let {UserException} = require('../util.js')
 
 const SPAWN_RESULTS = {
@@ -68,6 +69,10 @@ sys.path = [
   },
   "which_python_usr_local_bin": {  // which python
     'stdout': '/usr/local/bin/python',
+    'stderr': ''
+  },
+  "which_pip_usr_local_bin": {  // which pip
+    'stdout': '/usr/local/bin/pip',
     'stderr': ''
   },
   'stat_1': {  // stat -F some/path
@@ -120,6 +125,8 @@ class BaseSpawnMockBehaviour{
       this.python_m_site()
     else if (this.cmd == 'which' && this.params[0] == 'python')
       this.which_python()
+    else if (this.cmd == 'which' && this.params[0] == 'pip')
+      this.which_pip()
     else if (this.cmd == 'stat' && this.params[0] == '-F')
       this.stat()
     else
@@ -132,31 +139,43 @@ class BaseSpawnMockBehaviour{
 
   ls() {
     this.select('ls_success')
+    assert(this.result != undefined)
   }
 
   wc() {
     this.select('wc_fail')
+    assert(this.result != undefined)
   }
 
   version() {
     this.select('python_version_fail')
+    assert(this.result != undefined)
   }
 
   python_m_site() {
     this.select('python_m_site_1')
+    assert(this.result != undefined)
   }
 
   pip_version_via_python() {
     this.select('python_m_pip_version_1')
+    assert(this.result != undefined)
   }
 
   which_python() {
     this.select('which_python_usr_bin')
+    assert(this.result != undefined)
+  }
+
+  which_pip() {
+    this.select('which_pip_usr_local_bin')
+    assert(this.result != undefined)
   }
 
   stat() {
     this.select('stat_1')
     this.result['stdout'] = '-rwxr-xr-x 1 root wheel 66576 Dec 13 22:22:22 2017 ' + this.params[1]  // for now just make stat path the exact same as path
+    assert(this.result != undefined)
   }
 }
 

@@ -26,7 +26,7 @@ describe('pip python site relationships', function() {
         return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
       }
     })
-    let {Python, Pip, Which} = require('../lib.js')
+    let {Python, Pip} = require('../lib.js')
     let spy1 = sinon.spy(Python.prototype, 'analyse_site_info');
 
     let python_usr_bin = new Python('/usr/bin/python')

@@ -271,69 +271,75 @@ class Pip extends Base {
   }
 }
 
-class Which {
-  constructor(binary_name, excluded_binary_paths) {  // TODO should pass in Python class objects, not just a binary name, allowing wiring and updates of into
-    this.binary_name = binary_name
-    this.excluded_binary_paths = excluded_binary_paths
-  }
-
-  path() {
-    let result_shell_which = spawn('which', [this.binary_name])
-    if (result_shell_which.stderr.length == 0) {
-      let path = result_shell_which.stdout.toString()
-      console.log(`Default ${this.binary_name} is ${path}`)
-
-      for (let excluded_path of this.excluded_binary_paths) {
-        if (path == excluded_path)
-          return null
-
-        // The excluded path could in reality be a symbolic link to the same default python
-        let result_shell_stat = spawn('stat', ['-F', excluded_path])
-        if (result_shell_stat.stderr.length == 0) {
-          let real_excluded_path = result_shell_stat.stdout.toString()
-          // console.log('real_excluded_path', real_excluded_path, path)
-          if (real_excluded_path.indexOf(path) != -1) {
-            console.log(`Default ${this.binary_name} at ${path} is actually same as ${excluded_path}, thus no need to report`)
-            return null
-          }
-        }
-
-      }
-      return path.trim()
-    }
-    return null
-  }
-
-  static default_python(existing_pythons) {
-    let python
-    let existing_python_paths = existing_pythons.map(p => p.path)
-    let path = new Which('python', existing_python_paths).path()
-    // console.log('default python path', path)
-    if (path != null)
-      python = new Python(path)
-    return python
-  }
-
-  static default_pip(existing_pips) {
-    let pip
-    let existing_pip_paths = existing_pips.map(p => p.path)
-    let path = new Which('pip', existing_pip_paths).path()
-    if (path != null)
-      pip = new Pip(path)
-    return pip
-  }
-
-
-}
+// class Which {
+//   constructor(binary_name, excluded_binary_paths) {  // TODO should pass in Python class objects, not just a binary name, allowing wiring and updates of into
+//     this.binary_name = binary_name
+//     this.excluded_binary_paths = excluded_binary_paths
+//   }
+//
+//   path() {
+//     let result_shell_which = spawn('which', [this.binary_name])
+//     if (result_shell_which.stderr.length == 0) {
+//       let path = result_shell_which.stdout.toString()
+//       console.log(`Default ${this.binary_name} is ${path}`)
+//
+//       for (let excluded_path of this.excluded_binary_paths) {
+//         if (path == excluded_path)
+//           return null
+//
+//         // The excluded path could in reality be a symbolic link to the same default python
+//         let result_shell_stat = spawn('stat', ['-F', excluded_path])
+//         if (result_shell_stat.stderr.length == 0) {
+//           let real_excluded_path = result_shell_stat.stdout.toString()
+//           // console.log('real_excluded_path', real_excluded_path, path)
+//           if (real_excluded_path.indexOf(path) != -1) {
+//             console.log(`Default ${this.binary_name} at ${path} is actually same as ${excluded_path}, thus no need to report`)
+//             return null
+//           }
+//         }
+//
+//       }
+//       return path.trim()
+//     }
+//     return null
+//   }
+//
+//   static default_python(existing_pythons) {
+//     let python
+//     let existing_python_paths = existing_pythons.map(p => p.path)
+//     let path = new Which('python', existing_python_paths).path()
+//     // console.log('default python path', path)
+//     if (path != null)
+//       python = new Python(path)
+//     return python
+//   }
+//
+//   static default_pip(existing_pips) {
+//     let pip
+//     let existing_pip_paths = existing_pips.map(p => p.path)
+//     let path = new Which('pip', existing_pip_paths).path()
+//     if (path != null)
+//       pip = new Pip(path)
+//     return pip
+//   }
+//
+//
+// }
 
 class Brain {
   constructor() {
     this.pythons = []
+    this.pips = []
     this.python_default
+    this.pip_default
 
     this.find_python('/usr/bin/python')
     this.find_python('/usr/local/bin/python')
     this.find_python_default()
+
+    this.find_pip('/usr/bin/pip')
+    this.find_pip('/usr/local/bin/pip')
+    this.find_pip_default()
   }
 
   find_python(path) {
@@ -342,21 +348,46 @@ class Brain {
       this.pythons.push(python)
   }
 
+  find_pip(path) {
+    let pip = new Pip(path)
+    if (pip.exists)
+      this.pips.push(pip)
+  }
+
   find_python_default() {
     let result_shell_which = spawn('which', ['python'])
     if (result_shell_which.stderr.length != 0)
       throw new UserException(`which python failed with error "${result_shell_which.stderr.toString()}" thus cannot determine default python`)
-    let path_default_python = result_shell_which.stdout.toString()
+    let path_default_python = result_shell_which.stdout.toString().trim()
 
     for (let python of this.pythons)
-      if (this.paths_same(path_default_python, python.path))
+      if (this.paths_same(path_default_python, python.path)) {
         this.python_default = python  // default python is an existing python
         this.python_default.is_default = true
         return
+      }
     let another_python = new Python(path_default_python)
     this.pythons.push(another_python)  // default python is a totally new python we found e.g. miniconda
     this.python_default = another_python
     this.python_default.is_default = true
+  }
+
+  find_pip_default() {
+    let result_shell_which = spawn('which', ['pip'])
+    if (result_shell_which.stderr.length != 0)
+      throw new UserException(`which pip failed with error "${result_shell_which.stderr.toString()}" thus cannot determine default pip`)
+    let path_default_pip = result_shell_which.stdout.toString().trim()
+
+    for (let pip of this.pips)
+      if (this.paths_same(path_default_pip, pip.path)) {
+        this.pip_default = pip  // default pip is an existing pip
+        this.pip_default.is_default = true
+        return
+      }
+    let another_pip = new Pip(path_default_pip)
+    this.pips.push(another_pip)  // default pip is a totally new pip we found e.g. miniconda
+    this.pip_default = another_pip
+    this.pip_default.is_default = true
   }
 
   paths_same(path1, path2) {
@@ -390,9 +421,16 @@ class Brain {
     return undefined
   }
 
+  get_pip(path) {
+    for (let pip of this.pips)
+      if (path == pip.path)
+        return pip
+    return undefined
+  }
+
 }
 
-exports.Which = Which
+// exports.Which = Which
 exports.Python = Python
 exports.Pip = Pip
 exports.Brain = Brain

@@ -31,7 +31,7 @@ describe('existence', function() {
         }
       }
       mockery.registerMock('child_process', child_process_Mock);
-      let {Python, Pip, Which} = require('../lib.js')
+      let {Python} = require('../lib.js')
 
       let validSpy = sinon.spy(Python.prototype, 'valid');
       let analyseSpy = sinon.spy(Python.prototype, 'analyse');
@@ -81,7 +81,7 @@ describe('existence', function() {
           return (new SpawnMock(cmd, param_array)).process_possible_commands()
         }
       })
-      let {Python, Pip, Which} = require('../lib.js')
+      let {Python} = require('../lib.js')
       let python_usr_bin = new Python('/usr/bin/python')
 
       python_usr_bin.exists.should.be.false()
@@ -93,7 +93,7 @@ describe('existence', function() {
           return (new SpawnMock(cmd, param_array)).process_possible_commands()
         }
       })
-      let {Python, Pip, Which} = require('../lib.js')
+      let {Python} = require('../lib.js')
       let python_usr_local_bin = new Python('/usr/local/bin/python')
 
       python_usr_local_bin.exists.should.be.true()
@@ -110,7 +110,7 @@ describe('existence', function() {
           return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
         }
       })
-      let {Python, Pip, Which} = require('../lib.js')
+      let {Pip} = require('../lib.js')
 
       let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
       assert.equal(pip_usr_local_bin.exists, true);
@@ -131,7 +131,7 @@ describe('existence', function() {
           return (new SpawnMock(cmd, param_array)).process_possible_commands()
         }
       })
-      let {Python, Pip, Which} = require('../lib.js')
+      let {Pip} = require('../lib.js')
 
       let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
       assert.equal(pip_usr_local_bin.exists, false);

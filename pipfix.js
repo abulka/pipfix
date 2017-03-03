@@ -3,37 +3,58 @@
 const format = require('pretty-format')  // https://github.com/facebook/jest/tree/master/packages/pretty-format
 // const format = require('pretty-format')  // https://github.com/facebook/jest/tree/master/packages/pretty-format
 
-let {Python, Pip, Which} = require('./lib.js')
+let {Python, Pip, Brain} = require('./lib.js')
+var assert = require('assert');     // https://nodejs.org/api/assert.html
 
 // TODO should use proper command line parsing and have options etc.
 
-// standard pythons and pip
 
-let python_usr_bin = new Python('/usr/bin/python')
-let python_usr_local_bin = new Python('/usr/local/bin/python')
-let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
+// New Brain way of doing things...
 
-// construct list of all pythons and pips
+let brain = new Brain()
+let python_usr_bin = brain.get_python('/usr/bin/python')
+let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
+let python_default = brain.python_default
+assert(python_default.exists)
 
-let pythons = []
-let pips = []
+let pip_usr_local_bin = brain.get_pip('/usr/local/bin/pip')
+let pip_default = brain.pip_default
 
-pythons.push(python_usr_bin)
-pythons.push(python_usr_local_bin)
-pips.push(pip_usr_local_bin)
+let pythons = brain.pythons
+let pips = brain.pips
 
-// look for defaults
 
-let python_default = Which.default_python(pythons)
-let pip_default = Which.default_pip(pips)
+//
+// // standard pythons and pip
+//
+// let python_usr_bin = new Python('/usr/bin/python')
+// let python_usr_local_bin = new Python('/usr/local/bin/python')
+// let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
+//
+// // construct list of all pythons and pips
+//
+// let pythons = []
+// let pips = []
+//
+// pythons.push(python_usr_bin)
+// pythons.push(python_usr_local_bin)
+// pips.push(pip_usr_local_bin)
+//
+// // look for defaults
+//
+// let python_default = Which.default_python(pythons)
+// let pip_default = Which.default_pip(pips)
+//
+// // update full list
+//
+// if (python_default != undefined)
+//   pythons.push(python_default)
+//
+// if (pip_default != undefined)
+//   pips.push(pip_default)
+//
 
-// update full list
 
-if (python_default != undefined)
-  pythons.push(python_default)
-
-if (pip_default != undefined)
-  pips.push(pip_default)
 
 // inform all pips of all other pythons
 for (let pip of pips)
@@ -44,10 +65,12 @@ for (let pip of pips)
 // report
 
 python_usr_bin.report()
-python_usr_local_bin.report()
+if (python_usr_local_bin != undefined)
+  python_usr_local_bin.report()
 if (python_default != undefined)
   python_default.report()
-pip_usr_local_bin.report()
+if (pip_usr_local_bin != undefined)
+  pip_usr_local_bin.report()
 if (pip_default != undefined)
   pip_default.report()
 //
@@ -61,10 +84,14 @@ if (pip_default != undefined)
 console.log('1st Python')
 console.log('----------', format(python_usr_bin.report_obj))
 // console.log(format(python_usr_bin.report_obj))
-console.log('')
-console.log('2nd Python')
-console.log('----------', format(python_usr_local_bin.report_obj))
-// console.log(format(python_usr_local_bin.report_obj))
+
+if (python_usr_local_bin != undefined) {
+  console.log('')
+  console.log('2nd Python')
+  console.log('----------', format(python_usr_local_bin.report_obj))
+  // console.log(format(python_usr_local_bin.report_obj))
+}
+
 console.log('')
 
 if (python_default != undefined) {
