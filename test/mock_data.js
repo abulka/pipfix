@@ -1,19 +1,36 @@
-// function UserException(message) {
-//    this.message = message;
-//    this.name = 'UserException';
-// }
-class UserException extends Error {}
+/*
+  Mock Spawn.
 
-function spawn_result(spawn_result_data) {
-  if (spawn_result_data == undefined)
-    throw new UserException('trying to build a mock spawn result from undefined data, test data lookup failed?')
-  return {
-    stdout: spawn_result_data['stdout'],
-    stderr: spawn_result_data['stderr'],
-    args: [spawn_result_data['cmd'],
-           ...spawn_result_data['params']]
-  }
-}
+  Usually you:
+  ------------
+    let spawn = require( 'child_process' ).spawnSync
+
+    this.result_shell_ls = spawn('ls', ['-lh', this.path])
+
+  where the result looks like
+
+      args: [cmd, param1, param2, ...]
+      stdout: '...',
+      stderr: '...',
+
+  To Mock simply:
+  ---------------
+    mockery.registerMock('child_process', {
+      spawnSync: function(cmd, param_array) {
+        return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
+      }
+    })
+    let {Python, Pip, Which} = require('../lib.js')
+
+  What this does is replace the 'child_process' module with our own 'spawnSync' key/function, which
+  we have told to return a fake result object, via
+
+    (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
+
+  which looks like a complex thing, but it simply creates a class and calls '.process_possible_commands()'
+ */
+
+class UserException extends Error {}
 
 let spawn_results = {
   'ls_1': {
@@ -86,11 +103,24 @@ class BaseSpawnMockBehaviour{
   }
 
   select(key) {
+    // Select a mock result from the data structure of possibilities found in 'spawn_results'
     this.result = Object.assign({}, spawn_results[key])  // clone
     this.result['cmd'] = this.cmd
     this.result['params'] = this.params
   }
 
+  spawn_result() {
+    // Convert the json test result data into an object that looks exactly like what spawn returns
+    if (this.result == undefined)
+      throw new UserException('Trying to build a mock spawn result from undefined data.')
+    return {
+      stdout: this.result['stdout'],
+      stderr: this.result['stderr'],
+      args: [this.result['cmd'],
+             ...this.result['params']]
+    }
+  }
+  
   // Template Pattern - Design Pattern - override any step you want in a sub class e.g. this.ls()
 
   process_possible_commands() {
@@ -113,10 +143,10 @@ class BaseSpawnMockBehaviour{
     else
       throw new UserException(`Unknown Spawn case, not sure how to mock "${this.cmd}" with params "${this.params}"`)
 
-    return spawn_result(this.result)  // TODO move 'spawn_result' to be private and part of this class
+    return this.spawn_result()
   }
 
-  // Overridable steps
+  // Default results, individual methods can be overridden by subclasses to suit the test case
 
   ls() {
     this.select('ls_1')
@@ -148,6 +178,8 @@ class BaseSpawnMockBehaviour{
   }
 }
 
+// Common scenarios
+
 class SpawnMockBehaviourNonExistence extends BaseSpawnMockBehaviour {
   ls() {
     this.select('ls_fail')
@@ -171,6 +203,5 @@ class SpawnMockBehaviourOnePythonUsrBin extends BaseSpawnMockBehaviour {
 exports.BaseSpawnMockBehaviour = BaseSpawnMockBehaviour
 exports.SpawnMockBehaviourNonExistence = SpawnMockBehaviourNonExistence
 exports.SpawnMockBehaviourOnePythonUsrBin = SpawnMockBehaviourOnePythonUsrBin
-exports.spawn_result = spawn_result
 exports.spawn_results = spawn_results
 exports.UserException = UserException
