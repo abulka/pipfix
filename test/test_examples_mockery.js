@@ -94,12 +94,12 @@ describe('mockery experiments', function() {
             //console.log('fs_play mock called!')
           }
       };
-      mockery.registerMock('../fs_play.js', fs_playMock)  // needs to be first, before you use the require()
-      let fs_play = require('../fs_play.js')
+      mockery.registerMock('./fs_play.js', fs_playMock)  // needs to be first, before you use the require()
+      let fs_play = require('./fs_play.js')
 
       fs_play.fs_play()
 
-      mockery.deregisterMock('../fs_play.js');
+      mockery.deregisterMock('./fs_play.js');
 
     });
 
@@ -112,7 +112,7 @@ describe('mockery experiments', function() {
                                     }
       };
       mockery.registerMock('fs', fsMock);
-      let fs_play = require('../fs_play.js')
+      let fs_play = require('./fs_play.js')
 
       fs_play.fs_play()
 
@@ -130,7 +130,7 @@ describe('mockery experiments', function() {
       };
       mockery.registerMock('fs', fsMock);
       mockery.resetCache(); // does this work on the global require cache?  No.
-      let fs_play = require('../fs_play.js')   // HA THIS DOESN'T WORK - THE OLD REQUIRE FROM THE PREVIOUS TEST STILL IS IN PLACE
+      let fs_play = require('./fs_play.js')   // HA THIS DOESN'T WORK - THE OLD REQUIRE FROM THE PREVIOUS TEST STILL IS IN PLACE
 
       fs_play.fs_play()
 
@@ -147,7 +147,7 @@ describe('mockery experiments', function() {
                                     }
       };
       mockery.registerMock('fs', fsMock);
-      let fs_play = require('../fs_play2.js')
+      let fs_play = require('./fs_play2.js')
 
       fs_play.fs_play()
 
