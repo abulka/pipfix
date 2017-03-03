@@ -78,16 +78,16 @@ sys.path = [
 
 class BaseSpawnMockBehaviour{
 
-  constructor(cmd, param_array) {
+  constructor(cmd, params) {
     this.cmd = cmd
-    this.param_array = param_array
+    this.params = params
     this.result
   }
 
-  select_result(key) {
+  select(key) {
     this.result = Object.assign({}, spawn_results[key])  // clone
     this.result['cmd'] = this.cmd
-    this.result['params'] = this.param_array
+    this.result['params'] = this.params
   }
 
   // Template Pattern - Design Pattern - override any step you want in a sub class e.g. this.ls()
@@ -95,9 +95,9 @@ class BaseSpawnMockBehaviour{
   process_possible_commands() {
     let result
 
-    // console.log(`Mocking "${this.cmd}" with params "${this.param_array}"`)
+    // console.log(`Mocking "${this.cmd}" with params "${this.params}"`)
 
-    if (this.cmd == 'ls' && this.param_array[0] == '-lh') {
+    if (this.cmd == 'ls' && this.params[0] == '-lh') {
       this.ls()  // allow sub classes to modify result
       return spawn_result(this.result)  // TODO move 'spawn_result' to be private and part of this class
     }
@@ -130,7 +130,7 @@ class BaseSpawnMockBehaviour{
     if (result != undefined)
       return result
 
-    throw new UserException(`Unknown case, not sure how to mock "${this.cmd}" with params "${this.param_array}"`)
+    throw new UserException(`Unknown case, not sure how to mock "${this.cmd}" with params "${this.params}"`)
   }
 
   // Util
@@ -144,29 +144,29 @@ class BaseSpawnMockBehaviour{
   }
 
   get is_version() {
-    return (this.param_array[0] == '--version')  // cmd could be 'python' or 'pip'
+    return (this.params[0] == '--version')  // cmd could be 'python' or 'pip'
   }
 
   get is_pip_version_via_python() {
-    return (this.param_array[0] == '-m' && this.param_array[1] == 'pip' && this.param_array[2] == '--version')
+    return (this.params[0] == '-m' && this.params[1] == 'pip' && this.params[2] == '--version')
   }
 
   get is_python_m_site() {
-    return (this.param_array[0] == '-m' && this.param_array[1] == 'site')
+    return (this.params[0] == '-m' && this.params[1] == 'site')
   }
 
   get is_which_python() {
-    return (this.cmd == 'which' && this.param_array[0] == 'python')
+    return (this.cmd == 'which' && this.params[0] == 'python')
   }
 
   get is_stat() {  // TODO need more flexibility to check the parameter too, and give different results for each
-    return (this.cmd == 'stat' && this.param_array[0] == '-F')
+    return (this.cmd == 'stat' && this.params[0] == '-F')
   }
 
   // Overridable steps
 
   ls() {
-    this.select_result('ls_1')
+    this.select('ls_1')
   }
 
   wc() {
@@ -197,8 +197,8 @@ class BaseSpawnMockBehaviour{
   stat() {
     if (this.is_stat) {
       let result = spawn_results['stat_1']
-      result['params'] = this.param_array
-      result['stdout'] = '-rwxr-xr-x 1 root wheel 66576 Dec 13 22:22:22 2017 ' + this.param_array[1]  // for now just make stat path the exact same as path
+      result['params'] = this.params
+      result['stdout'] = '-rwxr-xr-x 1 root wheel 66576 Dec 13 22:22:22 2017 ' + this.params[1]  // for now just make stat path the exact same as path
       return spawn_result(result)
     }
   }
@@ -206,18 +206,18 @@ class BaseSpawnMockBehaviour{
 
 class SpawnMockBehaviourNonExistence extends BaseSpawnMockBehaviour {
   ls() {
-    this.select_result('ls_fail')
+    this.select('ls_fail')
   }
 }
 
 class SpawnMockBehaviourOnePythonUsrBin extends BaseSpawnMockBehaviour {
   ls() {
-    switch (this.param_array[1]) {
+    switch (this.params[1]) {
       case '/usr/bin/python':
-        this.select_result('ls_1')
+        this.select('ls_1')
         break
       case '/usr/local/bin/python':
-        this.select_result('ls_fail')
+        this.select('ls_fail')
         break
     }
   }
