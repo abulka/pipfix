@@ -30,7 +30,7 @@
   which looks like a complex thing, but it simply creates a class and calls '.process_possible_commands()'
  */
 
-class UserException extends Error {}
+let {UserException} = require('../util.js')
 
 const SPAWN_RESULTS = {
   'ls_1': {
