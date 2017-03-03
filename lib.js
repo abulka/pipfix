@@ -288,6 +288,14 @@ class Brain {
     this.find_pip_default()
 
     this.analyse_relationships()  // inform all pips of all other pythons
+    this.report()
+  }
+
+  report() {
+    for (let python of this.pythons)
+      python.report()
+    for (let pip of this.pips)
+      pip.report()
   }
 
   find_python(path) {

@@ -20,18 +20,6 @@ let pip_default = brain.pip_default
 let pythons = brain.pythons
 let pips = brain.pips
 
-
-// report
-
-python_usr_bin.report()
-if (python_usr_local_bin != undefined)
-  python_usr_local_bin.report()
-if (python_default != undefined)
-  python_default.report()
-if (pip_usr_local_bin != undefined)
-  pip_usr_local_bin.report()
-if (pip_default != undefined)
-  pip_default.report()
 //
 // let report = {
 //   '1st Python': python_usr_bin.report_obj,
