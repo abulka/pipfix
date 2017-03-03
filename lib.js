@@ -281,12 +281,10 @@ class Brain {
 
     this.find_python('/usr/bin/python')
     this.find_python('/usr/local/bin/python')
-    // this.find_python_default()
     this.python_default = this.find_default('python', this.pythons, Python)
 
     this.find_pip('/usr/bin/pip')
     this.find_pip('/usr/local/bin/pip')
-    // this.find_pip_default()
     this.pip_default = this.find_default('pip', this.pips, Pip)
 
     this.analyse_relationships()  // inform all pips of all other pythons
@@ -313,15 +311,16 @@ class Brain {
   }
 
   find_default(cmd, collection, Class) {
-    // Find default python or pip, add it to the collection.  If its not already in the collection, then
-    // create an instance of 'Class' and add it.
-    // Parameters:
-    //    'cmd' is e.g. 'python' or 'pip'
-    //    'collection' is e.g. this.pythons or this.pips
-    //    'Class' is Python or Pip class
-    // Returns:
-    //    The Python or Pip instance which is the default, which you should assign to this.python_default or this.pip_default
-
+    /*
+     Find default python or pip, add it to the collection.  If its not already in the collection, then
+     create an instance of 'Class' and add it.
+     Parameters:
+       'cmd' is e.g. 'python' or 'pip'
+       'collection' is e.g. this.pythons or this.pips
+       'Class' is Python or Pip class
+     Returns:
+       The Python or Pip instance which is the default, which you should assign to this.python_default or this.pip_default
+     */
     let result_shell_which = spawn('which', [cmd])
     if (result_shell_which.stderr.length != 0)
       throw new UserException(`which ${cmd} failed with error "${result_shell_which.stderr.toString()}" thus cannot determine default ${cmd}`)
@@ -338,42 +337,6 @@ class Brain {
     another.is_default = true
     return another
   }
-
-  // find_python_default() {
-  //   let result_shell_which = spawn('which', ['python'])
-  //   if (result_shell_which.stderr.length != 0)
-  //     throw new UserException(`which python failed with error "${result_shell_which.stderr.toString()}" thus cannot determine default python`)
-  //   let path_default_python = result_shell_which.stdout.toString().trim()
-  //
-  //   for (let python of this.pythons)
-  //     if (this.paths_same(path_default_python, python.path)) {
-  //       this.python_default = python  // default python is an existing python
-  //       this.python_default.is_default = true
-  //       return
-  //     }
-  //   let another_python = new Python(path_default_python)
-  //   this.pythons.push(another_python)  // default python is a totally new python we found e.g. miniconda
-  //   this.python_default = another_python
-  //   this.python_default.is_default = true
-  // }
-  //
-  // find_pip_default() {
-  //   let result_shell_which = spawn('which', ['pip'])
-  //   if (result_shell_which.stderr.length != 0)
-  //     throw new UserException(`which pip failed with error "${result_shell_which.stderr.toString()}" thus cannot determine default pip`)
-  //   let path_default_pip = result_shell_which.stdout.toString().trim()
-  //
-  //   for (let pip of this.pips)
-  //     if (this.paths_same(path_default_pip, pip.path)) {
-  //       this.pip_default = pip  // default pip is an existing pip
-  //       this.pip_default.is_default = true
-  //       return
-  //     }
-  //   let another_pip = new Pip(path_default_pip)
-  //   this.pips.push(another_pip)  // default pip is a totally new pip we found e.g. miniconda
-  //   this.pip_default = another_pip
-  //   this.pip_default.is_default = true
-  // }
 
   paths_same(path1, path2) {
     // See if the paths are the same.
@@ -421,7 +384,6 @@ class Brain {
   }
 }
 
-// exports.Which = Which
 exports.Python = Python
 exports.Pip = Pip
 exports.Brain = Brain
