@@ -20,11 +20,13 @@ describe('existence', function() {
     mockery.disable();
   });
 
-  describe('python', function() {
 
-    it('python_usr_bin exists', function() {
+  describe('python existence', function() {
+
+
+    it('python_usr_bin exists', function () {
       let child_process_Mock = {
-        spawnSync: function(cmd, param_array) {
+        spawnSync: function (cmd, param_array) {
           return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
         }
       }
@@ -52,19 +54,54 @@ describe('existence', function() {
 
     });
 
-    it('python_usr_bin does not exist', function() {
+  });
+
+
+  describe('python usr_bin does not exist', function () {
+
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_fail')
+            break
+          case '/usr/local/bin/python':
+            this.select('ls_success')
+            break
+        }
+      }
+      which_python() {
+        this.select('which_python_usr_local_bin')
+      }
+    }
+
+    it('python_usr_bin does not exist', function () {
       mockery.registerMock('child_process', {
-        spawnSync: function(cmd, param_array) {
-          return (new SpawnMockBehaviourNonExistence(cmd, param_array)).process_possible_commands()
+        spawnSync: function (cmd, param_array) {
+          return (new SpawnMock(cmd, param_array)).process_possible_commands()
         }
       })
       let {Python, Pip, Which} = require('../lib.js')
-
       let python_usr_bin = new Python('/usr/bin/python')
-      assert.equal(python_usr_bin.exists, false);
+
+      python_usr_bin.exists.should.be.false()
+    });
+
+    it('usr_local_bin python exists and is default', function () {
+      mockery.registerMock('child_process', {
+        spawnSync: function (cmd, param_array) {
+          return (new SpawnMock(cmd, param_array)).process_possible_commands()
+        }
+      })
+      let {Python, Pip, Which} = require('../lib.js')
+      let python_usr_local_bin = new Python('/usr/local/bin/python')
+
+      python_usr_local_bin.exists.should.be.true()
+      // python_usr_local_bin.is_default.should.be.true()  // TODO need to use brain to get this smart...
     });
 
   });
+
 
   describe('pip', function() {
     it('pip_usr_local_bin exists', function() {

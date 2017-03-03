@@ -33,33 +33,23 @@
 let {UserException} = require('../util.js')
 
 const SPAWN_RESULTS = {
-  'ls_1': {
-    'cmd': 'ls',
-    'params': ['-lh'],
+  "ls_success": {  // ls -lh some/path
     'stdout': '     281 /path/cmd',
     'stderr': ''
   },
-  'ls_fail': {
-    'cmd': 'ls',
-    'params': ['-lh'],
+  'ls_fail': {  // ls -lh some/path
     'stdout': '',
     'stderr': 'ls: /path/cmd: No such file or directory'
   },
-  'wc_1': {
-    'cmd': 'wc',
-    'params': ['param1', 'param2'],
+  "wc_fail": {  // wc ....
     'stdout': '',
     'stderr': 'wc err blah blah'
   },
-  'python_version_1': {
-    'cmd': 'some/python',
-    'params': ['--version'],
+  "python_version_fail": {  // some/python --version
     'stdout': '',
     'stderr': '--version err blah blah'
   },
-  'python_m_site_1': {
-    'cmd': 'some/python',
-    'params': ['-m', 'site'],
+  'python_m_site_1': {  // some/python -m site
     'stdout': `
 sys.path = [
 'path1', 
@@ -68,27 +58,19 @@ sys.path = [
 ]`,
     'stderr': ''
   },
-  'python_m_pip_version_1': {
-    'cmd': 'some/python',
-    'params': ['-m', 'pip', '--version'],
+  'python_m_pip_version_1': {  // some/python -m pip --version
     'stdout': 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)',
     'stderr': ''
   },
-  'which_python_1': {
-    'cmd': 'which',
-    'params': ['python'],
+  "which_python_usr_bin": {  // which python
     'stdout': '/usr/bin/python',
     'stderr': ''
   },
-  'which_python_2': {
-    'cmd': 'which',
-    'params': ['python'],
+  "which_python_usr_local_bin": {  // which python
     'stdout': '/usr/local/bin/python',
     'stderr': ''
   },
-  'stat_1': {
-    'cmd': 'stat',
-    'params': ['-F', 'some/path'],
+  'stat_1': {  // stat -F some/path
     'stdout': '/usr/bin/python',
     'stderr': ''
   },
@@ -149,15 +131,15 @@ class BaseSpawnMockBehaviour{
   // Default results, individual methods can be overridden by subclasses to suit the test case
 
   ls() {
-    this.select('ls_1')
+    this.select('ls_success')
   }
 
   wc() {
-    this.select('wc_1')
+    this.select('wc_fail')
   }
 
   version() {
-    this.select('python_version_1')
+    this.select('python_version_fail')
   }
 
   python_m_site() {
@@ -169,7 +151,7 @@ class BaseSpawnMockBehaviour{
   }
 
   which_python() {
-    this.select('which_python_1')
+    this.select('which_python_usr_bin')
   }
 
   stat() {
@@ -190,7 +172,7 @@ class SpawnMockBehaviourOnePythonUsrBin extends BaseSpawnMockBehaviour {
   ls() {
     switch (this.params[1]) {
       case '/usr/bin/python':
-        this.select('ls_1')
+        this.select('ls_success')
         break
       case '/usr/local/bin/python':
         this.select('ls_fail')

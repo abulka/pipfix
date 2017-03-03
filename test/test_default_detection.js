@@ -20,10 +20,26 @@ describe('default python detection', function() {
     mockery.disable();
   });
 
+
   it('brain finds /usr/bin and /usr/local/bin python', function() {
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_success')
+            break
+          case '/usr/local/bin/python':
+            this.select('ls_success')
+            break
+        }
+      }
+      which_python() {
+        this.select('which_python_usr_bin')
+      }
+    }
     mockery.registerMock('child_process', {
       spawnSync: function(cmd, param_array) {
-        return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
+        return (new SpawnMock(cmd, param_array)).process_possible_commands()
       }
     })
     let {Python, Pip, Which, Brain} = require('../lib.js')
@@ -32,10 +48,26 @@ describe('default python detection', function() {
     brain.pythons.length.should.equal(2)
   });
 
+
   it('brain finds /usr/bin python only', function() {
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_success')
+            break
+          case '/usr/local/bin/python':
+            this.select('ls_fail')
+            break
+        }
+      }
+      which_python() {
+        this.select('which_python_usr_bin')
+      }
+    }
     mockery.registerMock('child_process', {
       spawnSync: function(cmd, param_array) {
-        return (new SpawnMockBehaviourOnePythonUsrBin(cmd, param_array)).process_possible_commands()
+        return (new SpawnMock(cmd, param_array)).process_possible_commands()
       }
     })
     let {Python, Pip, Which, Brain} = require('../lib.js')
@@ -44,10 +76,26 @@ describe('default python detection', function() {
     brain.pythons.length.should.equal(1)
   });
 
+
   it('one default python is usr_bin', function() {
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_success')
+            break
+          case '/usr/local/bin/python':
+            this.select('ls_fail')
+            break
+        }
+      }
+      which_python() {
+        this.select('which_python_usr_bin')
+      }
+    }
     mockery.registerMock('child_process', {
       spawnSync: function(cmd, param_array) {
-        return (new SpawnMockBehaviourOnePythonUsrBin(cmd, param_array)).process_possible_commands()
+        return (new SpawnMock(cmd, param_array)).process_possible_commands()
       }
     })
     let {Python, Pip, Which, Brain} = require('../lib.js')
@@ -72,10 +120,26 @@ describe('default python detection', function() {
 
   });
 
+
   it('two pythons default python is usr_bin', function() {
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_success')
+            break
+          case '/usr/local/bin/python':
+            this.select('ls_success')
+            break
+        }
+      }
+      which_python() {
+        this.select('which_python_usr_bin')
+      }
+    }
     mockery.registerMock('child_process', {
       spawnSync: function(cmd, param_array) {
-        return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
+        return (new SpawnMock(cmd, param_array)).process_possible_commands()
       }
     })
     let {Python, Pip, Which, Brain} = require('../lib.js')
@@ -102,6 +166,7 @@ describe('default python detection', function() {
     python_usr_bin.report()
 
   });
+
 
   it('two pythons default python is usr_local_bin', function() {
     class SpawnMock extends BaseSpawnMockBehaviour {
