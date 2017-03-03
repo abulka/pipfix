@@ -2,7 +2,7 @@ var assert = require('assert');     // https://nodejs.org/api/assert.html
 var should = require('should');     // https://github.com/shouldjs/should.js
 var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-javascript-testing-mocks-spies-stubs/
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
-var {BaseSpawnMockBehaviour, SpawnMockBehaviourNonExistence, spawn_results} = require('./mock_data.js')
+var {BaseSpawnMockBehaviour, SpawnMockBehaviourNonExistence, SPAWN_RESULTS} = require('./mock_data.js')
 
 describe('pip python site relationships', function() {
 
@@ -46,23 +46,23 @@ describe('pip python site relationships', function() {
 
     // TEST python.result_shell_site_info.stdout
     //
-    // console.log("spawn_results['python_m_site_1']", spawn_results['python_m_site_1']['stdout'])
+    // console.log("SPAWN_RESULTS['python_m_site_1']", SPAWN_RESULTS['python_m_site_1']['stdout'])
     // console.log("python_usr_bin.result_shell_site_info.stdout", python_usr_bin.result_shell_site_info.stdout)
-    // console.log(python_usr_bin.result_shell_site_info.stdout == spawn_results['python_m_site_1']['stdout'])
-    assert.equal(python_usr_bin.result_shell_site_info.stdout == spawn_results['python_m_site_1']['stdout'], true)
-    python_usr_bin.result_shell_site_info.stdout.should.equal(spawn_results['python_m_site_1']['stdout'])
+    // console.log(python_usr_bin.result_shell_site_info.stdout == SPAWN_RESULTS['python_m_site_1']['stdout'])
+    assert.equal(python_usr_bin.result_shell_site_info.stdout == SPAWN_RESULTS['python_m_site_1']['stdout'], true)
+    python_usr_bin.result_shell_site_info.stdout.should.equal(SPAWN_RESULTS['python_m_site_1']['stdout'])
 
 
     // TEST python.site_info
     //
-    // assert.equal(python_usr_bin.site_info == spawn_results['python_m_site_1']['stdout'], true)
-    // python_usr_bin.site_info.should.equal(spawn_results['python_m_site_1']['stdout'])
+    // assert.equal(python_usr_bin.site_info == SPAWN_RESULTS['python_m_site_1']['stdout'], true)
+    // python_usr_bin.site_info.should.equal(SPAWN_RESULTS['python_m_site_1']['stdout'])
 
     // assert.equal(pip_usr_local_bin.report_obj.associations[python_usr_bin.path], true)
 
     // TEST python.result_shell_run_pip_as_module.stdout
     //
-    // python_usr_bin.result_shell_run_pip_as_module.stdout == spawn_results
+    // python_usr_bin.result_shell_run_pip_as_module.stdout == SPAWN_RESULTS
 
 
     spy1.restore();

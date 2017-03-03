@@ -32,7 +32,7 @@
 
 class UserException extends Error {}
 
-let spawn_results = {
+const SPAWN_RESULTS = {
   'ls_1': {
     'cmd': 'ls',
     'params': ['-lh'],
@@ -103,8 +103,8 @@ class BaseSpawnMockBehaviour{
   }
 
   select(key) {
-    // Select a mock result from the data structure of possibilities found in 'spawn_results'
-    this.result = Object.assign({}, spawn_results[key])  // clone
+    // Select a mock result from the data structure of possibilities found in 'SPAWN_RESULTS'
+    this.result = Object.assign({}, SPAWN_RESULTS[key])  // clone
     this.result['cmd'] = this.cmd
     this.result['params'] = this.params
   }
@@ -203,5 +203,5 @@ class SpawnMockBehaviourOnePythonUsrBin extends BaseSpawnMockBehaviour {
 exports.BaseSpawnMockBehaviour = BaseSpawnMockBehaviour
 exports.SpawnMockBehaviourNonExistence = SpawnMockBehaviourNonExistence
 exports.SpawnMockBehaviourOnePythonUsrBin = SpawnMockBehaviourOnePythonUsrBin
-exports.spawn_results = spawn_results
+exports.SPAWN_RESULTS = SPAWN_RESULTS
 exports.UserException = UserException
