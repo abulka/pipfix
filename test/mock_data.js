@@ -1,7 +1,8 @@
-function UserException(message) {
-   this.message = message;
-   this.name = 'UserException';
-}
+// function UserException(message) {
+//    this.message = message;
+//    this.name = 'UserException';
+// }
+class UserException extends Error {}
 
 function spawn_result(spawn_result_data) {
   if (spawn_result_data == undefined)
@@ -93,74 +94,26 @@ class BaseSpawnMockBehaviour{
   // Template Pattern - Design Pattern - override any step you want in a sub class e.g. this.ls()
 
   process_possible_commands() {
-    let result
-
     // console.log(`Mocking "${this.cmd}" with params "${this.params}"`)
 
-    if (this.cmd == 'ls' && this.params[0] == '-lh') {
-      this.ls()  // allow sub classes to modify result
-      return spawn_result(this.result)  // TODO move 'spawn_result' to be private and part of this class
-    }
-    // result = this.ls()
-    // if (result != undefined)
-    //   return result
-    //
+    if (this.cmd == 'ls' && this.params[0] == '-lh')
+      this.ls()
+    else if (this.cmd == 'wc')
+      this.wc()
+    else if (this.params[0] == '--version')  // cmd could be 'python' or 'pip'
+      this.version()
+    else if (this.params[0] == '-m' && this.params[1] == 'pip' && this.params[2] == '--version')
+      this.pip_version_via_python()
+    else if (this.params[0] == '-m' && this.params[1] == 'site')
+      this.python_m_site()
+    else if (this.cmd == 'which' && this.params[0] == 'python')
+      this.which_python()
+    else if (this.cmd == 'stat' && this.params[0] == '-F')
+      this.stat()
+    else
+      throw new UserException(`Unknown Spawn case, not sure how to mock "${this.cmd}" with params "${this.params}"`)
 
-    result = this.wc()
-    if (result != undefined)
-      return result
-
-    result = this.version()
-    if (result != undefined)
-      return result
-
-    result = this.python_m_site()
-    if (result != undefined)
-      return result
-
-    result = this.pip_version_via_python()
-    if (result != undefined)
-      return result
-
-    result = this.which_python()
-    if (result != undefined)
-      return result
-
-    result = this.stat()
-    if (result != undefined)
-      return result
-
-    throw new UserException(`Unknown case, not sure how to mock "${this.cmd}" with params "${this.params}"`)
-  }
-
-  // Util
-
-  // get is_ls() {  // TODO need more flexibility to check the parameter too, and give different results for each
-  //   return this.cmd == 'ls'
-  // }
-
-  get is_wc() {
-    return this.cmd == 'wc'
-  }
-
-  get is_version() {
-    return (this.params[0] == '--version')  // cmd could be 'python' or 'pip'
-  }
-
-  get is_pip_version_via_python() {
-    return (this.params[0] == '-m' && this.params[1] == 'pip' && this.params[2] == '--version')
-  }
-
-  get is_python_m_site() {
-    return (this.params[0] == '-m' && this.params[1] == 'site')
-  }
-
-  get is_which_python() {
-    return (this.cmd == 'which' && this.params[0] == 'python')
-  }
-
-  get is_stat() {  // TODO need more flexibility to check the parameter too, and give different results for each
-    return (this.cmd == 'stat' && this.params[0] == '-F')
+    return spawn_result(this.result)  // TODO move 'spawn_result' to be private and part of this class
   }
 
   // Overridable steps
@@ -170,37 +123,28 @@ class BaseSpawnMockBehaviour{
   }
 
   wc() {
-    if (this.is_wc)
-      return spawn_result(spawn_results['wc_1'])
+    this.select('wc_1')
   }
 
   version() {
-    if (this.is_version)
-      return spawn_result(spawn_results['python_version_1'])
+    this.select('python_version_1')
   }
 
   python_m_site() {
-    if (this.is_python_m_site)
-      return spawn_result(spawn_results['python_m_site_1'])
+    this.select('python_m_site_1')
   }
 
   pip_version_via_python() {
-    if (this.is_pip_version_via_python)
-      return spawn_result(spawn_results['python_m_pip_version_1'])
+    this.select('python_m_pip_version_1')
   }
 
   which_python() {
-    if (this.is_which_python)
-      return spawn_result(spawn_results['which_python_1'])
+    this.select('which_python_1')
   }
 
   stat() {
-    if (this.is_stat) {
-      let result = spawn_results['stat_1']
-      result['params'] = this.params
-      result['stdout'] = '-rwxr-xr-x 1 root wheel 66576 Dec 13 22:22:22 2017 ' + this.params[1]  // for now just make stat path the exact same as path
-      return spawn_result(result)
-    }
+    this.select('stat_1')
+    this.result['stdout'] = '-rwxr-xr-x 1 root wheel 66576 Dec 13 22:22:22 2017 ' + this.params[1]  // for now just make stat path the exact same as path
   }
 }
 

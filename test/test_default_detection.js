@@ -104,15 +104,15 @@ describe('default python detection', function() {
   });
 
   it('two pythons default python is usr_local_bin', function() {
-    class SpawnMockBehaviourDefaultPythonUsrLocalBin extends BaseSpawnMockBehaviour {
+    class SpawnMock extends BaseSpawnMockBehaviour {
       which_python() {
-        if (this.is_which_python)
-          return spawn_result(spawn_results['which_python_2'])  // stdout will be '/usr/local/bin/python'
+        super.which_python()
+        this.result.stdout = '/usr/local/bin/python'
       }
     }
     mockery.registerMock('child_process', {
       spawnSync: function(cmd, param_array) {
-        return (new SpawnMockBehaviourDefaultPythonUsrLocalBin(cmd, param_array)).process_possible_commands()
+        return (new SpawnMock(cmd, param_array)).process_possible_commands()
       }
     })
     let {Python, Pip, Which, Brain} = require('../lib.js')
