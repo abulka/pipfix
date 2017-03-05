@@ -4,7 +4,7 @@ var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
 var {BaseSpawnMockBehaviour, make_mock_spawn_func, SPAWN_RESULTS} = require('./mock_data.js')
 
-describe('default python detection', function() {
+describe('default command detection', function() {
 
   beforeEach(function() {
     // runs before each test in this block
@@ -327,7 +327,7 @@ describe('default python detection', function() {
   })
 
 
-  describe('pip detection via brain', function() {
+  describe('pip default detection via brain', function() {
 
     it('no pips', function() {
 
@@ -353,7 +353,7 @@ describe('default python detection', function() {
     });
 
 
-    it('one /usr/local/bin/pip', function() {
+    it('one /usr/local/bin/pip - and it is default', function() {
 
       class SpawnMock extends BaseSpawnMockBehaviour {
         ls() {
@@ -367,15 +367,49 @@ describe('default python detection', function() {
               break
           }
         }
+        which_pip() {
+          super.which_python()
+          this.result.stdout = '/usr/local/bin/pip'
+        }
       }
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Brain} = require('../lib.js')
       let brain = new Brain()
       brain.pips.length.should.be.equal(1)
       brain.get_pip('/usr/local/bin/pip').should.not.be.undefined()
+      brain.pip_default.should.not.be.undefined()
+      brain.pip_default.should.be.equal(brain.get_pip('/usr/local/bin/pip'))
     });
 
-    it('one /usr/local/bin/pip - plus miniconda pip', function() {
+
+    it('one /usr/local/bin/pip - and it is not default', function() {
+
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/pip':
+              this.select('ls_fail')
+              break
+            case '/usr/local/bin/pip':
+              this.select('ls_success')
+              break
+          }
+        }
+        which_pip() {
+          this.select('which_none')
+        }
+      }
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      brain.pips.length.should.be.equal(1)
+      brain.get_pip('/usr/local/bin/pip').should.not.be.undefined()
+      assert(brain.pip_default == undefined)
+    });
+
+
+    it('one /usr/local/bin/pip - plus miniconda pip (default)', function() {
 
       class SpawnMock extends BaseSpawnMockBehaviour {
         ls() {
@@ -400,6 +434,8 @@ describe('default python detection', function() {
       brain.pips.length.should.be.equal(2)
       brain.get_pip('/usr/local/bin/pip').should.not.be.undefined()
       brain.get_pip('/Users/Andy/miniconda/bin/pip').should.not.be.undefined()
+      brain.pip_default.should.not.be.undefined()
+      brain.pip_default.should.be.equal(brain.get_pip('/Users/Andy/miniconda/bin/pip'))
     });
 
   });
