@@ -4,7 +4,7 @@ var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
 var {BaseSpawnMockBehaviour, make_mock_spawn_func, SPAWN_RESULTS} = require('./mock_data.js')
 
-describe('Python class - existence', function() {
+describe('existence', function() {
 
   beforeEach(function() {
     // runs before each test in this block
@@ -20,7 +20,31 @@ describe('Python class - existence', function() {
     mockery.disable();
   });
 
-  it('/usr/bin/python exists', function () {
+  it('brain finds no pythons', function() {
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        super.ls()
+        switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_fail')
+            break
+          case '/usr/local/bin/python':
+            this.select('ls_fail')
+            break
+        }
+      }
+      which_python() {
+        this.select('which_python_none')
+      }
+    }
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+    let {Brain} = require('../lib.js')
+    let brain = new Brain()
+    brain.pythons.length.should.equal(0)
+  });
+
+
+  it('brain finds /usr/bin python only', function() {
 
     class SpawnMock extends BaseSpawnMockBehaviour {
       ls() {
@@ -29,126 +53,96 @@ describe('Python class - existence', function() {
           case '/usr/bin/python':
             this.select('ls_success')
             break
-        }
-      }
-    }
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Python} = require('../lib.js')
-    let validSpy = sinon.spy(Python.prototype, 'valid');
-    let analyseSpy = sinon.spy(Python.prototype, 'analyse');
-    let python_usr_bin = new Python('/usr/bin/python')
-    assert.equal(python_usr_bin.path, '/usr/bin/python');
-    assert.equal(python_usr_bin.exists, true);
-    sinon.assert.callCount(analyseSpy, 1);
-    sinon.assert.called(validSpy);
-    // sinon.assert.callCount(validSpy, 5);
-    analyseSpy.restore();
-    validSpy.restore();
-  });
-
-
-  it('/usr/bin/python does not exist', function() {
-
-    class SpawnMock extends BaseSpawnMockBehaviour {
-      ls() {
-        switch (this.params[1]) {
-          case '/usr/bin/python':
+          case '/usr/local/bin/python':
             this.select('ls_fail')
             break
         }
       }
+      which_python() {
+        this.select('which_python_none')
+      }
     }
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Python} = require('../lib.js')
-    let p = new Python('/usr/bin/python')
-    p.exists.should.be.false()
-  });
+    let {Brain} = require('../lib.js')
+    let brain = new Brain()
+    brain.pythons.length.should.equal(1)
+  })
 
 
-  it('/usr/local/bin/python exists', function() {
+  it('brain finds /usr/local/bin python only', function() {
 
     class SpawnMock extends BaseSpawnMockBehaviour {
       ls() {
+        super.ls()
         switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_fail')
+            break
           case '/usr/local/bin/python':
             this.select('ls_success')
             break
         }
       }
-    }
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Python} = require('../lib.js')
-    let p = new Python('/usr/local/bin/python')
-    p.exists.should.be.true()
-  });
-
-
-  it('/usr/local/bin/python does not exist', function() {
-
-    class SpawnMock extends BaseSpawnMockBehaviour {
-      ls() {
-        switch (this.params[1]) {
-          case '/usr/local/bin/python':
-            this.select('ls_fail')
-            break
-        }
+      which_python() {
+        this.select('which_python_none')
       }
     }
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Python} = require('../lib.js')
-    let p = new Python('/usr/local/bin/python')
-    p.exists.should.be.false()
-  });
+    let {Brain} = require('../lib.js')
+    let brain = new Brain()
+    brain.pythons.length.should.equal(1)
+  })
 
 
-  it('/usr/bin/python and /usr/local/bin/python both exist', function() {
-
+  it('brain finds both /usr/bin and /usr/local/bin python', function() {
     class SpawnMock extends BaseSpawnMockBehaviour {
       ls() {
+        super.ls()
         switch (this.params[1]) {
           case '/usr/bin/python':
             this.select('ls_success')
             break
-        }
-        switch (this.params[1]) {
           case '/usr/local/bin/python':
             this.select('ls_success')
             break
         }
       }
-    }
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Python} = require('../lib.js')
-    let p1 = new Python('/usr/bin/python')
-    let p2 = new Python('/usr/local/bin/python')
-    p1.exists.should.be.true()
-    p2.exists.should.be.true()
-  });
-
-
-  it('/usr/bin/python and /usr/local/bin/python both do not exist', function() {
-
-    class SpawnMock extends BaseSpawnMockBehaviour {
-      ls() {
-        switch (this.params[1]) {
-          case '/usr/bin/python':
-            this.select('ls_fail')
-            break
-        }
-        switch (this.params[1]) {
-          case '/usr/local/bin/python':
-            this.select('ls_fail')
-            break
-        }
+      which_python() {
+        this.select('which_python_none')
       }
     }
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Python} = require('../lib.js')
-    let p1 = new Python('/usr/bin/python')
-    let p2 = new Python('/usr/local/bin/python')
-    p1.exists.should.be.false()
-    p2.exists.should.be.false()
-  });
+    let {Brain} = require('../lib.js')
+    let brain = new Brain()
+    brain.pythons.length.should.equal(2)
+  })
 
-});
+
+  it('brain finds three pythons - /usr/bin and /usr/local/bin python and extra default python', function() {
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        super.ls()
+        switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_success')
+            break
+          case '/usr/local/bin/python':
+            this.select('ls_success')
+            break
+        }
+      }
+      which_python() {
+        super.which_python()
+        this.result.stdout = '/Users/Andy/miniconda/bin/python'
+      }
+    }
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+    let {Brain} = require('../lib.js')
+    let brain = new Brain()
+    brain.pythons.length.should.equal(3)
+  })
+
+  // TODO pip existence
+
+})
 

@@ -4,7 +4,7 @@ var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
 var {BaseSpawnMockBehaviour, make_mock_spawn_func, SPAWN_RESULTS} = require('./mock_data.js')
 
-describe('pip existence', function() {
+describe('Pip class - existence', function() {
 
   beforeEach(function() {
     // runs before each test in this block
@@ -20,17 +20,26 @@ describe('pip existence', function() {
     mockery.disable();
   });
 
+  it('/usr/local/bin/pip exists', function() {
 
-  it('pip_usr_local_bin exists', function() {
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(BaseSpawnMockBehaviour) })
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        switch (this.params[1]) {
+          case '/usr/local/bin/pip':
+            this.select('ls_success')
+            break
+        }
+      }
+    }
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Pip} = require('../lib.js')
-
     let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
     assert.equal(pip_usr_local_bin.exists, true);
   });
 
 
-  it('pip_usr_local_bin does not exist', function() {
+  it('/usr/local/bin/pip does not exist', function() {
+
     class SpawnMock extends BaseSpawnMockBehaviour {
       ls() {
         switch (this.params[1]) {
@@ -42,7 +51,6 @@ describe('pip existence', function() {
     }
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Pip} = require('../lib.js')
-
     let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
     assert.equal(pip_usr_local_bin.exists, false);
   });

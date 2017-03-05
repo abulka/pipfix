@@ -327,6 +327,9 @@ class Brain {
       throw new UserException(`which ${cmd} failed with error "${result_shell_which.stderr.toString()}" thus cannot determine default ${cmd}`)
     let path_default = result_shell_which.stdout.toString().trim()
 
+    if (path_default == '')  // 'which python' command found no default python
+      return undefined
+
     for (let el of collection)
       if (this.paths_same(path_default, el.path)) {
         // this.python_default = el

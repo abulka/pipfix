@@ -20,9 +20,84 @@ describe('default python detection', function() {
     mockery.disable();
   });
 
+  describe('one python', function() {
 
-  it('brain finds /usr/bin and /usr/local/bin python', function() {
-    class SpawnMock extends BaseSpawnMockBehaviour {
+    it('one usr/bin/python - and is default', function() {
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/python':
+              this.select('ls_success')
+              break
+            case '/usr/local/bin/python':
+              this.select('ls_fail')
+              break
+          }
+        }
+        which_python() {
+          this.select('which_python_usr_bin')
+        }
+      }
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      let python_usr_bin = brain.get_python('/usr/bin/python')
+      let python_default = brain.python_default
+      brain.pythons.length.should.be.equal(1)
+      brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
+      brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.equal(-1)
+      python_usr_bin.exists.should.be.true()
+      python_default.exists.should.be.true()
+      python_usr_bin.should.equal(python_default)
+      python_usr_bin.is_default.should.equal(true)
+      python_default.is_default.should.equal(true)
+    });
+
+
+    it('one usr/bin/python - and it is not default', function() {
+      // TODO
+    })
+
+
+    it('one usr/local/bin/python - and is default', function() {
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/python':
+              this.select('ls_fail')
+              break
+            case '/usr/local/bin/python':
+              this.select('ls_success')
+              break
+          }
+        }
+        which_python() {
+          this.select('which_python_usr_local_bin')
+        }
+      }
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      brain.pythons.length.should.be.equal(1)
+      let p = brain.get_python('/usr/local/bin/python')
+      assert(p != undefined)
+      p.should.equal(brain.python_default)
+      p.is_default.should.equal(true)
+    })
+
+
+    it('one usr/local/bin/python - and it is not default', function() {
+      // TODO
+    })
+
+  })
+
+
+  describe('two pythons', function() {
+
+    class TwoPythonsFound extends BaseSpawnMockBehaviour {
       ls() {
         super.ls()
         switch (this.params[1]) {
@@ -34,208 +109,223 @@ describe('default python detection', function() {
             break
         }
       }
-      which_python() {
-        this.select('which_python_usr_bin')
-      }
     }
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Brain} = require('../lib.js')
 
-    let brain = new Brain()
-    brain.pythons.length.should.equal(2)
-  });
+    it('two pythons found - default is usr/bin', function() {
 
-
-  it('brain finds /usr/bin python only', function() {
-
-    class SpawnMock extends BaseSpawnMockBehaviour {
-      ls() {
-        super.ls()
-        switch (this.params[1]) {
-          case '/usr/bin/python':
-            this.select('ls_success')
-            break
-          case '/usr/local/bin/python':
-            this.select('ls_fail')
-            break
+      class SpawnMock extends TwoPythonsFound {
+        which_python() {
+          this.select('which_python_usr_bin')
         }
       }
-      which_python() {
-        this.select('which_python_usr_bin')
-      }
-    }
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Brain} = require('../lib.js')
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
 
-    let brain = new Brain()
-    brain.pythons.length.should.equal(1)
-  });
+      let brain = new Brain()
+      let python_usr_bin = brain.get_python('/usr/bin/python')
+      let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
+      let python_default = brain.python_default
+      brain.pythons.length.should.be.equal(2)
+      brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
+      brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.aboveOrEqual(0)
+      python_usr_bin.exists.should.be.true()
+      python_usr_local_bin.exists.should.be.true()
+      python_default.exists.should.be.true()
+      python_usr_bin.should.equal(python_default)
+      python_usr_bin.is_default.should.equal(true)
+      python_default.is_default.should.equal(true)
+      python_usr_local_bin.is_default.should.equal(false)
+    });
 
 
-  it('one default python is usr_bin', function() {
-    class SpawnMock extends BaseSpawnMockBehaviour {
-      ls() {
-        super.ls()
-        switch (this.params[1]) {
-          case '/usr/bin/python':
-            this.select('ls_success')
-            break
-          case '/usr/local/bin/python':
-            this.select('ls_fail')
-            break
+    it('two pythons found - default is usr/local/bin', function() {
+      class SpawnMock extends TwoPythonsFound {
+        which_python() {
+          super.which_python()
+          this.result.stdout = '/usr/local/bin/python'
         }
       }
-      which_python() {
-        this.select('which_python_usr_bin')
-      }
-    }
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Brain} = require('../lib.js')
-
-    let brain = new Brain()
-    let python_usr_bin = brain.get_python('/usr/bin/python')
-    let python_default = brain.python_default
-
-    brain.pythons.length.should.be.equal(1)
-
-    brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
-    brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.equal(-1)
-
-    python_usr_bin.exists.should.be.true()
-    python_default.exists.should.be.true()
-
-    python_usr_bin.should.equal(python_default)
-    python_usr_bin.is_default.should.equal(true)
-    python_default.is_default.should.equal(true)
-
-    python_usr_bin.report()
-
-  });
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      let python_usr_bin = brain.get_python('/usr/bin/python')
+      let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
+      let python_default = brain.python_default
+      brain.pythons.length.should.be.equal(2)
+      brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
+      brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.aboveOrEqual(0)
+      python_usr_bin.exists.should.be.true()
+      python_usr_local_bin.exists.should.be.true()
+      python_default.exists.should.be.true()
+      python_usr_bin.should.not.equal(python_default)
+      python_usr_local_bin.should.equal(python_default)
+      python_usr_bin.is_default.should.equal(false)
+      python_default.is_default.should.equal(true)
+      python_usr_local_bin.is_default.should.equal(true)
+    });
 
 
-  it('two pythons default python is usr_bin', function() {
-    class SpawnMock extends BaseSpawnMockBehaviour {
-      ls() {
-        super.ls()
-        switch (this.params[1]) {
-          case '/usr/bin/python':
-            this.select('ls_success')
-            break
-          case '/usr/local/bin/python':
-            this.select('ls_success')
-            break
+    it('two pythons found - neither is default', function() {
+      // TODO
+    })
+
+  })
+
+  describe('two pythons - miniconda is one of them', function() {
+
+    /*
+      the only way we detect miniconda or other python is if it is default
+      thus we always know which is the default - its minconda python
+     */
+
+    it('two pythons - /usr/bin/python and default miniconda python', function() {
+
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/python':
+              this.select('ls_success')
+              break
+            case '/usr/local/bin/python':
+              this.select('ls_fail')
+              break
+          }
+        }
+        which_python() {
+          super.which_python()
+          this.result.stdout = '/Users/Andy/miniconda/bin/python'
         }
       }
-      which_python() {
-        this.select('which_python_usr_bin')
-      }
-    }
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Brain} = require('../lib.js')
-
-    let brain = new Brain()
-    let python_usr_bin = brain.get_python('/usr/bin/python')
-    let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
-    let python_default = brain.python_default
-
-    brain.pythons.length.should.be.equal(2)
-
-    brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
-    brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.aboveOrEqual(0)
-
-    python_usr_bin.exists.should.be.true()
-    python_usr_local_bin.exists.should.be.true()
-    python_default.exists.should.be.true()
-
-    python_usr_bin.should.equal(python_default)
-    python_usr_bin.is_default.should.equal(true)
-    python_default.is_default.should.equal(true)
-    python_usr_local_bin.is_default.should.equal(false)
-
-    python_usr_bin.report()
-
-  });
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      let python_usr_bin = brain.get_python('/usr/bin/python')
+      let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
+      let python_other = brain.get_python('/Users/Andy/miniconda/bin/python')
+      let python_default = brain.python_default
+      brain.pythons.length.should.be.equal(2)
+      assert(python_usr_local_bin == undefined)
+      python_usr_bin.should.not.be.undefined()
+      python_other.should.not.be.undefined()
+      brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
+      brain.pythons.map(p => p.path).indexOf('/Users/Andy/miniconda/bin/python').should.be.aboveOrEqual(0)
+      brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.equal(-1)
+      python_usr_bin.should.not.equal(python_default)
+      python_other.should.equal(python_default)
+      python_other.is_default.should.equal(true)
+    });
 
 
-  it('two pythons default python is usr_local_bin', function() {
-    class SpawnMock extends BaseSpawnMockBehaviour {
-      which_python() {
-        super.which_python()
-        this.result.stdout = '/usr/local/bin/python'
-      }
-    }
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Brain} = require('../lib.js')
+    it('two pythons - /usr/local/bin/python and default miniconda python', function() {
 
-    let brain = new Brain()
-    let python_usr_bin = brain.get_python('/usr/bin/python')
-    let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
-    let python_default = brain.python_default
-
-    brain.pythons.length.should.be.equal(2)
-
-    brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
-    brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.aboveOrEqual(0)
-
-    python_usr_bin.exists.should.be.true()
-    python_usr_local_bin.exists.should.be.true()
-    python_default.exists.should.be.true()
-
-    python_usr_bin.should.not.equal(python_default)
-    python_usr_local_bin.should.equal(python_default)
-    python_usr_bin.is_default.should.equal(false)
-    python_default.is_default.should.equal(true)
-    python_usr_local_bin.is_default.should.equal(true)
-
-    python_usr_bin.report()
-
-  });
-
-  it('two pythons default python and miniconda python', function() {
-    class SpawnMock extends BaseSpawnMockBehaviour {
-      ls() {
-        super.ls()
-        switch (this.params[1]) {
-          case '/usr/bin/python':
-            this.select('ls_success')
-            break
-          case '/usr/local/bin/python':
-            this.select('ls_fail')
-            break
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/python':
+              this.select('ls_fail')
+              break
+            case '/usr/local/bin/python':
+              this.select('ls_success')
+              break
+          }
+        }
+        which_python() {
+          super.which_python()
+          this.result.stdout = '/Users/Andy/miniconda/bin/python'
         }
       }
-      which_python() {
-        super.which_python()
-        this.result.stdout = '/Users/Andy/miniconda/bin/python'
-      }
-    }
-    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Brain} = require('../lib.js')
-
-    let brain = new Brain()
-    let python_usr_bin = brain.get_python('/usr/bin/python')
-    let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
-    let python_other = brain.get_python('/Users/Andy/miniconda/bin/python')
-    let python_default = brain.python_default
-
-    brain.pythons.length.should.be.equal(2)
-    python_usr_bin.should.not.be.undefined()
-    python_other.should.not.be.undefined()
-    assert(python_usr_local_bin == undefined)
-
-    brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.aboveOrEqual(0)
-    brain.pythons.map(p => p.path).indexOf('/Users/Andy/miniconda/bin/python').should.be.aboveOrEqual(0)
-    brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.equal(-1)
-
-    python_usr_bin.exists.should.be.true()
-    python_other.exists.should.be.true()
-    python_default.exists.should.be.true()
-
-    python_usr_bin.should.not.equal(python_default)
-    python_other.should.equal(python_default)
-
-    python_other.is_default.should.equal(true)
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      let python_usr_bin = brain.get_python('/usr/bin/python')
+      let python_usr_local_bin = brain.get_python('/usr/local/bin/python')
+      let python_other = brain.get_python('/Users/Andy/miniconda/bin/python')
+      let python_default = brain.python_default
+      brain.pythons.length.should.be.equal(2)
+      assert(python_usr_bin == undefined)
+      python_other.should.not.be.undefined()
+      brain.pythons.map(p => p.path).indexOf('/usr/local/bin/python').should.be.aboveOrEqual(0)
+      brain.pythons.map(p => p.path).indexOf('/Users/Andy/miniconda/bin/python').should.be.aboveOrEqual(0)
+      brain.pythons.map(p => p.path).indexOf('/usr/bin/python').should.be.equal(-1)
+      python_usr_local_bin.should.not.equal(python_default)
+      python_other.should.equal(python_default)
+      python_other.is_default.should.equal(true)
+    });
 
   });
 
-});
+
+  describe('miniconda edge cases', function() {
+
+    it('three pythons - /usr/bin/python and /usr/local/bin/python and default miniconda python', function() {
+
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/python':
+              this.select('ls_success')
+              break
+            case '/usr/local/bin/python':
+              this.select('ls_success')
+              break
+          }
+        }
+        which_python() {
+          super.which_python()
+          this.result.stdout = '/Users/Andy/miniconda/bin/python'
+        }
+      }
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      assert(brain.get_python('/usr/bin/python') != undefined)
+      assert(brain.get_python('/usr/local/bin/python') != undefined)
+      let python_other = brain.get_python('/Users/Andy/miniconda/bin/python')
+      let python_default = brain.python_default
+      brain.pythons.length.should.be.equal(3)
+      python_other.should.not.be.undefined()
+      python_other.should.equal(python_default)
+      python_other.is_default.should.equal(true)
+    });
+
+
+    it('one python - default miniconda python', function() {
+
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/python':
+              this.select('ls_fail')
+              break
+            case '/usr/local/bin/python':
+              this.select('ls_fail')
+              break
+          }
+        }
+        which_python() {
+          super.which_python()
+          this.result.stdout = '/Users/Andy/miniconda/bin/python'
+        }
+      }
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      assert(brain.get_python('/usr/bin/python') == undefined)
+      assert(brain.get_python('/usr/local/bin/python') == undefined)
+      let python_other = brain.get_python('/Users/Andy/miniconda/bin/python')
+      let python_default = brain.python_default
+      brain.pythons.length.should.be.equal(1)
+      python_other.should.not.be.undefined()
+      python_other.should.equal(python_default)
+      python_other.is_default.should.equal(true)
+    });
+
+  })
+
+  // TODO pip detection via the brain...
+
+})
