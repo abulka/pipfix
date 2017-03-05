@@ -63,11 +63,7 @@ describe('default python detection', function() {
         this.select('which_python_usr_bin')
       }
     }
-    mockery.registerMock('child_process', {
-      spawnSync: function(cmd, param_array) {
-        return (new SpawnMock(cmd, param_array)).process_possible_commands()
-      }
-    })
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
 
     let brain = new Brain()
@@ -92,11 +88,7 @@ describe('default python detection', function() {
         this.select('which_python_usr_bin')
       }
     }
-    mockery.registerMock('child_process', {
-      spawnSync: function(cmd, param_array) {
-        return (new SpawnMock(cmd, param_array)).process_possible_commands()
-      }
-    })
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
 
     let brain = new Brain()
@@ -137,11 +129,7 @@ describe('default python detection', function() {
         this.select('which_python_usr_bin')
       }
     }
-    mockery.registerMock('child_process', {
-      spawnSync: function(cmd, param_array) {
-        return (new SpawnMock(cmd, param_array)).process_possible_commands()
-      }
-    })
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
 
     let brain = new Brain()
@@ -175,11 +163,7 @@ describe('default python detection', function() {
         this.result.stdout = '/usr/local/bin/python'
       }
     }
-    mockery.registerMock('child_process', {
-      spawnSync: function(cmd, param_array) {
-        return (new SpawnMock(cmd, param_array)).process_possible_commands()
-      }
-    })
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
 
     let brain = new Brain()
@@ -224,11 +208,7 @@ describe('default python detection', function() {
         this.result.stdout = '/Users/Andy/miniconda/bin/python'
       }
     }
-    mockery.registerMock('child_process', {
-      spawnSync: function(cmd, param_array) {
-        return (new SpawnMock(cmd, param_array)).process_possible_commands()
-      }
-    })
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
 
     let brain = new Brain()

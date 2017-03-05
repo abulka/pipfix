@@ -2,7 +2,7 @@ var assert = require('assert');     // https://nodejs.org/api/assert.html
 var should = require('should');     // https://github.com/shouldjs/should.js
 var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-javascript-testing-mocks-spies-stubs/
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
-var {BaseSpawnMockBehaviour, SPAWN_RESULTS} = require('./mock_data.js')
+var {BaseSpawnMockBehaviour, make_mock_spawn_func, SPAWN_RESULTS} = require('./mock_data.js')
 
 describe('existence', function() {
 
@@ -25,12 +25,7 @@ describe('existence', function() {
 
 
     it('python_usr_bin exists', function () {
-      let child_process_Mock = {
-        spawnSync: function (cmd, param_array) {
-          return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
-        }
-      }
-      mockery.registerMock('child_process', child_process_Mock);
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(BaseSpawnMockBehaviour) })
       let {Python} = require('../lib.js')
 
       let validSpy = sinon.spy(Python.prototype, 'valid');
@@ -76,11 +71,7 @@ describe('existence', function() {
     }
 
     it('python_usr_bin does not exist', function () {
-      mockery.registerMock('child_process', {
-        spawnSync: function (cmd, param_array) {
-          return (new SpawnMock(cmd, param_array)).process_possible_commands()
-        }
-      })
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Python} = require('../lib.js')
       let python_usr_bin = new Python('/usr/bin/python')
 
@@ -88,11 +79,7 @@ describe('existence', function() {
     });
 
     it('usr_local_bin python exists and is default', function () {
-      mockery.registerMock('child_process', {
-        spawnSync: function (cmd, param_array) {
-          return (new SpawnMock(cmd, param_array)).process_possible_commands()
-        }
-      })
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Python} = require('../lib.js')
       let python_usr_local_bin = new Python('/usr/local/bin/python')
 
@@ -105,11 +92,7 @@ describe('existence', function() {
 
   describe('pip', function() {
     it('pip_usr_local_bin exists', function() {
-      mockery.registerMock('child_process', {
-        spawnSync: function(cmd, param_array) {
-          return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
-        }
-      })
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(BaseSpawnMockBehaviour) })
       let {Pip} = require('../lib.js')
 
       let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
@@ -126,11 +109,7 @@ describe('existence', function() {
           }
         }
       }
-      mockery.registerMock('child_process', {
-        spawnSync: function(cmd, param_array) {
-          return (new SpawnMock(cmd, param_array)).process_possible_commands()
-        }
-      })
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Pip} = require('../lib.js')
 
       let pip_usr_local_bin = new Pip('/usr/local/bin/pip')

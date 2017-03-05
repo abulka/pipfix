@@ -2,7 +2,7 @@ var assert = require('assert');     // https://nodejs.org/api/assert.html
 var should = require('should');     // https://github.com/shouldjs/should.js
 var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-javascript-testing-mocks-spies-stubs/
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
-var {BaseSpawnMockBehaviour, SPAWN_RESULTS} = require('./mock_data.js')
+var {BaseSpawnMockBehaviour, make_mock_spawn_func, SPAWN_RESULTS} = require('./mock_data.js')
 
 describe('pip python site relationships', function() {
 
@@ -21,11 +21,7 @@ describe('pip python site relationships', function() {
   });
 
   it('python_usr_bin has a usr_local_bin_pip', function() {
-    mockery.registerMock('child_process', {
-      spawnSync: function(cmd, param_array) {
-        return (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
-      }
-    })
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(BaseSpawnMockBehaviour) })
     let {Python, Pip} = require('../lib.js')
     let spy1 = sinon.spy(Python.prototype, 'analyse_site_info');
 
