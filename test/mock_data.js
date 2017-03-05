@@ -46,7 +46,7 @@ const SPAWN_RESULTS = {
     'stdout': '',
     'stderr': 'wc err blah blah'
   },
-  "python_version_fail": {  // some/python --version
+  "cmd_version_fail": {  // some/cmd --version
     'stdout': '',
     'stderr': '--version err blah blah'
   },
@@ -142,7 +142,7 @@ class BaseSpawnMockBehaviour{
   // Default results, individual methods can be overridden by subclasses to suit the test case
 
   ls() {
-    this.select('ls_success')
+    this.select('ls_fail')
     assert(this.result != undefined)
   }
 
@@ -152,7 +152,7 @@ class BaseSpawnMockBehaviour{
   }
 
   version() {
-    this.select('python_version_fail')
+    this.select('cmd_version_fail')
     assert(this.result != undefined)
   }
 

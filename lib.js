@@ -144,6 +144,9 @@ class Python extends Base {
     super.analyse()
 
     // why run these if this python doesn't exist?
+    if (! this.exists)
+      return
+
     this.result_shell_site_info = spawn( this.path, [ '-m', 'site' ] )
     this.result_shell_run_pip_as_module = spawn( this.path, [ '-m', 'pip', '--version' ] )
     // why analyse these if this python doesn't exist?
@@ -260,6 +263,7 @@ class Pip extends Base {
     super.report()
     this.report_obj.site = this.site_package_path
 
+    // TODO this info should be built during analyze, not during reporting
     this.report_obj.associations = {}
     for (let python of this.pythons) {
       let pip_and_python_share_a_site = false
