@@ -47,6 +47,7 @@ describe('default python detection', function() {
 
 
   it('brain finds /usr/bin python only', function() {
+
     class SpawnMock extends BaseSpawnMockBehaviour {
       ls() {
         super.ls()

@@ -21,37 +21,6 @@ describe('existence', function() {
   });
 
 
-  describe('python existence', function() {
-
-
-    it('python_usr_bin exists', function () {
-      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(BaseSpawnMockBehaviour) })
-      let {Python} = require('../lib.js')
-
-      let validSpy = sinon.spy(Python.prototype, 'valid');
-      let analyseSpy = sinon.spy(Python.prototype, 'analyse');
-
-      // debugger
-      let python_usr_bin = new Python('/usr/bin/python')
-
-      assert.equal(python_usr_bin.path, '/usr/bin/python');
-      assert.equal(python_usr_bin.exists, true);
-
-      // console.log(analyseSpy.callCount)
-      // console.log(validSpy.callCount)
-
-      sinon.assert.callCount(analyseSpy, 1);
-      sinon.assert.called(validSpy);
-      // sinon.assert.callCount(validSpy, 5);
-
-      analyseSpy.restore();
-      validSpy.restore();
-
-    });
-
-  });
-
-
   describe('python usr_bin does not exist', function () {
 
     class SpawnMock extends BaseSpawnMockBehaviour {
@@ -78,6 +47,7 @@ describe('existence', function() {
       python_usr_bin.exists.should.be.false()
     });
 
+
     it('usr_local_bin python exists and is default', function () {
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Python} = require('../lib.js')
@@ -89,34 +59,6 @@ describe('existence', function() {
 
   });
 
-
-  describe('pip', function() {
-    it('pip_usr_local_bin exists', function() {
-      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(BaseSpawnMockBehaviour) })
-      let {Pip} = require('../lib.js')
-
-      let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
-      assert.equal(pip_usr_local_bin.exists, true);
-    });
-
-    it('pip_usr_local_bin does not exist', function() {
-      class SpawnMock extends BaseSpawnMockBehaviour {
-        ls() {
-          switch (this.params[1]) {
-            case '/usr/local/bin/pip':
-              this.select('ls_fail')
-              break
-          }
-        }
-      }
-      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-      let {Pip} = require('../lib.js')
-
-      let pip_usr_local_bin = new Pip('/usr/local/bin/pip')
-      assert.equal(pip_usr_local_bin.exists, false);
-    });
-
-  });
 
 });
 
