@@ -63,7 +63,7 @@ sys.path = [
     'stdout': 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)',
     'stderr': ''
   },
-  "which_python_none": {  // which python
+  "which_none": {  // which python or pip
     'stdout': '',
     'stderr': ''
   },
@@ -167,7 +167,7 @@ class BaseSpawnMockBehaviour{
   }
 
   which_python() {
-    this.select('which_python_none')
+    this.select('which_none')
     assert(this.result != undefined)
   }
 
