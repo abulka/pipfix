@@ -172,7 +172,7 @@ class BaseSpawnMockBehaviour{
   }
 
   which_pip() {
-    this.select('which_pip_usr_local_bin')
+    this.select('which_none')
     assert(this.result != undefined)
   }
 

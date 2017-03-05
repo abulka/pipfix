@@ -326,6 +326,82 @@ describe('default python detection', function() {
 
   })
 
-  // TODO pip detection via the brain...
+
+  describe('pip detection via brain', function() {
+
+    it('no pips', function() {
+
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/pip':
+              this.select('ls_fail')
+              break
+            case '/usr/local/bin/pip':
+              this.select('ls_fail')
+              break
+          }
+        }
+      }
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      brain.pips.length.should.be.equal(0)
+      assert(brain.get_pip('/usr/local/bin/pip') == undefined)
+      assert(brain.pip_default == undefined)
+    });
+
+
+    it('one /usr/local/bin/pip', function() {
+
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/pip':
+              this.select('ls_fail')
+              break
+            case '/usr/local/bin/pip':
+              this.select('ls_success')
+              break
+          }
+        }
+      }
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      brain.pips.length.should.be.equal(1)
+      brain.get_pip('/usr/local/bin/pip').should.not.be.undefined()
+    });
+
+    it('one /usr/local/bin/pip - plus miniconda pip', function() {
+
+      class SpawnMock extends BaseSpawnMockBehaviour {
+        ls() {
+          super.ls()
+          switch (this.params[1]) {
+            case '/usr/bin/pip':
+              this.select('ls_fail')
+              break
+            case '/usr/local/bin/pip':
+              this.select('ls_success')
+              break
+          }
+        }
+        which_pip() {
+          super.which_python()
+          this.result.stdout = '/Users/Andy/miniconda/bin/pip'
+        }
+      }
+      mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+      let {Brain} = require('../lib.js')
+      let brain = new Brain()
+      brain.pips.length.should.be.equal(2)
+      brain.get_pip('/usr/local/bin/pip').should.not.be.undefined()
+      brain.get_pip('/Users/Andy/miniconda/bin/pip').should.not.be.undefined()
+    });
+
+  });
 
 })
