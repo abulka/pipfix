@@ -23,6 +23,7 @@ describe('default command detection', function() {
   describe('one python', function() {
 
     it('one usr/bin/python - and is default', function() {
+
       class SpawnMock extends BaseSpawnMockBehaviour {
         ls() {
           super.ls()
@@ -61,6 +62,7 @@ describe('default command detection', function() {
 
 
     it('one usr/local/bin/python - and is default', function() {
+
       class SpawnMock extends BaseSpawnMockBehaviour {
         ls() {
           super.ls()
@@ -139,6 +141,7 @@ describe('default command detection', function() {
 
 
     it('two pythons found - default is usr/local/bin', function() {
+
       class SpawnMock extends TwoPythonsFound {
         which_python() {
           super.which_python()

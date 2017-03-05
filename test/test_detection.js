@@ -97,6 +97,7 @@ describe('existence', function() {
 
 
     it('brain finds both /usr/bin and /usr/local/bin python', function() {
+
       class SpawnMock extends BaseSpawnMockBehaviour {
         ls() {
           super.ls()
@@ -121,6 +122,7 @@ describe('existence', function() {
 
 
     it('brain finds three pythons - /usr/bin and /usr/local/bin python and extra default python', function() {
+
       class SpawnMock extends BaseSpawnMockBehaviour {
         ls() {
           super.ls()
@@ -149,6 +151,7 @@ describe('existence', function() {
   describe('pip existence', function() {
 
     it('brain finds no pips', function() {
+
       class SpawnMock extends BaseSpawnMockBehaviour {
         ls() {
           super.ls()
@@ -173,6 +176,7 @@ describe('existence', function() {
 
 
     it('brain finds /usr/local/bin/pip', function() {
+
       class SpawnMock extends BaseSpawnMockBehaviour {
         ls() {
           super.ls()
@@ -197,6 +201,7 @@ describe('existence', function() {
 
 
     it('brain finds /usr/local/bin/pip plus another default pip', function() {
+
       class SpawnMock extends BaseSpawnMockBehaviour {
         ls() {
           super.ls()
