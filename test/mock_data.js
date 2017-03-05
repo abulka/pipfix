@@ -107,7 +107,7 @@ class BaseSpawnMockBehaviour{
              ...this.result['params']]
     }
   }
-  
+
   // Template Pattern - Design Pattern - override any step you want in a sub class e.g. this.ls()
 
   process_possible_commands() {
@@ -179,5 +179,19 @@ class BaseSpawnMockBehaviour{
   }
 }
 
+function make_mock_spawn_func(HelperClass) {
+  /*
+   Returns mock version of 'spawn' function acting in accordance with the mocking logic within 'HelperClass'
+   Note: closure technology in use - returns a function 'my_spawn' closed over 'HelperClass'
+   but which takes 'cmd', 'param_array' as params, just like the real spawn and spawnSync do.
+   */
+  function my_spawn(cmd, param_array) {
+    let o = new HelperClass(cmd, param_array)
+    return o.process_possible_commands()
+  }
+  return my_spawn
+}
+
 exports.BaseSpawnMockBehaviour = BaseSpawnMockBehaviour
+exports.make_mock_spawn_func = make_mock_spawn_func
 exports.SPAWN_RESULTS = SPAWN_RESULTS

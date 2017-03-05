@@ -2,7 +2,7 @@ var assert = require('assert');     // https://nodejs.org/api/assert.html
 var should = require('should');     // https://github.com/shouldjs/should.js
 var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-javascript-testing-mocks-spies-stubs/
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
-var {BaseSpawnMockBehaviour, SPAWN_RESULTS} = require('./mock_data.js')
+var {BaseSpawnMockBehaviour, make_mock_spawn_func, SPAWN_RESULTS} = require('./mock_data.js')
 
 describe('default python detection', function() {
 
@@ -38,11 +38,7 @@ describe('default python detection', function() {
         this.select('which_python_usr_bin')
       }
     }
-    mockery.registerMock('child_process', {
-      spawnSync: function(cmd, param_array) {
-        return (new SpawnMock(cmd, param_array)).process_possible_commands()
-      }
-    })
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
 
     let brain = new Brain()
