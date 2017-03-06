@@ -25,12 +25,12 @@ describe('pip python site relationships', function() {
   })
 
 
-  it('python_usr_bin has a usr_local_bin_pip, but not associated', function() {
+  it('/usr/bin/python and /usr/local/bin/pip both exist, but are not associated', function() {
     // TODO
   })
 
 
-  it('python_usr_bin has a usr_local_bin_pip, associated', function() {
+  it('/usr/bin/python and /usr/local/bin/pip both exist, associated ok', function() {
 
     class SpawnMock extends BaseSpawnMockBehaviour {
       ls() {
@@ -49,18 +49,33 @@ describe('pip python site relationships', function() {
       }
       python_m_site() {
         super.python_m_site()
+        // mock the typical result on a mac of "/usr/bin/python -m site"
+        // note that we expect the line "/Library/Python/2.7/site-packages" to match
+        // the site reported via "pip --version"
         this.result.stdout = `
 sys.path = [
-'path1',
-'path2',
-'/Users/Andy/miniconda/lib/python2.7/site-packages',
+  '/Library/Python/2.7/site-packages/pip-7.1.0-py2.7.egg',
+  '/usr/local/lib/wxPython-unicode-2.8.12.1/lib/python2.7/site-packages',
+  '/usr/local/lib/wxPython-unicode-2.8.12.1/lib/python2.7/site-packages/wx-2.8-mac-unicode',
+  '/Library/Python/2.7/site-packages',
+  '/usr/local/lib/wxPython-unicode-2.8.12.1/lib/python2.7',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python27.zip',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-darwin',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-mac',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-mac/lib-scriptpackages',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-tk',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-old',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-dynload',
+  '/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC',
 ]`
       }
       version() {
         super.version()
         // console.log('this.params[0]', this.params[0], this.cmd)
         if (this.cmd == '/usr/local/bin/pip')
-          this.result.stdout = 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)'
+          this.result.stdout = 'pip 7.1.0 from /Library/Python/2.7/site-packages/pip-7.1.0-py2.7.egg (python 2.7)'
         else if (this.cmd == '/usr/bin/python')
           this.result.stderr = 'Python 2.7.0'
       }
@@ -112,42 +127,33 @@ sys.path = [
     console.log(pip_usr_local_bin.report_obj.associations)
     pip_usr_local_bin.report_obj.associations['/usr/bin/python'].should.be.true()
 
-    /*
-    TODO
-
-    - change miniconda references above to /usr/local/bin/pip
-        pip 7.1.0 from /Library/Python/2.7/site-packages/pip-7.1.0-py2.7.egg (python 2.7)
-
-       which is then compatible with
-
-Andys-iMac-2:pipfix Andy$ /usr/bin/python -m site
-sys.path = [
-    '/Users/Andy/Devel/pipfix',
-    '/Library/Python/2.7/site-packages/pip-7.1.0-py2.7.egg',
-    '/usr/local/lib/wxPython-unicode-2.8.12.1/lib/python2.7/site-packages',
-    '/usr/local/lib/wxPython-unicode-2.8.12.1/lib/python2.7/site-packages/wx-2.8-mac-unicode',
-    '/Library/Python/2.7/site-packages',
-    '/usr/local/lib/wxPython-unicode-2.8.12.1/lib/python2.7',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python27.zip',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-darwin',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-mac',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/plat-mac/lib-scriptpackages',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-tk',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-old',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-dynload',
-    '/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/PyObjC',
-]
-
-
-     - shouldn't need to pip.report() to get this analysis done
-
-     - check version() mocking above to cater for both pip and python --version mocking
-
-     */
     spy1.restore();
-
   });
+
+  it('miniconda python and pip both exist as default, and are associated ok', function() {
+    // TODO
+    /*
+    python_m_site() {
+      super.python_m_site()
+      this.result.stdout = `
+sys.path = [
+'path1',
+'path2',
+'/Users/Andy/miniconda/lib/python2.7/site-packages',
+]`
+    }
+    version() {
+      super.version()
+      // console.log('this.params[0]', this.params[0], this.cmd)
+      if (this.cmd == '/usr/local/bin/pip')
+        this.result.stdout = 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)'
+      else if (this.cmd == '/usr/bin/python')
+        this.result.stderr = 'Python 2.7.0'
+    }
+  }
+    */
+
+  })
+
 
 });
