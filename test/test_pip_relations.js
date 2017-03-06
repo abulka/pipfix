@@ -21,11 +21,6 @@ describe('pip python site relationships', function() {
   });
 
 
-  it('/usr/bin/python and /usr/local/bin/pip both exist, but are not associated', function() {
-    // TODO
-  })
-
-
   it('/usr/bin/python and /usr/local/bin/pip both exist, associated ok', function() {
 
     class SpawnMock extends BaseSpawnMockBehaviour {
@@ -51,10 +46,7 @@ describe('pip python site relationships', function() {
         this.result.stdout = `
 sys.path = [
   '/Library/Python/2.7/site-packages/pip-7.1.0-py2.7.egg',
-  '/usr/local/lib/wxPython-unicode-2.8.12.1/lib/python2.7/site-packages',
-  '/usr/local/lib/wxPython-unicode-2.8.12.1/lib/python2.7/site-packages/wx-2.8-mac-unicode',
   '/Library/Python/2.7/site-packages',
-  '/usr/local/lib/wxPython-unicode-2.8.12.1/lib/python2.7',
   '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python27.zip',
   '/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7',
   '...',
@@ -85,6 +77,47 @@ sys.path = [
     pip_usr_local_bin.report_obj.associations['/usr/bin/python'].should.be.true()
     spy1.restore();
   });
+
+
+  it('/usr/bin/python and /usr/local/bin/pip both exist, but are not associated', function() {
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        super.ls()
+        switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_success')
+            break
+          case '/usr/local/bin/pip':
+            this.select('ls_success')
+            break
+        }
+      }
+      python_m_site() {
+        super.python_m_site()
+        // mock the typical result on a mac of "/usr/bin/python -m site"
+        // note that we do not expect any line
+        // the site reported via "pip --version"
+        this.result.stdout = `
+sys.path = [
+  '/Library/Blah.egg',
+  '/Library/Blah/Blah/Blah/Python/2.7/site-packages',
+  '...',
+]`
+      }
+      version() {
+        super.version()
+        if (this.cmd == '/usr/local/bin/pip')
+          this.result.stdout = 'pip 7.1.0 from /Library/Python/2.7/site-packages/pip-7.1.0-py2.7.egg (python 2.7)'
+        else if (this.cmd == '/usr/bin/python')
+          this.result.stderr = 'Python 2.7.0'
+      }
+    }
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+    let {Brain, Python} = require('../lib.js')
+    let brain = new Brain()
+    brain.get_pip('/usr/local/bin/pip').report()    // TODO shouldn't need to report to get this analysis done
+    brain.get_pip('/usr/local/bin/pip').report_obj.associations['/usr/bin/python'].should.be.false()
+  })
 
 
   it('miniconda python and pip both exist as default, and are associated ok', function() {
