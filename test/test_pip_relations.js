@@ -73,7 +73,7 @@ sys.path = [
     python_usr_bin.runs_ok.should.be.true()
     pip_usr_local_bin.exists.should.be.true()
     pip_usr_local_bin.report()    // TODO shouldn't need to report to get this analysis done
-    console.log(pip_usr_local_bin.report_obj.associations)
+    // console.log(pip_usr_local_bin.report_obj.associations)
     pip_usr_local_bin.report_obj.associations['/usr/bin/python'].should.be.true()
     spy1.restore();
   });
@@ -121,7 +121,7 @@ sys.path = [
 
 
   it('miniconda python and pip both exist as default, and are associated ok', function() {
-    // TODO
+    // TODO - need to use default python & pip finding to get this test running.
     /*
     python_m_site() {
       super.python_m_site()
