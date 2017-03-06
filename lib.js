@@ -55,8 +55,8 @@ class Base {
     let accept_stderr_msg_as_valid = result_shell_obj.args[1] == "--version" &&
                                      this.interpret_stderr_as_stdout_for_getting_version_info
 
-    if (accept_stderr_msg_as_valid)
-      return result_shell_obj.stderr.length > 0
+    if (accept_stderr_msg_as_valid)  // TODO this is a python specific test in a Base class - not good
+      return result_shell_obj.stderr.length > 0 && result_shell_obj.stderr.toString().indexOf('Python') != -1
     else
       return result_shell_obj.stderr.length == 0
   }
@@ -73,6 +73,8 @@ class Base {
     this.result_shell_ls = spawn('ls', ['-lh', this.path])
     this.result_shell_version = spawn(this.path, ['--version'])
     this.result_shell_file_size = spawn('wc', ['-c', this.path])
+
+    // console.log(`Base analyse() for ${this.path} ls stderr "${this.result_shell_ls.stderr.toString()}" version stderr "${this.result_shell_version.stderr.toString()}"`)
 
     if (this.exists) {
       this.analyse_is_exe_empty()

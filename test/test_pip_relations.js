@@ -51,15 +51,18 @@ describe('pip python site relationships', function() {
         super.python_m_site()
         this.result.stdout = `
 sys.path = [
-'path1', 
-'path2', 
+'path1',
+'path2',
 '/Users/Andy/miniconda/lib/python2.7/site-packages',
 ]`
       }
       version() {
         super.version()
-        if (this.params[0] == 'pip')
+        // console.log('this.params[0]', this.params[0], this.cmd)
+        if (this.cmd == '/usr/local/bin/pip')
           this.result.stdout = 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)'
+        else if (this.cmd == '/usr/bin/python')
+          this.result.stderr = 'Python 2.7.0'
       }
     }
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
@@ -71,8 +74,9 @@ sys.path = [
     brain.pips.length.should.be.equal(1)
     let python_usr_bin = brain.get_python('/usr/bin/python')
     let pip_usr_local_bin = brain.get_pip('/usr/local/bin/pip')
-    assert.equal(python_usr_bin.exists, true);
-    assert.equal(pip_usr_local_bin.exists, true);
+    python_usr_bin.exists.should.be.true()
+    python_usr_bin.runs_ok.should.be.true()
+    pip_usr_local_bin.exists.should.be.true()
 
 
     // TEST python.result_shell_site_info.stdout
@@ -106,7 +110,7 @@ sys.path = [
      */
     pip_usr_local_bin.report()    // TODO shouldn't need to report to get this analysis done
     console.log(pip_usr_local_bin.report_obj.associations)
-    // pip_usr_local_bin.report_obj.associations['/usr/bin/python'].should.be.true()
+    pip_usr_local_bin.report_obj.associations['/usr/bin/python'].should.be.true()
 
     /*
     TODO
@@ -137,8 +141,6 @@ sys.path = [
 ]
 
 
-     - why is --version mock default behaviour to fail but nothing in the tests is picking up on that and failing?
-
      - shouldn't need to pip.report() to get this analysis done
 
      - check version() mocking above to cater for both pip and python --version mocking
@@ -149,4 +151,3 @@ sys.path = [
   });
 
 });
-

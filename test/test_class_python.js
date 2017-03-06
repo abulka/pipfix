@@ -4,7 +4,7 @@ var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
 var {BaseSpawnMockBehaviour, make_mock_spawn_func, SPAWN_RESULTS} = require('./mock_data.js')
 
-describe('Python class - existence', function() {
+describe('Python class', function() {
 
   beforeEach(function() {
     // runs before each test in this block
@@ -150,5 +150,50 @@ describe('Python class - existence', function() {
     p2.exists.should.be.false()
   });
 
-});
 
+  it('/usr/local/bin/python exists but is not valid', function() {
+
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        switch (this.params[1]) {
+          case '/usr/local/bin/python':
+            this.select('ls_success')
+            break
+        }
+      }
+      version() {
+        super.version()
+        this.result.stderr = 'some error'
+      }
+    }
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+    let {Python} = require('../lib.js')
+    let p = new Python('/usr/local/bin/python')
+    p.exists.should.be.true()
+    p.runs_ok.should.be.false()  // not valid, as determined by running --version on it and getting error
+  });
+
+
+  it('/usr/local/bin/python exists and is valid', function() {
+
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        switch (this.params[1]) {
+          case '/usr/local/bin/python':
+            this.select('ls_success')
+            break
+        }
+      }
+      version() {
+        super.version()
+        this.result.stderr = 'Python 2.7.0'
+      }
+    }
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+    let {Python} = require('../lib.js')
+    let p = new Python('/usr/local/bin/python')
+    p.exists.should.be.true()
+    p.runs_ok.should.be.true()  // note python 2 returns version in stderr
+  });
+
+});

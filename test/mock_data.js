@@ -28,6 +28,14 @@
     (new BaseSpawnMockBehaviour(cmd, param_array)).process_possible_commands()
 
   which looks like a complex thing, but it simply creates a class and calls '.process_possible_commands()'
+
+  Update
+  ------
+  Even simpler now.  Just call make_mock_spawn_func(HelperClass) - see notes below.
+
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+    let {Brain, Python} = require('../lib.js')
+
  */
 
 var assert = require('assert');     // https://nodejs.org/api/assert.html
@@ -53,8 +61,8 @@ const SPAWN_RESULTS = {
   'python_m_site_1': {  // some/python -m site
     'stdout': `
 sys.path = [
-'path1', 
-'path2', 
+'path1',
+'path2',
 '/Users/Andy/miniconda/lib/python2.7/site-packages',
 ]`,
     'stderr': ''
