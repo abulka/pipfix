@@ -72,7 +72,6 @@ sys.path = [
     python_usr_bin.exists.should.be.true()
     python_usr_bin.runs_ok.should.be.true()
     pip_usr_local_bin.exists.should.be.true()
-    pip_usr_local_bin.report()    // TODO shouldn't need to report to get this analysis done
     // console.log(pip_usr_local_bin.report_obj.associations)
     pip_usr_local_bin.report_obj.associations['/usr/bin/python'].should.be.true()
     spy1.restore();
@@ -115,7 +114,6 @@ sys.path = [
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
     let brain = new Brain()
-    brain.get_pip('/usr/local/bin/pip').report()    // TODO shouldn't need to report to get this analysis done
     brain.get_pip('/usr/local/bin/pip').report_obj.associations['/usr/bin/python'].should.be.false()
   })
 
@@ -160,7 +158,6 @@ sys.path = [
     let {Brain} = require('../lib.js')
     let brain = new Brain()
     let pip = brain.get_pip('/Users/Andy/miniconda/bin/pip')
-    pip.report()    // TODO shouldn't need to report to get this analysis done
     // console.log(pip.report_obj.associations, pip.site_package_path)
     pip.report_obj.associations['/Users/Andy/miniconda/bin/python'].should.be.true()
     Object.keys(pip.report_obj.associations).length.should.be.equal(1)

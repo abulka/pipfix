@@ -232,6 +232,7 @@ class Pip extends Base {
   constructor(path) {
     super(path);
     this.site_package_path
+    this.site_relationships = {}  // hash where keys are python paths, values are boolean
     this.pythons = []
     this.analyse()
   }
@@ -261,22 +262,15 @@ class Pip extends Base {
 
   inform_about(python) {
     this.pythons.push(python)
+
+    // Figure out if pip and this python share a site
+    this.site_relationships[python.path] = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
   }
 
   report() {
     super.report()
     this.report_obj.site = this.site_package_path
-
-    // TODO this info should be built during analyze, not during reporting
-    this.report_obj.associations = {}
-    for (let python of this.pythons) {
-      let pip_and_python_share_a_site = false
-      if (! python.exists)
-        pip_and_python_share_a_site = 'N/A'
-      else
-        pip_and_python_share_a_site = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
-      this.report_obj.associations[python.path] = pip_and_python_share_a_site
-    }
+    this.report_obj.associations = this.site_relationships  // TODO rename 'associations' to 'site_relationships'
   }
 }
 
