@@ -121,8 +121,8 @@ sys.path = [
 
     class SpawnMock extends BaseSpawnMockBehaviour {
       ls() {
-        // rely on default python & pip finding via 'which' to get this test running.
-        // though ls() on those binaries needs to also return true
+        // Test relies on default python & pip being found via (mocked) system 'which' call.
+        // Though ls() on those default binaries needs also to return true
         super.ls()
         if (['/Users/Andy/miniconda/bin/python', '/Users/Andy/miniconda/bin/pip'].indexOf(this.params[1]) >= 0)
           this.select('ls_success')
