@@ -4,7 +4,7 @@ var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
 var {BaseSpawnMockBehaviour, make_mock_spawn_func} = require('./mock_data.js')
 
-describe('pip python site relationships', function() {
+describe('site package relationships between pip and python', function() {
 
   beforeEach(function() {
     // runs before each test in this block

@@ -13,220 +13,184 @@ var mockery = require('mockery');   // https://github.com/mfncooper/mockery
 // ./node_modules/mocha/bin/mocha --fgrep "some text to match"
 // etc.
 
-describe('mockery experiments', function() {
+describe('experiments - mockery', function() {
 
-  // describe('disabled cos accesses real file system for python - uses no mockery just sinon', function() {
-  //
-  //   it('real call checking for python_usr_bin', function() {
-  //
-  //     let {Python, Pip, Which} = require('../lib.js')  // CAREFUL - letting in one real require subverts the mocking later....
-  //                                                      // even when its done within an inner scope like this
-  //                                                      // UNLESS you call mockery.enable({ useCleanCache: true }) before() each test.
-  //
-  //     let validSpy = sinon.spy(Python.prototype, 'valid');
-  //     let analyseSpy = sinon.spy(Python.prototype, 'analyse');
-  //
-  //     let python_usr_bin = new Python('/usr/bin/python')
-  //
-  //
-  //     assert.equal(python_usr_bin.path, '/usr/bin/python');
-  //
-  //     // console.log(analyseSpy.callCount)
-  //     // console.log(validSpy.callCount)
-  //
-  //     sinon.assert.called(validSpy);
-  //     sinon.assert.callCount(validSpy, 5);
-  //
-  //     sinon.assert.callCount(Python.prototype.analyse, 1);
-  //     sinon.assert.callCount(analyseSpy, 1);
-  //     assert.equal(analyseSpy, Python.prototype.analyse)
-  //
-  //     analyseSpy.restore();
-  //     validSpy.restore();
-  //
-  //   });
-  // });
-
-  describe('deeper mockery experiments', function() {
-
-    before(function() {
-      // runs before all tests in this block
-
-      // mockery.enable();
-
-      mockery.enable({
-          warnOnReplace: false,
-          warnOnUnregistered: false,
-          useCleanCache: true  // attempt to allow old requires() to expire between tests - works!
-      });
-
+  beforeEach(function() {
+    mockery.enable({
+        warnOnReplace: false,
+        warnOnUnregistered: false,
+        useCleanCache: true  // attempt to allow old requires() to expire between tests - works!
     });
+  });
 
-    after(function() {
-      // runs after all tests in this block
-      mockery.disable();
-    });
+  afterEach(function() {
+    mockery.disable();
+  });
 
-    beforeEach(function() {
-      // runs before each test in this block
-    });
+  it('mock system fs.stat()', function() {
+    let fsMock = {
+        stat: function (path, cb) { /* your mock code */ flag = true }
+    };
+    let flag = false
 
-    afterEach(function() {
-      // runs after each test in this block
-    });
+    // Parameter one is the module you are mocking, using require syntax.  Parameter two is an object {}
+    // representing the mocked namespace - you can add the functions names as keys and functions as values.
+    mockery.registerMock('fs', fsMock);
 
-    it('should mock fs', function() {
+    // Careful, doing a non mocked 'real' require subverts the mocking later on
+    // even when its done within an inner scope like within this test
+    // To be safe call mockery.enable({ useCleanCache: true }) before() each test to clear out the require cache.
+    let fs = require('fs')
 
-      var fsMock = {
-          stat: function (path, cb) { /* your mock code */ }
-      };
-      mockery.registerMock('fs', fsMock);
-      // mockery.registerMock('../some-other-module', stubbedModule);
+    // Call the function
+    fs.stat('some/path')
 
-      mockery.deregisterMock('fs');
+    // Test
+    flag.should.be.true()
 
-    });
+    mockery.deregisterMock('fs');
+  });
 
-    it('fs_play mock entire module', function() {
-      var fs_playMock = {
-          // stat: function (path, callback) { console.log('fs stat mock callback called!') /* your mock code */ }
-          fs_play: function () {
-            //console.log('fs_play mock called!')
-          }
-      };
-      mockery.registerMock('./fs_play.js', fs_playMock)  // needs to be first, before you use the require()
-      let fs_play = require('./fs_play.js')
+  it('fs_play mock entire module', function() {
+    let flag = false
+    var fs_playMock = {
+        // stat: function (path, callback) { console.log('fs stat mock callback called!') /* your mock code */ }
+        fs_play: function () {
+          //console.log('fs_play mock called!')
+          flag = true
+        }
+    };
+    mockery.registerMock('./fs_play.js', fs_playMock)  // needs to be first, before you use the require()
+    let fs_play = require('./fs_play.js')
 
-      fs_play.fs_play()
+    fs_play.fs_play()
+    flag.should.be.true()
 
-      mockery.deregisterMock('./fs_play.js');
+    mockery.deregisterMock('./fs_play.js');
 
-    });
+  });
 
-    it('fs_play mock attempt of just the fs import within the module', function() {
-      var fsMock = {
-          stat: function (path, cb) { /* your mock code */
-                                      console.log('fake stat called fs_play');
-                                      let stats = 'some mock stats....'
-                                      cb(0, stats)
-                                    }
-      };
-      mockery.registerMock('fs', fsMock);
-      let fs_play = require('./fs_play.js')
+  it('fs_play mock attempt of just the fs import within the module', function() {
+    var fsMock = {
+        stat: function (path, cb) { /* your mock code */
+                                    console.log('fake stat called fs_play');
+                                    let stats = 'some mock stats....'
+                                    cb(0, stats)
+                                  }
+    };
+    mockery.registerMock('fs', fsMock);
+    let fs_play = require('./fs_play.js')
 
-      fs_play.fs_play()
+    fs_play.fs_play()
 
-      mockery.deregisterMock('fs');
+    mockery.deregisterMock('fs');
 
-    });
+  });
 
-    it('fs_play (again) mock attempt of just the fs import within the module', function() {
-      var fsMock = {
-          stat: function (path, cb) { /* your mock code */
-                                      console.log('fake stat called fs_play (again)');
-                                      let stats = 'some mock stats....'
-                                      cb(0, stats)
-                                    }
-      };
-      mockery.registerMock('fs', fsMock);
-      mockery.resetCache(); // does this work on the global require cache?  No.
-      let fs_play = require('./fs_play.js')   // HA THIS DOESN'T WORK - THE OLD REQUIRE FROM THE PREVIOUS TEST STILL IS IN PLACE
+  it('fs_play (again) mock attempt of just the fs import within the module', function() {
+    var fsMock = {
+        stat: function (path, cb) { /* your mock code */
+                                    console.log('fake stat called fs_play (again)');
+                                    let stats = 'some mock stats....'
+                                    cb(0, stats)
+                                  }
+    };
+    mockery.registerMock('fs', fsMock);
+    mockery.resetCache(); // does this work on the global require cache?  No.
+    let fs_play = require('./fs_play.js')   // HA THIS DOESN'T WORK - THE OLD REQUIRE FROM THE PREVIOUS TEST STILL IS IN PLACE
 
-      fs_play.fs_play()
+    fs_play.fs_play()
 
-      mockery.deregisterMock('fs');
+    mockery.deregisterMock('fs');
 
-    });
+  });
 
-    it('fs_play2 mock attempt of just the fs import within the module', function() {
-      var fsMock = {
-          stat: function (path, cb) { /* your mock code */
-                                      console.log('fake stat called fs_play2');
-                                      let stats = 'some mock stats....'
-                                      cb(0, stats)
-                                    }
-      };
-      mockery.registerMock('fs', fsMock);
-      let fs_play = require('./fs_play2.js')
+  it('fs_play2 mock attempt of just the fs import within the module', function() {
+    var fsMock = {
+        stat: function (path, cb) { /* your mock code */
+                                    console.log('fake stat called fs_play2');
+                                    let stats = 'some mock stats....'
+                                    cb(0, stats)
+                                  }
+    };
+    mockery.registerMock('fs', fsMock);
+    let fs_play = require('./fs_play2.js')
 
-      fs_play.fs_play()
+    fs_play.fs_play()
 
-      mockery.deregisterMock('fs');
+    mockery.deregisterMock('fs');
 
-    });
+  });
 
-    it('fake one system python only', function() {
+  it('fake one system python only', function() {
 
-      let result_shell = {
-        stdout: null,
-        stderr: null,
-        args: ['cmd', 'param1', 'param2']
-      }
-      let child_process_Mock = {
-        spawnSync: function(cmd, param_array) {
+    let result_shell = {
+      stdout: null,
+      stderr: null,
+      args: ['cmd', 'param1', 'param2']
+    }
+    let child_process_Mock = {
+      spawnSync: function(cmd, param_array) {
 
-          switch (cmd) {
-            case 'ls':
-              console.log('fake spawnSync ls')
-              return {
-                stdout: '',
-                stderr: 'no such file',
-                args: ['ls', 'param1', 'param2']
-              }
-              break
-            case 'wc':
-              console.log('fake spawnSync wc')
-              return {
-                stdout: '',
-                stderr: 'wc blah blah',
-                args: ['wc', 'param1', 'param2']
-              }
-              break
-          }
-
-          if (param_array[0] == '--version') {
-            console.log('fake spawnSync --version')
+        switch (cmd) {
+          case 'ls':
+            console.log('fake spawnSync ls')
             return {
               stdout: '',
-              stderr: '--version blah blah',
-              args: ['??', '--version', 'param2']
+              stderr: 'no such file',
+              args: ['ls', 'param1', 'param2']
             }
-          }
-
-          return result_shell
+            break
+          case 'wc':
+            console.log('fake spawnSync wc')
+            return {
+              stdout: '',
+              stderr: 'wc blah blah',
+              args: ['wc', 'param1', 'param2']
+            }
+            break
         }
+
+        if (param_array[0] == '--version') {
+          console.log('fake spawnSync --version')
+          return {
+            stdout: '',
+            stderr: '--version blah blah',
+            args: ['??', '--version', 'param2']
+          }
+        }
+
+        return result_shell
       }
-      mockery.registerMock('child_process', child_process_Mock);
+    }
+    mockery.registerMock('child_process', child_process_Mock);
 
-      let {Python, Pip, Which} = require('../lib.js')
+    let {Python, Pip, Which} = require('../lib.js')
 
-      // let validSpy = sinon.spy(Python.prototype, 'valid');
-      // let analyseSpy = sinon.spy(Python.prototype, 'analyse');
-      //
-      let python_usr_bin = new Python('/usr/bin/python')
+    // let validSpy = sinon.spy(Python.prototype, 'valid');
+    // let analyseSpy = sinon.spy(Python.prototype, 'analyse');
+    //
+    let python_usr_bin = new Python('/usr/bin/python')
 
 
-      assert.equal(python_usr_bin.path, '/usr/bin/python');
-      assert.equal(python_usr_bin.exists, false);
+    assert.equal(python_usr_bin.path, '/usr/bin/python');
+    assert.equal(python_usr_bin.exists, false);
 
-      //
-      // // console.log(analyseSpy.callCount)
-      // // console.log(validSpy.callCount)
-      //
-      // sinon.assert.called(validSpy);
-      // sinon.assert.callCount(validSpy, 5);
-      //
-      // sinon.assert.callCount(Python.prototype.analyse, 1);
-      // sinon.assert.callCount(analyseSpy, 1);
-      // assert.equal(analyseSpy, Python.prototype.analyse)
-      //
-      // analyseSpy.restore();
-      // validSpy.restore();
+    //
+    // // console.log(analyseSpy.callCount)
+    // // console.log(validSpy.callCount)
+    //
+    // sinon.assert.called(validSpy);
+    // sinon.assert.callCount(validSpy, 5);
+    //
+    // sinon.assert.callCount(Python.prototype.analyse, 1);
+    // sinon.assert.callCount(analyseSpy, 1);
+    // assert.equal(analyseSpy, Python.prototype.analyse)
+    //
+    // analyseSpy.restore();
+    // validSpy.restore();
 
-      mockery.deregisterMock('child_process');
-
-    });
-
+    mockery.deregisterMock('child_process');
 
   });
 
