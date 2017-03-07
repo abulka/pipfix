@@ -2,7 +2,7 @@ var assert = require('assert');     // https://nodejs.org/api/assert.html
 var should = require('should');     // https://github.com/shouldjs/should.js
 var sinon = require('sinon');       // https://www.sitepoint.com/sinon-tutorial-javascript-testing-mocks-spies-stubs/
 var mockery = require('mockery');   // https://github.com/mfncooper/mockery
-var {BaseSpawnMockBehaviour, make_mock_spawn_func, SPAWN_RESULTS} = require('./mock_data.js')
+var {BaseSpawnMockBehaviour, make_mock_spawn_func} = require('./mock_data.js')
 
 describe('pip python site relationships', function() {
 
@@ -113,7 +113,7 @@ sys.path = [
       }
     }
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
-    let {Brain, Python} = require('../lib.js')
+    let {Brain} = require('../lib.js')
     let brain = new Brain()
     brain.get_pip('/usr/local/bin/pip').report()    // TODO shouldn't need to report to get this analysis done
     brain.get_pip('/usr/local/bin/pip').report_obj.associations['/usr/bin/python'].should.be.false()
@@ -121,27 +121,50 @@ sys.path = [
 
 
   it('miniconda python and pip both exist as default, and are associated ok', function() {
-    // TODO - need to use default python & pip finding to get this test running.
-    /*
-    python_m_site() {
-      super.python_m_site()
-      this.result.stdout = `
+
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        // rely on default python & pip finding via 'which' to get this test running.
+        // though ls() on those binaries needs to also return true
+        super.ls()
+        if (['/Users/Andy/miniconda/bin/python', '/Users/Andy/miniconda/bin/pip'].indexOf(this.params[1]) >= 0)
+          this.select('ls_success')
+      }
+      python_m_site() {
+        super.python_m_site()
+        this.result.stdout = `
 sys.path = [
 'path1',
 'path2',
 '/Users/Andy/miniconda/lib/python2.7/site-packages',
 ]`
+      }
+      version() {
+        super.version()
+        if (this.cmd == '/Users/Andy/miniconda/bin/pip')
+          this.result.stdout = 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)'
+        else if (this.cmd == '/Users/Andy/miniconda/bin/python')
+          this.result.stderr = 'Python 2.7.1'
+      }
+      which_python() {
+        super.which_python()
+        this.result.stdout = '/Users/Andy/miniconda/bin/python'
+      }
+      which_pip() {
+        super.which_pip()
+        this.result.stdout = '/Users/Andy/miniconda/bin/pip'
+      }
     }
-    version() {
-      super.version()
-      // console.log('this.params[0]', this.params[0], this.cmd)
-      if (this.cmd == '/usr/local/bin/pip')
-        this.result.stdout = 'pip 9.0.1 from /Users/Andy/miniconda/lib/python2.7/site-packages (python 2.7)'
-      else if (this.cmd == '/usr/bin/python')
-        this.result.stderr = 'Python 2.7.0'
-    }
-  }
-    */
+
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+    let {Brain} = require('../lib.js')
+    let brain = new Brain()
+    let pip = brain.get_pip('/Users/Andy/miniconda/bin/pip')
+    pip.report()    // TODO shouldn't need to report to get this analysis done
+    // console.log(pip.report_obj.associations, pip.site_package_path)
+    pip.report_obj.associations['/Users/Andy/miniconda/bin/python'].should.be.true()
+    Object.keys(pip.report_obj.associations).length.should.be.equal(1)
+    assert(brain.get_pip('/Users/Andy/miniconda/bin/pip').report_obj.associations['/usr/bin/python'] == undefined)
   })
 
 });
