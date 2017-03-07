@@ -72,8 +72,7 @@ sys.path = [
     python_usr_bin.exists.should.be.true()
     python_usr_bin.runs_ok.should.be.true()
     pip_usr_local_bin.exists.should.be.true()
-    // console.log(pip_usr_local_bin.report_obj.associations)
-    pip_usr_local_bin.report_obj.associations['/usr/bin/python'].should.be.true()
+    pip_usr_local_bin.site_relationships['/usr/bin/python'].should.be.true()
     spy1.restore();
   });
 
@@ -114,7 +113,7 @@ sys.path = [
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
     let brain = new Brain()
-    brain.get_pip('/usr/local/bin/pip').report_obj.associations['/usr/bin/python'].should.be.false()
+    brain.get_pip('/usr/local/bin/pip').site_relationships['/usr/bin/python'].should.be.false()
   })
 
 
@@ -158,10 +157,10 @@ sys.path = [
     let {Brain} = require('../lib.js')
     let brain = new Brain()
     let pip = brain.get_pip('/Users/Andy/miniconda/bin/pip')
-    // console.log(pip.report_obj.associations, pip.site_package_path)
-    pip.report_obj.associations['/Users/Andy/miniconda/bin/python'].should.be.true()
-    Object.keys(pip.report_obj.associations).length.should.be.equal(1)
-    assert(brain.get_pip('/Users/Andy/miniconda/bin/pip').report_obj.associations['/usr/bin/python'] == undefined)
+    // console.log(pip.site_relationships, pip.site_package_path)
+    pip.site_relationships['/Users/Andy/miniconda/bin/python'].should.be.true()
+    Object.keys(pip.site_relationships).length.should.be.equal(1)
+    assert(brain.get_pip('/Users/Andy/miniconda/bin/pip').site_relationships['/usr/bin/python'] == undefined)
   })
 
 });

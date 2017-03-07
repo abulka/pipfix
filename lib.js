@@ -270,7 +270,7 @@ class Pip extends Base {
   report() {
     super.report()
     this.report_obj.site = this.site_package_path
-    this.report_obj.associations = this.site_relationships  // TODO rename 'associations' to 'site_relationships'
+    this.report_obj.site_relationships = this.site_relationships  // TODO rename 'associations' to 'site_relationships'
   }
 }
 
