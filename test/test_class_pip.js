@@ -56,5 +56,37 @@ describe('Pip class - existence', function() {
   });
 
 
+  it('/usr/local/bin/pip runs ok but is empty - edge case', function() {
+
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        switch (this.params[1]) {
+          case '/usr/local/bin/pip':
+            this.select('ls_success')
+            break
+        }
+      }
+      version() {
+        super.version()
+        if (this.cmd == '/usr/local/bin/pip')
+          this.result.stderr = ''
+          this.result.stdout = ''  // edge case - should normally return something like
+                                   // 'pip 7.1.0 from /Library/Python/2.7/site-packages/pip-7.1.0-py2.7.egg (python 2.7)'
+      }
+      wc() {
+        super.wc()
+        this.result.stderr = ''
+        this.result.stdout = '     0 /usr/local/bin/pip'
+      }
+    }
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+    let {Pip} = require('../lib.js')
+    let pip = new Pip('/usr/local/bin/pip')
+    pip.runs_ok.should.be.true()
+    pip.size.should.be.equal(0)
+
+  })
+
+
 });
 

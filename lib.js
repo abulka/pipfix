@@ -89,6 +89,8 @@ class Base {
                                               [this.result_shell_ls, this.result_shell_version])
   }
 
+  analyse_version() {} // Subclasses should override and set 'this.version'
+
   add_warning(message, shell_results=[]) {
     // console.log('adding warning', message, 'this.report_line=', this.report_line)
     if (SIMPLE_WARNINGS) {

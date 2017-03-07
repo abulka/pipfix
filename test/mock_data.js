@@ -50,7 +50,11 @@ const SPAWN_RESULTS = {
     'stdout': '',
     'stderr': 'ls: /path/cmd: No such file or directory'
   },
-  "wc_fail": {  // wc ....
+  "wc_success": {  // wc -c some/path
+    'stdout': '   100 some/path',
+    'stderr': ''
+  },
+  "wc_fail": {  // wc -c some/path
     'stdout': '',
     'stderr': 'wc err blah blah'
   },
@@ -141,6 +145,8 @@ class BaseSpawnMockBehaviour{
       this.which_pip()
     else if (this.cmd == 'stat' && this.params[0] == '-F')
       this.stat()
+    // else if (this.cmd == 'wc' && this.params[0] == '-c')
+    //   this.size()
     else
       throw new UserException(`Unknown Spawn case, not sure how to mock "${this.cmd}" with params "${this.params}"`)
 
@@ -155,7 +161,7 @@ class BaseSpawnMockBehaviour{
   }
 
   wc() {
-    this.select('wc_fail')
+    this.select('wc_success')
     assert(this.result != undefined)
   }
 
@@ -189,6 +195,7 @@ class BaseSpawnMockBehaviour{
     this.result['stdout'] = '-rwxr-xr-x 1 root wheel 66576 Dec 13 22:22:22 2017 ' + this.params[1]  // for now just make stat path the exact same as path
     assert(this.result != undefined)
   }
+
 }
 
 function make_mock_spawn_func(HelperClass) {
