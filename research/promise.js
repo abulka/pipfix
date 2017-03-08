@@ -25,7 +25,9 @@ function work1() { console.log('work1'); return 5 }
 EXPERIMENTS_A = false
 EXPERIMENTS_B = false
 EXPERIMENTS_C = false
-EXPERIMENTS_D = true
+EXPERIMENTS_D = false
+EXPERIMENTS_E = false
+EXPERIMENTS_F = true
 
 if (EXPERIMENTS_A) {
   // 00. Simplest example, ignoring parameters, and no .then() method - functionality runs immediately
@@ -139,79 +141,83 @@ if (EXPERIMENTS_D) {
 
 }
 
+if (EXPERIMENTS_E) {
 
-return
+  /*
+   More chaining.
 
-// // Chain two promises
-// let p1 = new Promise(function(cb) { let result = 1; cb(result) }).then( (result)=>{console.log('p1 done, got', result)} )
-//
-// //var p = Promise.resolve(42);
-// return
+   Each then returns a new promise.  Except for the last one.
+   When a value is simply returned from within a then lambda, it will effectively
+   return Promise.resolve(<value returned by whichever handler was called>).
+   see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/then
+   */
 
-let p1 = new Promise(function (resolve, reject) {
-    // do a thing, possibly async, then…
-    work1()
-    resolve("inside promise 1 body, work1 accomplished")
-    // reject(Error("It broke"))
-})
+  // Return a promise which resolves after the specified interval
+  function delay(interval) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, interval);
+    });
+  }
 
-let p2 = new Promise(function(resolve) {
-    console.log('inside promise 2 body, about to setTimeout')
-    setTimeout(resolve, 4);
-})
-
-// then(f,f) is the way to call the promise.  f are the callback functions that get called on success of the work
-// promise.then(onResolve, onReject) allows us to assign handlers to a promise’s events.
-//
-p1.then(
-   function(result) { console.log('p1 success', result); },
-   function(err) { console.log(err); }
-);
-
-// Success & failure handlers
-p2.then(
-    function(details) { /* handle success */ },
-    function(error) { /* handle failure */ }
-);
-
-/*
-Promise.all is amazing. What it accomplishes is so painful using callbacks that I chickened out from even writing a
-callback-based example, yet the abstraction it provides is so simple.
-
-What does it do? It returns a promise which resolves when all of it’s argument promises have resolved, or is rejected
-when any of it’s argument promises are rejected. The returned promise resolves to an array containing the results of
-every promise, or fails with the error with which the first promise was rejected.
-
-Promise.all([
-    parallelAnimation1(),
-    parallelAnimation2()
-]).then(function() {
-    finalAnimation();
-});
-
- */
-let arrayOfPromises = [p, p2]
-Promise.all(arrayOfPromises).then(function(arrayOfResults) {
-  console.log('all promises done')
-})
-
-/////
-
-/*
-This is the key to chaining multiple promises together- by returning another promise inside the then() method.
- */
-
-// Return a promise which resolves after the specified interval
-function delay(interval) {
-    return new Promise(function(resolve) {
-        setTimeout(resolve, interval);
+  delay(1000)
+    .then(function () {
+      console.log('first delay in chain complete');
+      return delay(1000);
+    })
+    .then(function () {
+      console.log('second delay in chain complete');
+      return delay(250);
+    })
+    .then(function () {
+      console.log('third delay in chain complete');
+      return 5;
+    })
+    .then(function (value) {
+      console.log('final value is not a promise, just a value', value); // 5
     });
 }
-delay(1000)
-    .then(function() {
-        console.log('first chain place');
-        return 5;
+
+if (EXPERIMENTS_F) {
+
+  /*
+   Promise.all is amazing. What it accomplishes is so painful using callbacks that I chickened out from even writing a
+   callback-based example, yet the abstraction it provides is so simple.
+
+   What does it do? It returns a promise which resolves when all of it’s argument promises have resolved, or is rejected
+   when any of it’s argument promises are rejected. The returned promise resolves to an array containing the results of
+   every promise, or fails with the error with which the first promise was rejected.
+
+   Promise.all([
+     parallelAnimation1(),
+     parallelAnimation2()
+   ]).then(function() {
+     finalAnimation();
+   });
+   */
+
+  function parallelAnimation1() {
+    return new Promise(function (resolve) {
+      console.log('parallelAnimation1 work begins');
+      setTimeout(function() { resolve("parallelAnimation1 success!") }, 250)
     })
-    .then(function(value) {
-        console.log(value); // 5
-    });
+  }
+  function parallelAnimation2() {
+    return new Promise(function (resolve) {
+      console.log('parallelAnimation2 work begins');
+      setTimeout(function() { resolve("parallelAnimation2 success!") }, 1250)
+    })
+  }
+
+  function finalAnimation(values) {
+      console.log('finalAnimation work begins using values', values)
+  }
+
+  Promise.all([
+    parallelAnimation1(),
+    parallelAnimation2()
+  ]).then(function (arrayOfResults) {
+    finalAnimation(arrayOfResults);
+  });
+
+}
+
