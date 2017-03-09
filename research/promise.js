@@ -22,12 +22,12 @@ function work1() { console.log('work1'); return 5 }
 
 // EXPERIMENTS
 
-EXPERIMENTS_A = false
-EXPERIMENTS_B = false
-EXPERIMENTS_C = false
-EXPERIMENTS_D = false
-EXPERIMENTS_E = false
-EXPERIMENTS_F = true
+const EXPERIMENTS_A = false
+const EXPERIMENTS_B = false
+const EXPERIMENTS_C = false
+const EXPERIMENTS_D = false
+const EXPERIMENTS_E = false
+const EXPERIMENTS_F = true
 
 if (EXPERIMENTS_A) {
   // 00. Simplest example, ignoring parameters, and no .then() method - functionality runs immediately
