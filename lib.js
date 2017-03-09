@@ -1,6 +1,7 @@
 'use strict';
 
 let spawn = require( 'child_process' ).spawnSync
+const {run_async} = require('./run_async.js')
 let {UserException} = require('./util.js')
 
 const SIMPLE_WARNINGS = true
