@@ -351,11 +351,33 @@ var sites = await Promise.all([
 
 
 
-// Performance musing...
-//
-// P.S. Interestingly - what are we gaining - by blocking on a single promise, either using .then() or await
-// surely no performance is gained?  I guess
-// the benefit comes in when we trigger multiple promises at once and block on them all.
+/*
+ Performance musing...
+
+ P.S. Interestingly - what are we gaining - by blocking on a single promise, either using .then() or await
+ surely no performance is gained?  I guess
+ the benefit comes in when we trigger multiple promises at once and block on them all.
+
+well,
+
+https://medium.com/@bluepnume/learn-about-promises-before-you-start-using-async-await-eb148164a9c8#.erhb0kiw9
+says...
+
+Pitfall 2: awaiting multiple values
+
+So, here’s one of the rubs of await: under normal usage, I can only await one thing at a time:
+
+let foo = await getFoo();
+let bar = await getBar();
+
+Even though I should be able to get both at the same time, this code will get foo and bar sequentially.
+The way to do this is:
+
+let [foo, bar] = await Promise.all([getFoo(), getBar()]);
+
+This is kinda confusing — aren’t we using async/await, not promises?! The reason this works because async/await and
+promises are the same thing under the hood.
 
 
+*/
 
