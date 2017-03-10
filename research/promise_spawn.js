@@ -3,6 +3,7 @@
 const spawn = require('child_process').spawn
 const exec = require('child_process').exec
 const execSync = require('child_process').execSync
+const {run_async} = require('../run_async.js')  // by Andy, returns a promise
 
 // EXPERIMENTS
 
@@ -10,7 +11,8 @@ const EXPERIMENTS_A = false
 const EXPERIMENTS_B = false
 const EXPERIMENTS_C = false    // async 10-14 seconds
 const EXPERIMENTS_D = false   // sync  23-30 seconds - double the time!
-const EXPERIMENTS_E = true
+const EXPERIMENTS_E = false
+const EXPERIMENTS_F = true
 
 // EXPERIMENTS_A
 
@@ -186,8 +188,6 @@ if (EXPERIMENTS_D) {
 
 if (EXPERIMENTS_E) {
 
-  const {run_async} = require('../run_async.js')
-
   // this.result_shell_ls = spawn('ls', ['-lh', this.path])
   // this.result_shell_version = spawn(this.path, ['--version'])
   // this.result_shell_file_size = spawn('wc', ['-c', this.path])
@@ -219,6 +219,37 @@ if (EXPERIMENTS_E) {
      console.log("Promise Rejected", err.syscall);
   })
 
+}
+
+// AWAIT version, remember never return anything from an async function()
+
+async function run_shells() {
+  console.time('sync timing')
+  try {
+    let arrayOfResults = await Promise.all([
+      run_async('ls', ['-lh', '/usr/bin/python']),
+      run_async('ls', ['-lh', '/usr/local/bin/python']),
+      run_async('ls', ['-lh', '/usr/local/bin/pip']),
+      run_async('/usr/bin/python', ['--version']),
+      run_async('/usr/local/bin/python', ['--version']),
+      run_async('/usr/local/bin/pip', ['--version']),
+      run_async('wc', ['-c', '/usr/bin/python']),
+      run_async('wc', ['-c', '/usr/local/bin/python']),
+      run_async('wc', ['-c', '/usr/local/bin/pip']),
+      run_async('which', ['python']),
+      run_async('which', ['pip']),
+    ])
+    console.log('final results', arrayOfResults)
+  } catch(err) {
+     console.log("Promise Rejected or something", err.syscall);
+     throw Error('yikes')
+  } finally {
+    console.timeEnd('sync timing')
+  }
+}
+
+if (EXPERIMENTS_F) {
+  run_shells()
 }
 
 
