@@ -27,7 +27,8 @@ const EXPERIMENTS_B = false
 const EXPERIMENTS_C = false
 const EXPERIMENTS_D = false
 const EXPERIMENTS_E = false
-const EXPERIMENTS_F = true
+const EXPERIMENTS_F = false
+const EXPERIMENTS_G = true
 
 if (EXPERIMENTS_A) {
   // 00. Simplest example, ignoring parameters, and no .then() method - functionality runs immediately
@@ -220,4 +221,141 @@ if (EXPERIMENTS_F) {
   });
 
 }
+
+
+// EXPERIMENTS_G
+
+// Playing with ASYNC and AWAIT - requires node 7.x
+
+function getUsers() {
+  /*
+   getUsers() returns a promise. Any promise we have, using ES2016, we can await.
+   That’s literally all await means: it functions in exactly the same way as calling `.then()`
+   on a promise (but without requiring any callback function).
+
+   I can await any promise I want, whether it’s already been resolved or not, whether I created it or not.
+   await will simply pause the execution of my method until the value from the promise is available.
+  */
+  return new Promise(function (resolve) {
+    let users = [{name:'sam'}, {name:'mary'}]
+    setTimeout(function() { resolve(users) }, 2250)
+  })
+}
+
+// EXAMPLE 1 - a bit dodgy because I'm defining functions getFirstUser() and getSecondUser() and trying to return
+// things - which is a very synchronous approach - you run into all sorts of problems
+
+async function getFirstUser() {
+  let users = await getUsers();  // this will block till the promise is resolved.
+  // console.log(users)
+  console.log('...first user is', users[0].name)  // thus this will correctly report the value
+                                                  // yet...
+  // In async world you can't return values - this function will always just return Promise { <pending> }
+  // since this is an 'async function'
+  // return users[0].name;    // won't work
+  // return 'fred'  // won't work
+}
+
+function getSecondUser() {
+  getUsers().then(function (users) {  // this will also block till promise is resolved (like await, but requires a callback function)
+    // console.log(users)
+    console.log('...second user is', users[1].name)
+    return users[1].name  // pretty sure this is meaningless too
+  })
+  return 'uggg'  // this works, but is useless since it has nothing to do with the users being retrieved
+}
+
+if (EXPERIMENTS_G) {
+  // EXAMPLE 1
+  console.log('The first user is', getFirstUser())  // the return value from getFirstUser() is meaningless
+  console.log('The second user is', getSecondUser()) // the return value from getSecondUser() works (gets 'uggg'), but is also meaningless
+
+  // EXAMPLE 2
+  // A better idiom is call a function that returns a promise and then block on the then
+  // Which means we aren't dealing with all those meaningless return complexities.
+  getUsers()
+    .then(function (users) {
+      console.log('Da first user is', users[1].name)
+    })
+
+  // EXAMPLE 3
+  // surely we can use await instead of .then() ?  YES.  Cleaner syntax, albeit we HAVE to wrap the whole thing in an async function.
+  // Note we cannot use await on its own, it has to be wrapped in an async function.
+  // And despite the slideshow example in the comments below, the function cannot be anonymous, it must have a name.
+  async function X() {
+    let users = await getUsers()
+    console.log('Awaited and the first user is', users[1].name)
+  }
+  X()
+
+}
+
+
+
+/*
+Some slideshow notes on await from http://rossboucher.com/await/#/10
+
+This is a promisified version of our first "callback hell" example. It's much cleaner, but still requires
+lots of extra syntax and awkward workarounds for the scopes introduced by new functions.
+
+function(request, response) {
+    var user, notebook;
+
+    User.get(request.user)
+    .then(function(aUser) {
+        user = aUser;
+        return Notebook.get(user.notebook);
+    })
+    .then(function(aNotebook) {
+        notebook = aNotebook;
+        return doSomethingAsync(user, notebook);
+    })
+    .then(function(result) {
+        response.send(result)
+    })
+    .catch(function(err) {
+        response.send(err)
+    })
+}
+
+Finally, the await based version of the same code. No awkward functions, clear linear style code, explicit asynchronous points,
+and native try/catch error handling.
+
+The simplest explanation of how this works is that await takes a promise, waits for it's value to be available,
+and then returns that value.
+
+async function(request, response) {
+    try {
+        var user = await User.get(request.user);
+        var notebook = await Notebook.get(user.notebook);
+        response.send(await doSomethingAsync(user, notebook));
+    } catch(err) {
+        response.send(err);
+    }
+}
+
+
+await gives you explicit control over concurrency. You can combine this with powerful promise utilities like Promise.all,
+which will wait for every promise to finish and then finish itself, to write powerful and yet easy to understand asynchronous code.
+
+var P = require("popsicle");
+var sites = await Promise.all([
+    P.get("http://www.google.com"),
+    P.get("http://www.apple.com"),
+    P.get("http://www.yahoo.com")
+])
+
+
+
+ */
+
+
+
+// Performance musing...
+//
+// P.S. Interestingly - what are we gaining - by blocking on a single promise, either using .then() or await
+// surely no performance is gained?  I guess
+// the benefit comes in when we trigger multiple promises at once and block on them all.
+
+
 
