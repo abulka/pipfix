@@ -284,3 +284,13 @@ So it sounds like the only solution is to save and rename the pip files in `/usr
 overwritten and we have access to both pips - in the case of a combined mac python and python org python install.
 
 That's the solution described at the top of this README.
+
+## Latest Python 3.6 from python.org ##
+
+Says:
+
+Python 3 and Python 2 Co-existence
+
+Python.org Python 3.6 and 2.7.x versions can both be installed on your system and will not conflict. Command names for Python 3 contain a 3 in them, python3 (or python3.6), idle3 (or idle3.6), pip3 (or pip3.6), etc.  Python 2.7 command names contain a 2 or no digit: python2 (or python2.7 or python), idle2 (or idle2.7 or idle), etc.
+
+
