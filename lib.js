@@ -92,7 +92,10 @@ class Base {
       this.analyse_is_exe_empty()
       this.analyse_version()  // template pattern - method declared in subclass
 
-      if (this.version == undefined) this.add_warning(`version could not be determined`, this.result_shell_version)
+      if (this.version == undefined) {
+        debugger
+        this.add_warning(`version could not be determined`, this.result_shell_version)
+      }
       if (this.size == undefined) this.add_warning(`could not determine file size`, this.result_shell_file_size)
       if (this.size == 0) this.add_warning(`executable file exists but is empty?`,
                                               [this.result_shell_ls, this.result_shell_file_size])
@@ -296,10 +299,12 @@ class Brain {
 
     this.find_python('/usr/bin/python')
     this.find_python('/usr/local/bin/python')
+    this.find_python('/usr/local/bin/python3')
     this.python_default = this.find_default('python', this.pythons, Python)
 
     this.find_pip('/usr/bin/pip')
     this.find_pip('/usr/local/bin/pip')
+    this.find_pip('/usr/local/bin/pip3')
     this.pip_default = this.find_default('pip', this.pips, Pip)
 
     this.analyse_relationships()  // inform all pips of all other pythons
