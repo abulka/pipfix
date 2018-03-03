@@ -16,7 +16,7 @@ function advice(brain) {
       if (process.platform == 'darwin') {
         if (python.path == '/usr/bin/python') {
           console.log(`${tab}try "sudo easy_install pip" which puts pip into "/usr/local/bin"`)
-          if (brain.get_pip('/usr/local/bin/pip').exists)
+          if (brain.get_pip('/usr/local/bin/pip') != undefined && brain.get_pip('/usr/local/bin/pip').exists)
             console.log(`${tab}warning: another pip already exists there, so perhaps rename the old one to "${brain.get_pip('/usr/local/bin/pip').path}_sys"`)
         }
       }
