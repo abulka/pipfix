@@ -26,6 +26,17 @@ function prt(cmd, verbose=true) {
   return result
 }
 
+function spawn_xtra(cmd, arg_list) {
+  // Enhanced spawn, puts back undocumented .args property which disappeared somewhere in between node 7 and node 9
+  // Usage: same as spawn e.g. spawn_xtra('ls', ['-lh', '/'])
+  let result_shell_obj = spawn(cmd, arg_list)
+  if (result_shell_obj.args == undefined) {
+    arg_list.splice(0, 0, cmd)  // arg_list.insert(0, cmd) 
+    result_shell_obj.args = arg_list
+  }
+  //result_shell_obj.cmd = cmd
+  return result_shell_obj
+}
 
 class Base {
   constructor(path) {
@@ -71,9 +82,9 @@ class Base {
   }
 
   analyse() {
-    this.result_shell_ls = spawn('ls', ['-lh', this.path])
-    this.result_shell_version = spawn(this.path, ['--version'])
-    this.result_shell_file_size = spawn('wc', ['-c', this.path])
+    this.result_shell_ls = spawn_xtra('ls', ['-lh', this.path])
+    this.result_shell_version = spawn_xtra(this.path, ['--version'])
+    this.result_shell_file_size = spawn_xtra('wc', ['-c', this.path])
 
     // console.log(`Base analyse() for ${this.path} ls stderr "${this.result_shell_ls.stderr.toString()}" version stderr "${this.result_shell_version.stderr.toString()}"`)
 
@@ -152,8 +163,8 @@ class Python extends Base {
     if (! this.exists)
       return
 
-    this.result_shell_site_info = spawn( this.path, [ '-m', 'site' ] )
-    this.result_shell_run_pip_as_module = spawn( this.path, [ '-m', 'pip', '--version' ] )
+    this.result_shell_site_info = spawn_xtra( this.path, [ '-m', 'site' ] )
+    this.result_shell_run_pip_as_module = spawn_xtra( this.path, [ '-m', 'pip', '--version' ] )
     // why analyse these if this python doesn't exist?
     this.analyse_site_info()
     this.analyse_pip_version()
@@ -325,7 +336,7 @@ class Brain {
      Returns:
        The Python or Pip instance which is the default, which you should assign to this.python_default or this.pip_default
      */
-    let result_shell_which = spawn('which', [cmd])
+    let result_shell_which = spawn_xtra('which', [cmd])
     if (result_shell_which.stderr.length != 0)
       throw new UserException(`which ${cmd} failed with error "${result_shell_which.stderr.toString()}" thus cannot determine default ${cmd}`)
     let path_default = result_shell_which.stdout.toString().trim()
@@ -361,7 +372,7 @@ class Brain {
 
   symbolic_path(path) {
     // get the real underlying path
-    let result_shell_stat = spawn('stat', ['-F', path])
+    let result_shell_stat = spawn_xtra('stat', ['-F', path])
     if (result_shell_stat.stderr.length != 0)
       throw new UserException(`"stat" failed with error "${result_shell_stat.stderr.toString()}" thus cannot determine symbolic link behind "${path}"`)
 
