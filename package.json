@@ -9,8 +9,11 @@
     "test_fred": "./node_modules/mocha/bin/mocha --fgrep fred",
     "test_dbg": "./node_modules/mocha/bin/mocha --inspect --debug-brk --fgrep \"python existence\"",
     "test_python_existence": "./node_modules/mocha/bin/mocha --fgrep \"python existence\"",
-    "test_python_default": "./node_modules/mocha/bin/mocha --fgrep \"default python detection\"",
-    "test_python_default_dbg": "./node_modules/mocha/bin/mocha  --inspect --debug-brk --fgrep \"default python detection\"",
+    "test_python_default": "./node_modules/mocha/bin/mocha --fgrep \"default python\"",
+    "test_python_default_dbg": "./node_modules/mocha/bin/mocha  --inspect --debug-brk --fgrep \"default python\"",
+    "test_python_exist_valid_single_test": "./node_modules/mocha/bin/mocha --fgrep \"python exists and is valid\"",
+    "test_python_exist_valid_single_test_dbg_chrome": "./node_modules/mocha/bin/mocha --inspect-brk --fgrep \"python exists and is valid\"",
+    "test_python_class_tests_all": "./node_modules/mocha/bin/mocha test/test_class_python.js",
     "ls2": "npm ls --depth=0",
     "start": "node pipfix.js",
     "dbg_not_working_cos_nodejs_bug_wait_for_future_fix": "node-debug pipfix.js",
@@ -26,7 +29,6 @@
   "devDependencies": {
     "mocha": "^3.2.0",
     "mockery": "^2.0.0",
-    "node-inspector": "^0.12.8",
     "should": "^11.2.0",
     "sinon": "^1.17.7"
   },

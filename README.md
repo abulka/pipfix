@@ -18,6 +18,18 @@ this tool will also (in time) report if you have conda technology python install
 
 # Installation
 
+## Quick Steps ##
+
+- git clone https://github.com/abulka/pipfix.git
+- ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+- brew install node
+- cd pipfix
+- npm install
+- npm test
+- npm start
+
+## Details ##
+
 Download the pipfix code (clone the repo or download the code).  
 Ensure you have installed node https://nodejs.org/en/download/
 
@@ -41,6 +53,24 @@ not actually do anything.
 1. I didn't want to run python when trying to report on python and pip - let's get an outsider's point of view
 2. I will probably turn this into an electron web app which will allow a nice UI way to display all the information.  
 election uses nodejs / javascript technology.
+
+# Running tests and debugging
+
+The Node Inspector npm package is a debugger interface for Node.js but is deprecated, instead we now use the built in 
+https://medium.com/@paul_irish/debugging-node-js-nightlies-with-chrome-devtools-7c4a1b95ae27
+e.g. `node --inspect --debug-brk pipfix.js` which lets you debug in a chrome window, using the chrome visual debugger.
+
+Run tests with 
+- `npm test`
+- `npm run BLAH` where BLAH is one the many run targets defined in `package.json` e.g. `npm run test_python_default`
+- `./node_modules/mocha/bin/mocha --fgrep \"python exists and is valid\"` which only runs tests with that test in their `it` name e.g.  it('one blah blah and is default', function() {
+- `./node_modules/mocha/bin/mocha test/test_class_python.js` run all the tests in a particular file
+- `./node_modules/mocha/bin/mocha --inspect-brk --fgrep "python exists and is valid"` run a single test with chrome debugging.  Requires mocha > 3.3 see https://stackoverflow.com/questions/14352608/whats-the-right-way-to-enable-the-node-debugger-with-mochas-debug-brk-switch Remember to add a `debugger` line in your source code.
+
+You can also debug using Visual Studio Code, without Chrome.  You need to create 'launch configurations' in `launch.json` - there are some included in this project in `.vscode/launch.json` - these are like what you do in PyCharm etc.  From the debug menu, you pick your configuration, then you run with debugging or without using the debug menu.  A bit strange that you have to run without debugging from the debug menu.  Oh well.  If you just want to run the run targets defined in `package.json` using Visual Studio Code then use the Tasks menu, which should list all of the tasks/targets it finds.
+
+This code was developed using node 7.x but we are now up to node 9.x so upgrading needs to happen.  Seems to work in the newer version node. I've locked in some node npm packages but these could probably be updated, too.
+
 
 # The main problem you may face
 
@@ -285,11 +315,7 @@ overwritten and we have access to both pips - in the case of a combined mac pyth
 
 That's the solution described at the top of this README.
 
-## Latest Python 3.6 from python.org ##
-
-Says:
-
-Python 3 and Python 2 Co-existence
+## Python 3 and Python 2 co-existence information from python.org ##
 
 Python.org Python 3.6 and 2.7.x versions can both be installed on your system and will not conflict. Command names for Python 3 contain a 3 in them, python3 (or python3.6), idle3 (or idle3.6), pip3 (or pip3.6), etc.  Python 2.7 command names contain a 2 or no digit: python2 (or python2.7 or python), idle2 (or idle2.7 or idle), etc.
 
