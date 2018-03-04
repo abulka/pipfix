@@ -229,7 +229,6 @@ describe('class Python', function() {
         }
       }
       version() {
-        debugger
         super.version()
         this.result.stdout = 'Python 3.6.4'
       }

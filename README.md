@@ -534,3 +534,4 @@ Recommendations (2 pythons found, 2 pips found)
 DONE 
 ```
 
+Notice that Python 3 is now detected, along with its associated pip3.
