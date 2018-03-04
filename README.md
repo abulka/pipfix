@@ -535,3 +535,233 @@ DONE
 ```
 
 Notice that Python 3 is now detected, along with its associated pip3.
+
+What if we install python 3 using homebrew?  `brew install python3` 
+
+```
+...
+Possible conflicting files are:
+/usr/local/bin/2to3 -> /Library/Frameworks/Python.framework/Versions/3.6/bin/2to3
+/usr/local/bin/2to3-3.6 -> /Library/Frameworks/Python.framework/Versions/3.6/bin/2to3-3.6
+/usr/local/bin/idle3 -> /Library/Frameworks/Python.framework/Versions/3.6/bin/idle3
+/usr/local/bin/idle3.6 -> /Library/Frameworks/Python.framework/Versions/3.6/bin/idle3.6
+/usr/local/bin/pydoc3 -> /Library/Frameworks/Python.framework/Versions/3.6/bin/pydoc3
+/usr/local/bin/pydoc3.6 -> /Library/Frameworks/Python.framework/Versions/3.6/bin/pydoc3.6
+/usr/local/bin/python3 -> /Library/Frameworks/Python.framework/Versions/3.6/bin/python3
+/usr/local/bin/python3-config -> /Library/Frameworks/Python.framework/Versions/3.6/bin/python3-config
+/usr/local/bin/python3.6 -> /Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6
+/usr/local/bin/python3.6-config -> /Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6-config
+/usr/local/bin/python3.6m -> /Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6m
+/usr/local/bin/python3.6m-config -> /Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6m-config
+/usr/local/bin/pyvenv -> /Library/Frameworks/Python.framework/Versions/3.6/bin/pyvenv
+/usr/local/bin/pyvenv-3.6 -> /Library/Frameworks/Python.framework/Versions/3.6/bin/pyvenv-3.6
+...
+...
+
+Pip, setuptools, and wheel have been installed. To update them
+  pip3 install --upgrade pip setuptools wheel
+
+You can install Python packages with
+  pip3 install <package>
+
+They will install into the site-package directory
+  /usr/local/lib/python3.6/site-packages
+
+See: https://docs.brew.sh/Homebrew-and-Python
+
+Unversioned symlinks python, python-config, pip etc. pointing to python3,
+python3-config, pip3 etc., respectively, have been installed.
+
+If you need Homebrew's Python 2, `brew install python@2`.
+==> Summary
+🍺  /usr/local/Cellar/python/3.6.4_3: 3,615 files, 56.3MB
+```
+so what's going on - have we clobbered python.org's Python 3?
+
+```
+$ python3
+Python 3.6.4 (v3.6.4:d48ecebad5, Dec 18 2017, 21:07:28) 
+[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
+
+$ /usr/local/Cellar/python/3.6.4_3/bin/python3
+Python 3.6.4 (default, Mar  1 2018, 18:36:42) 
+[GCC 4.2.1 Compatible Apple LLVM 9.0.0 (clang-900.0.39.2)] on darwin
+```
+
+looks like the brew version is separate, though there are some potential conflicts being listed by the brew installer. Hmmm.  Let's looks at what pipfix says:
+
+```
+> node pipfix.js
+
+pipfix is analysing...
+/usr/bin/python ---------- Object {
+  "is_default": true,
+  "path": "/usr/bin/python",
+  "pip": Object {
+    "installed": true,
+    "site": "/Library/Python/2.7/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "13 entries",
+  "version": "2.7.10",
+}
+/usr/local/bin/python3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/bin/python3",
+  "pip": Object {
+    "installed": true,
+    "site": "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "5 entries",
+  "version": "3.6.4",
+}
+/usr/local/Cellar/python/3.6.4_3/bin/python3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/Cellar/python/3.6.4_3/bin/python3",
+  "pip": Object {
+    "installed": true,
+    "site": "/usr/local/lib/python3.6/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "6 entries",
+  "version": "3.6.4",
+}
+/usr/local/bin/pip ---------- Object {
+  "is_default": true,
+  "path": "/usr/local/bin/pip",
+  "runs_ok": true,
+  "site": "/usr/local/lib/python3.6/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": false,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": true,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+/usr/local/bin/pip3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/bin/pip3",
+  "runs_ok": true,
+  "site": "/usr/local/lib/python3.6/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": false,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": true,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+/usr/local/Cellar/python/3.6.4_3/bin/pip3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/Cellar/python/3.6.4_3/bin/pip3",
+  "runs_ok": true,
+  "site": "/usr/local/lib/python3.6/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": false,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": true,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+
+Recommendations (3 pythons found, 3 pips found)
+---------------
+/usr/bin/python
+   - ok
+
+/usr/local/bin/python3
+   - ok
+
+/usr/local/Cellar/python/3.6.4_3/bin/python3
+   - ok
+
+/usr/local/bin/pip
+   - ok
+
+/usr/local/bin/pip3
+   - ok
+
+/usr/local/Cellar/python/3.6.4_3/bin/pip3
+   - ok
+```
+
+Looking at the pure Python information
+
+```
+Python 3 from python.org lives in /usr/local/bin/python3 and its pip uses
+    "site": "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages",
+Python 3 from brew lives in /usr/local/Cellar/python/3.6.4_3/bin/python3 and its pip uses
+    "site": "/usr/local/lib/python3.6/site-packages",
+```
+
+we can clearly see that brew is using a different site_packages location than python.org Python - which is good.  But let's look at the pip3 invocations, because they seem to tell a different story:
+
+```
+/usr/local/bin/pip3
+  "site": "/usr/local/lib/python3.6/site-packages",
+
+/usr/local/Cellar/python/3.6.4_3/bin/pip3
+  "site": "/usr/local/lib/python3.6/site-packages",  
+```
+
+thus it looks like pip3 from brew has taken over?   Yet ironically, invoking `pip3` gives us the python.org pip3 version"
+
+```
+$ which pip3
+/Library/Frameworks/Python.framework/Versions/3.6/bin/pip3
+```
+
+This is because of the PATH and python.org has put its stuff first:
+
+```
+Andys-Mac:pipfix andy$ echo $PATH
+/Library/Frameworks/Python.framework/Versions/3.6/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+```
+
+Gosh.  How confusing.  This is why I built `pipfix` so that we can investigate and look at this stuff!  Invoking `/usr/local/bin/python3` gives us python.org Python
+
+```
+Andys-Mac:pipfix andy$ /usr/local/bin/python3
+Python 3.6.4 (v3.6.4:d48ecebad5, Dec 18 2017, 21:07:28) 
+[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+
+>>> ^D
+Andys-Mac:pipfix andy$ /Library/Frameworks/Python.framework/Versions/3.6/bin/python3
+Python 3.6.4 (v3.6.4:d48ecebad5, Dec 18 2017, 21:07:28) 
+[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> ^D
+```
+
+It looks like unless we fiddle with the PATH, to get brew's pip3 and python3 we need to invoke the brew 'cellar' version of Python directly
+
+```
+Andys-Mac:pipfix andy$ /usr/local/Cellar/python/3.6.4_3/bin/python3
+Python 3.6.4 (default, Mar  1 2018, 18:36:42) 
+[GCC 4.2.1 Compatible Apple LLVM 9.0.0 (clang-900.0.39.2)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> 
+
+
+$ /usr/local/Cellar/python/3.6.4_3/bin/pip3 install -r requirements.txt
+
+```
+
+etc.
+
+The caching seems compatible, and site packages that were installed for python.org Python 3 install almost instantly for brew Python 3 - which is nice.
+
+## Can you have Python 3 from python.prg, anaconda and brew installed at the same time?
+
+Looks like you can.
+
+- Python.org python installs itself in /usr/local/bin/ (site packages go in /Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages) as a 'framework python' (which is what e.g. wxpython needs, and thus what packages like gooey UI builder need)
+- Brew python installs itself into /usr/local/Cellar/python/... (site packages go in /usr/local/lib/python3.6/site-packages) 
+- Anaconda / Miniconda installs itself wherever you specify and has local version of sitepackages, too.
+
+Invoke with `python3` and use the PATH to put the one you want first.  Or invoke with a full path.  Same with the corresponding `pip3` invocations.
+
