@@ -13,6 +13,7 @@
     "test_python_default_dbg": "./node_modules/mocha/bin/mocha  --inspect --debug-brk --fgrep \"default python\"",
     "test_python_exist_valid_single_test": "./node_modules/mocha/bin/mocha --fgrep \"python exists and is valid\"",
     "test_python_exist_valid_single_test_dbg_chrome": "./node_modules/mocha/bin/mocha --inspect-brk --fgrep \"python exists and is valid\"",
+    "test_python_stderr_dbg_chrome": "./node_modules/mocha/bin/mocha --inspect-brk --fgrep \"version to stderr pre 3.4 or is anaconda 3.6\"",
     "test_python_class_tests_all": "./node_modules/mocha/bin/mocha test/test_class_python.js",
     "ls2": "npm ls --depth=0",
     "start": "node pipfix.js",

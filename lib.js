@@ -68,7 +68,8 @@ class Base {
                                      this.interpret_stderr_as_stdout_for_getting_version_info
 
     if (accept_stderr_msg_as_valid)  // TODO this is a python specific test in a Base class - not good
-      return result_shell_obj.stderr.length > 0 && result_shell_obj.stderr.toString().indexOf('Python') != -1
+      return (result_shell_obj.stderr.length > 0 && result_shell_obj.stderr.toString().indexOf('Python') != -1 ) ||
+             (result_shell_obj.stdout.length > 0 && result_shell_obj.stdout.toString().indexOf('Python') != -1 )
     else
       return result_shell_obj.stderr.length == 0
   }
@@ -176,9 +177,15 @@ class Python extends Base {
   analyse_version() {
     const regex = /Python (.*)/
 
-    let match = regex.exec(this.result_shell_version.stderr.toString())  // note: python 2 reports python version via stderr rather than stdout
+    let match = regex.exec(this.result_shell_version.stderr.toString())  // note: python 2 and python < 3.4 reports python version via stderr rather than stdout
     if (match != null)
       this.version = match[1]
+    else {
+      // try again with stdout
+      match = regex.exec(this.result_shell_version.stdout.toString())
+      if (match != null)
+        this.version = match[1]
+    }
   }
 
   analyse_site_info() {

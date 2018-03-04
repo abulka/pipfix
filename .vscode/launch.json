@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Single test python exists and is valid",
-            "program": "${workspaceFolder}/node_modules/mocha/bin/mocha",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
                 "-u",
                 "tdd",
@@ -17,6 +17,22 @@
                 "--colors",
                 "--fgrep",
                 "python exists and is valid"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Single test python3 version to stdout",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "--fgrep",
+                "python3 version to stdout"
             ],
             "internalConsoleOptions": "openOnSessionStart"
         },
