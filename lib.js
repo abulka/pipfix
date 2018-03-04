@@ -6,9 +6,15 @@ let {UserException} = require('./util.js')
 
 const SIMPLE_WARNINGS = true
 
-function cmd_was_run(cmd) {
-  return (cmd.stderr != null &&
-          cmd.stdout != null )
+function cmd_was_run(result_shell_obj) {
+  // if command was truly run, then stdout and stderr would be arrays, not null
+  return (result_shell_obj.stderr != null && result_shell_obj.stdout != null )
+}
+
+function cmd_had_error(result_shell_obj) {
+  // stderr triggered
+  // return (result_shell_obj.status != 0 || result_shell_obj.stderr.length > 0)  // TODO mock up the status for tests
+  return (result_shell_obj.stderr.length > 0)
 }
 
 function prt(cmd, verbose=true) {
@@ -53,46 +59,47 @@ class Base {
   }
 
   get exists() {
-    if (! cmd_was_run(this.result_shell_ls))
-      return false
-    return this.result_shell_ls.stderr.length == 0
+    // based on running 'ls' of the file
+    return this.result_shell_ls != undefined && cmd_was_run(this.result_shell_ls) && ! cmd_had_error(this.result_shell_ls)
   }
 
   get runs_ok() {
-    return this.valid(this.result_shell_version)
+    // based on running '--version' on the file. We don't call cmd_had_error() because of Python idiosyncrasy of reporting version in stderr, 
+    // so we instead check if version was extracted successfully - which should always be possible if the command ran ok
+    return this.result_shell_version != undefined && cmd_was_run(this.result_shell_version) && this.version != undefined
   }
 
-  valid(result_shell_obj) {
-    if (! cmd_was_run(result_shell_obj))
-      return false
+  // valid(result_shell_obj) {
+  //   // shell commands ran without error
+  //   if (! cmd_was_run(result_shell_obj))
+  //     return false
+  //   if (result_shell_obj.status != 0)
+  //     return false
+  //   if (result_shell_obj.stderr.length > 0)
+  //     return false
+  // /*
+  //   let accept_stderr_msg_as_valid = result_shell_obj.args[1] == "--version" &&
+  //                                    this.interpret_stderr_as_stdout_for_getting_version_info
 
-    let accept_stderr_msg_as_valid = result_shell_obj.args[1] == "--version" &&
-                                     this.interpret_stderr_as_stdout_for_getting_version_info
-
-    if (accept_stderr_msg_as_valid)  // TODO this is a python specific test in a Base class - not good
-      return (result_shell_obj.stderr.length > 0 && result_shell_obj.stderr.toString().indexOf('Python') != -1 ) ||
-             (result_shell_obj.stdout.length > 0 && result_shell_obj.stdout.toString().indexOf('Python') != -1 )
-    else
-      return result_shell_obj.stderr.length == 0
-  }
-
-  analyse_is_exe_empty() {
-    const regex = /^\s+(\d+)\s{1}\//
-
-    let match = regex.exec(this.result_shell_file_size.stdout.toString())  // match things like "     281 /usr/local/bin/pip"
-    if (match != null)
-      this.size = parseInt(match[1])
-  }
+  //   if (accept_stderr_msg_as_valid)  // TODO this is a python specific test in a Base class - not good
+  //     return (result_shell_obj.stderr.length > 0 && result_shell_obj.stderr.toString().indexOf('Python') != -1 ) ||
+  //            (result_shell_obj.stdout.length > 0 && result_shell_obj.stdout.toString().indexOf('Python') != -1 )
+  //   else
+  //     return result_shell_obj.stderr.length == 0
+  //     */
+  // }
 
   analyse() {
     this.result_shell_ls = spawn_xtra('ls', ['-lh', this.path])
-    this.result_shell_version = spawn_xtra(this.path, ['--version'])
-    this.result_shell_file_size = spawn_xtra('wc', ['-c', this.path])
+    // if (this.exists) {
+      this.result_shell_version = spawn_xtra(this.path, ['--version'])
+      this.result_shell_file_size = spawn_xtra('wc', ['-c', this.path])
+    // }
 
     // console.log(`Base analyse() for ${this.path} ls stderr "${this.result_shell_ls.stderr.toString()}" version stderr "${this.result_shell_version.stderr.toString()}"`)
 
     if (this.exists) {
-      this.analyse_is_exe_empty()
+      this.analyse_size()
       this.analyse_version()  // template pattern - method declared in subclass
 
       if (this.version == undefined)
@@ -104,6 +111,14 @@ class Base {
     }
     if (this.exists && ! this.runs_ok) 
       this.add_warning(`${this.path} doesn't run properly`, [this.result_shell_ls, this.result_shell_version])
+  }
+
+  analyse_size() {
+    const regex = /^\s+(\d+)\s{1}\//
+
+    let match = regex.exec(this.result_shell_file_size.stdout.toString())  // match things like "     281 /usr/local/bin/pip"
+    if (match != null)
+      this.size = parseInt(match[1])
   }
 
   analyse_version() {} // Subclasses should override and set 'this.version'
@@ -164,8 +179,8 @@ class Python extends Base {
   analyse() {
     super.analyse()
 
-    // this python doesn't exist
-    if (! this.exists)
+    // this python doesn't exist or we can't run it properly and determine its version
+    if (! this.exists || ! this.runs_ok)
       return
 
     this.result_shell_site_info = spawn_xtra( this.path, [ '-m', 'site' ] )
@@ -189,7 +204,8 @@ class Python extends Base {
   }
 
   analyse_site_info() {
-    if (! this.valid(this.result_shell_site_info))
+    let valid = cmd_was_run(this.result_shell_ls) && ! cmd_had_error(this.result_shell_ls)
+    if (! valid)
       return
 
     let lines = this.result_shell_site_info.stdout.toString().split("\n")

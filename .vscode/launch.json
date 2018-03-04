@@ -23,7 +23,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Single test python3 version to stdout",
+            "name": "Single test /usr/bin/python exists",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
                 "-u",
@@ -32,7 +32,23 @@
                 "999999",
                 "--colors",
                 "--fgrep",
-                "python3 version to stdout"
+                "/usr/bin/python exists"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Single test USE THIS FOR MOST",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "--fgrep",
+                "pip runs ok but is empty - edge case"
             ],
             "internalConsoleOptions": "openOnSessionStart"
         },

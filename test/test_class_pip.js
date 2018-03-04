@@ -81,7 +81,7 @@ describe('class Pip', function() {
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Pip} = require('../lib.js')
     let pip = new Pip('/usr/local/bin/pip')
-    pip.runs_ok.should.be.true()
+    pip.runs_ok.should.be.false()
     pip.size.should.be.equal(0)
 
   })

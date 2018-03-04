@@ -34,16 +34,25 @@ describe('class Python', function() {
     }
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Python} = require('../lib.js')
-    let validSpy = sinon.spy(Python.prototype, 'valid');
+
+    // let existsSpy = sinon.spy(Python.prototype, 'exists', ['get'])   // A later version of sinon spy hopefully will implement spying on getters http://sinonjs.org/releases/v4.4.2/ 
+    // let runs_okSpy = sinon.spy(Python.prototype, 'runs_ok', ['get']);
     let analyseSpy = sinon.spy(Python.prototype, 'analyse');
+
     let python_usr_bin = new Python('/usr/bin/python')
+
+    // ensure calls were made
+    sinon.assert.callCount(analyseSpy, 1);
+    // sinon.assert.called(existsSpy);
+    // sinon.assert.called(runs_okSpy);
+    // sinon.assert.callCount(validSpy, 5);
+
     assert.equal(python_usr_bin.path, '/usr/bin/python');
     assert.equal(python_usr_bin.exists, true);
-    sinon.assert.callCount(analyseSpy, 1);
-    sinon.assert.called(validSpy);
-    // sinon.assert.callCount(validSpy, 5);
+
     analyseSpy.restore();
-    validSpy.restore();
+    // existsSpy.restore();
+    // runs_okSpy.restore();
   });
 
 
