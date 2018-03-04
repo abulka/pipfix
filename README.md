@@ -320,3 +320,217 @@ That's the solution described at the top of this README.
 Python.org Python 3.6 and 2.7.x versions can both be installed on your system and will not conflict. Command names for Python 3 contain a 3 in them, python3 (or python3.6), idle3 (or idle3.6), pip3 (or pip3.6), etc.  Python 2.7 command names contain a 2 or no digit: python2 (or python2.7 or python), idle2 (or idle2.7 or idle), etc.
 
 
+# Multiple Pythons #
+
+Let's explore what we get with multiple Python installations on a Mac.
+
+## Default Python in Sierra ##
+
+This is what you will see when you run `pipfix` on a fresh install of Sierra:
+
+```
+/usr/bin/python ---------- Object {
+  "is_default": true,
+  "path": "/usr/bin/python",
+  "pip": Object {
+    "installed": false,
+    "site": undefined,
+    "version": undefined,
+  },
+  "runs_ok": true,
+  "sys.path": "12 entries",
+  "version": "2.7.10",
+  "warnings": Array [
+    "pip module not installed",
+  ],
+}
+
+Recommendations (1 pythons found, 0 pips found)
+---------------
+/usr/bin/python
+   - has no pip
+   - try "sudo easy_install pip" which puts pip into "/usr/local/bin"
+```
+
+The recommendation to install `pip`
+
+```
+...
+creating /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg
+Extracting pip-9.0.1-py2.7.egg to /Library/Python/2.7/site-packages
+Adding pip 9.0.1 to easy-install.pth file
+Installing pip script to /usr/local/bin
+Installing pip2.7 script to /usr/local/bin
+Installing pip2 script to /usr/local/bin
+
+Installed /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg
+Processing dependencies for pip
+Finished processing dependencies for pip
+```
+
+will result in `pip` looking after the default mac Python.  Running `pipfix` again you can see:
+
+```
+$ node pipfix.js 
+
+pipfix is analysing...
+/usr/bin/python ---------- Object {
+  "is_default": true,
+  "path": "/usr/bin/python",
+  "pip": Object {
+    "installed": true,
+    "site": "/Library/Python/2.7/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "13 entries",
+  "version": "2.7.10",
+}
+/usr/local/bin/pip ---------- Object {
+  "is_default": true,
+  "path": "/usr/local/bin/pip",
+  "runs_ok": true,
+  "site": "/Library/Python/2.7/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": true,
+  },
+  "version": "9.0.1",
+}
+
+Recommendations (1 pythons found, 1 pips found)
+---------------
+/usr/bin/python
+   - ok
+
+/usr/local/bin/pip
+   - ok
+```
+
+Running pip will list the built in Python 2 packages.  Interesting that Sierra includes numpy !
+
+```
+$ pip list
+
+altgraph (0.10.2)
+bdist-mpkg (0.5.0)
+bonjour-py (0.3)
+macholib (1.5.1)
+matplotlib (1.3.1)
+modulegraph (0.10.4)
+numpy (1.8.0rc1)
+pip (9.0.1)
+py2app (0.7.3)
+pyobjc-core (2.5.1)
+pyobjc-framework-Accounts (2.5.1)
+pyobjc-framework-AddressBook (2.5.1)
+pyobjc-framework-AppleScriptKit (2.5.1)
+pyobjc-framework-AppleScriptObjC (2.5.1)
+pyobjc-framework-Automator (2.5.1)
+pyobjc-framework-CFNetwork (2.5.1)
+pyobjc-framework-Cocoa (2.5.1)
+pyobjc-framework-Collaboration (2.5.1)
+pyobjc-framework-CoreData (2.5.1)
+pyobjc-framework-CoreLocation (2.5.1)
+pyobjc-framework-CoreText (2.5.1)
+pyobjc-framework-DictionaryServices (2.5.1)
+pyobjc-framework-EventKit (2.5.1)
+pyobjc-framework-ExceptionHandling (2.5.1)
+pyobjc-framework-FSEvents (2.5.1)
+pyobjc-framework-InputMethodKit (2.5.1)
+pyobjc-framework-InstallerPlugins (2.5.1)
+pyobjc-framework-InstantMessage (2.5.1)
+pyobjc-framework-LatentSemanticMapping (2.5.1)
+pyobjc-framework-LaunchServices (2.5.1)
+pyobjc-framework-Message (2.5.1)
+pyobjc-framework-OpenDirectory (2.5.1)
+pyobjc-framework-PreferencePanes (2.5.1)
+pyobjc-framework-PubSub (2.5.1)
+pyobjc-framework-QTKit (2.5.1)
+pyobjc-framework-Quartz (2.5.1)
+pyobjc-framework-ScreenSaver (2.5.1)
+pyobjc-framework-ScriptingBridge (2.5.1)
+pyobjc-framework-SearchKit (2.5.1)
+pyobjc-framework-ServiceManagement (2.5.1)
+pyobjc-framework-Social (2.5.1)
+pyobjc-framework-SyncServices (2.5.1)
+pyobjc-framework-SystemConfiguration (2.5.1)
+pyobjc-framework-WebKit (2.5.1)
+pyOpenSSL (0.13.1)
+pyparsing (2.0.1)
+python-dateutil (1.5)
+pytz (2013.7)
+scipy (0.13.0b1)
+setuptools (18.5)
+six (1.4.1)
+xattr (0.6.4)
+zope.interface (4.1.1)
+```
+
+Now lets install Python 3 from www.python.org.  Then run pipfix
+
+```
+pipfix is analysing...
+/usr/bin/python ---------- Object {
+  "is_default": true,
+  "path": "/usr/bin/python",
+  "pip": Object {
+    "installed": true,
+    "site": "/Library/Python/2.7/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "13 entries",
+  "version": "2.7.10",
+}
+/usr/local/bin/python3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/bin/python3",
+  "pip": Object {
+    "installed": true,
+    "site": "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "5 entries",
+  "version": "3.6.4",
+}
+/usr/local/bin/pip ---------- Object {
+  "is_default": true,
+  "path": "/usr/local/bin/pip",
+  "runs_ok": true,
+  "site": "/Library/Python/2.7/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": true,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+/usr/local/bin/pip3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/bin/pip3",
+  "runs_ok": true,
+  "site": "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": false,
+    "/usr/local/bin/python3": true,
+  },
+  "version": "9.0.1",
+}
+
+Recommendations (2 pythons found, 2 pips found)
+---------------
+/usr/bin/python
+   - ok
+
+/usr/local/bin/python3
+   - ok
+
+/usr/local/bin/pip
+   - ok
+
+/usr/local/bin/pip3
+   - ok
+
+DONE 
+```
+
