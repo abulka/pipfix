@@ -53,7 +53,9 @@ class Base {
   }
 
   get exists() {
-    return this.valid(this.result_shell_ls)
+    if (! cmd_was_run(this.result_shell_ls))
+      return false
+    return this.result_shell_ls.stderr.length == 0
   }
 
   get runs_ok() {
@@ -93,16 +95,15 @@ class Base {
       this.analyse_is_exe_empty()
       this.analyse_version()  // template pattern - method declared in subclass
 
-      if (this.version == undefined) {
-        debugger
+      if (this.version == undefined)
         this.add_warning(`version could not be determined`, this.result_shell_version)
-      }
-      if (this.size == undefined) this.add_warning(`could not determine file size`, this.result_shell_file_size)
-      if (this.size == 0) this.add_warning(`executable file exists but is empty?`,
-                                              [this.result_shell_ls, this.result_shell_file_size])
+      if (this.size == undefined)
+        this.add_warning(`could not determine file size`, this.result_shell_file_size)
+      if (this.size == 0) 
+        this.add_warning(`executable file exists but is empty?`, [this.result_shell_ls, this.result_shell_file_size])
     }
-    if (this.exists && ! this.runs_ok) this.add_warning(`${this.path} doesn't run properly`,
-                                              [this.result_shell_ls, this.result_shell_version])
+    if (this.exists && ! this.runs_ok) 
+      this.add_warning(`${this.path} doesn't run properly`, [this.result_shell_ls, this.result_shell_version])
   }
 
   analyse_version() {} // Subclasses should override and set 'this.version'
@@ -163,19 +164,18 @@ class Python extends Base {
   analyse() {
     super.analyse()
 
-    // why run these if this python doesn't exist?
+    // this python doesn't exist
     if (! this.exists)
       return
 
     this.result_shell_site_info = spawn_xtra( this.path, [ '-m', 'site' ] )
     this.result_shell_run_pip_as_module = spawn_xtra( this.path, [ '-m', 'pip', '--version' ] )
-    // why analyse these if this python doesn't exist?
     this.analyse_site_info()
     this.analyse_pip_version()
   }
 
   analyse_version() {
-    const regex = /Python (.*)/
+    const regex = /^Python (.*)/
 
     let match = regex.exec(this.result_shell_version.stderr.toString())  // note: python 2 and python < 3.4 reports python version via stderr rather than stdout
     if (match != null)
