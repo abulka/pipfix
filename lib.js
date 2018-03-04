@@ -69,32 +69,12 @@ class Base {
     return this.result_shell_version != undefined && cmd_was_run(this.result_shell_version) && this.version != undefined
   }
 
-  // valid(result_shell_obj) {
-  //   // shell commands ran without error
-  //   if (! cmd_was_run(result_shell_obj))
-  //     return false
-  //   if (result_shell_obj.status != 0)
-  //     return false
-  //   if (result_shell_obj.stderr.length > 0)
-  //     return false
-  // /*
-  //   let accept_stderr_msg_as_valid = result_shell_obj.args[1] == "--version" &&
-  //                                    this.interpret_stderr_as_stdout_for_getting_version_info
-
-  //   if (accept_stderr_msg_as_valid)  // TODO this is a python specific test in a Base class - not good
-  //     return (result_shell_obj.stderr.length > 0 && result_shell_obj.stderr.toString().indexOf('Python') != -1 ) ||
-  //            (result_shell_obj.stdout.length > 0 && result_shell_obj.stdout.toString().indexOf('Python') != -1 )
-  //   else
-  //     return result_shell_obj.stderr.length == 0
-  //     */
-  // }
-
   analyse() {
     this.result_shell_ls = spawn_xtra('ls', ['-lh', this.path])
-    // if (this.exists) {
+    if (this.exists) {
       this.result_shell_version = spawn_xtra(this.path, ['--version'])
       this.result_shell_file_size = spawn_xtra('wc', ['-c', this.path])
-    // }
+    }
 
     // console.log(`Base analyse() for ${this.path} ls stderr "${this.result_shell_ls.stderr.toString()}" version stderr "${this.result_shell_version.stderr.toString()}"`)
 
