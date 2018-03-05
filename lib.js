@@ -300,8 +300,9 @@ class Brain {
     this.pips = []
     this.python_default
     this.pip_default
+    this.visualisation = ''
 
-    this.find_python('/usr/bin/python')
+    this.find_python('ls')
     this.find_python('/usr/local/bin/python')
     this.find_python('/usr/local/bin/python3')
     for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/python?"))
@@ -318,6 +319,7 @@ class Brain {
 
     this.analyse_relationships()  // inform all pips of all other pythons
     this.report()
+    this.visualise()
   }
 
   report() {
@@ -325,6 +327,29 @@ class Brain {
       python.report()
     for (let pip of this.pips)
       pip.report()
+  }
+
+  visualise() {
+    // let sites = []
+    let sites = ''
+    let result = ''
+    let s
+    for (let python of this.pythons) {
+      result += `  "${python.path}" -> "${python.pip_module_site_package_path}" [style=dotted];\n`
+      sites += `  "${python.pip_module_site_package_path}" [shape=box];\n`  // todo should put into a set and not repeat
+    }
+    for (let pip of this.pips) {
+      result += `  "${pip.path}" -> "${pip.site_package_path}" [style=dotted];\n`
+      sites += `  "${pip.site_package_path}" [shape=box];\n`  // todo should put into a set and not repeat
+
+      let relationship
+      Object.keys(pip.site_relationships).forEach( key => {
+        if (pip.site_relationships[key])
+          result += `  "${pip.path}" -> "${key}" [color=blue];\n`  // pip to python relationship
+      });
+
+    }
+    this.visualisation = `digraph G {\n${sites}\n${result}\n}`
   }
 
   find_python(path) {

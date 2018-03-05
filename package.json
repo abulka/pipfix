@@ -30,6 +30,7 @@
   "devDependencies": {
     "mocha": "^3.2.0",
     "mockery": "^2.0.0",
+    "opn": "^5.2.0",
     "should": "^11.2.0",
     "sinon": "^5.0.0"
   },

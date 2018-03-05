@@ -87,6 +87,15 @@
             "request": "launch",
             "name": "Launch Program",
             "program": "${workspaceFolder}/pipfix.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program --visualise",
+            "program": "${workspaceFolder}/pipfix.js",
+            "args": [
+                "--visualise",
+            ],        
         }
     ]
 }
