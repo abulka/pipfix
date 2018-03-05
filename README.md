@@ -1053,3 +1053,45 @@ $ /usr/local/Cellar/python@2/2.7.14_1/bin/python2 -V
 Python 2.7.14
 ```
 
+# Lots of python bits
+
+TODO - need to list all the Python and pip hard links and amalgamate information about which are different ways of invoking the same Python etc.  e.g.
+
+```
+Andys-Mac:pipfix andy$ ls -l /usr/bin/python*
+-rwxr-xr-x  1 root  wheel  66576 15 Jul  2017 /usr/bin/python
+-rwxr-xr-x  5 root  wheel    925  7 Feb  2017 /usr/bin/python-config
+lrwxr-xr-x  1 root  wheel     75  3 Mar 10:04 /usr/bin/python2.6 -> ../../System/Library/Frameworks/Python.framework/Versions/2.6/bin/python2.6
+lrwxr-xr-x  1 root  wheel     82  3 Mar 10:04 /usr/bin/python2.6-config -> ../../System/Library/Frameworks/Python.framework/Versions/2.6/bin/python2.6-config
+lrwxr-xr-x  1 root  wheel     75  3 Mar 10:04 /usr/bin/python2.7 -> ../../System/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7
+lrwxr-xr-x  1 root  wheel     82  3 Mar 10:04 /usr/bin/python2.7-config -> ../../System/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7-config
+-rwxr-xr-x  1 root  wheel  66576 15 Jul  2017 /usr/bin/pythonw
+lrwxr-xr-x  1 root  wheel     76  3 Mar 10:04 /usr/bin/pythonw2.6 -> ../../System/Library/Frameworks/Python.framework/Versions/2.6/bin/pythonw2.6
+lrwxr-xr-x  1 root  wheel     76  3 Mar 10:04 /usr/bin/pythonw2.7 -> ../../System/Library/Frameworks/Python.framework/Versions/2.7/bin/pythonw2.7
+Andys-Mac:pipfix andy$ ls -l /usr/local/bin/python*
+-rwxr-xr-x  1 andy  admin  2574  4 Mar 21:54 /usr/local/bin/python-argcomplete-check-easy-install-script
+-rwxr-xr-x  1 andy  admin   314  4 Mar 21:54 /usr/local/bin/python-argcomplete-tcsh
+-rwxr-xr-x  1 andy  admin   232  4 Mar 21:54 /usr/local/bin/python-escpos
+lrwxr-xr-x  1 root  wheel    69  3 Mar 17:21 /usr/local/bin/python3 -> ../../../Library/Frameworks/Python.framework/Versions/3.6/bin/python3
+lrwxr-xr-x  1 root  wheel    72  3 Mar 17:21 /usr/local/bin/python3-32 -> ../../../Library/Frameworks/Python.framework/Versions/3.6/bin/python3-32
+lrwxr-xr-x  1 root  wheel    76  3 Mar 17:21 /usr/local/bin/python3-config -> ../../../Library/Frameworks/Python.framework/Versions/3.6/bin/python3-config
+lrwxr-xr-x  1 root  wheel    71  3 Mar 17:21 /usr/local/bin/python3.6 -> ../../../Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6
+lrwxr-xr-x  1 root  wheel    74  3 Mar 17:21 /usr/local/bin/python3.6-32 -> ../../../Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6-32
+lrwxr-xr-x  1 root  wheel    78  3 Mar 17:21 /usr/local/bin/python3.6-config -> ../../../Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6-config
+lrwxr-xr-x  1 root  wheel    72  3 Mar 17:21 /usr/local/bin/python3.6m -> ../../../Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6m
+lrwxr-xr-x  1 root  wheel    79  3 Mar 17:21 /usr/local/bin/python3.6m-config -> ../../../Library/Frameworks/Python.framework/Versions/3.6/bin/python3.6m-config
+Andys-Mac:pipfix andy$
+```
+
+Lots of juicy information here. Notice there is a 'System' Python 2.6 as well as a Python 2.7.  Pipfix should be finding stuff like this.  For example is there a pip for Python 2.6? We can find out manually that there isn't a pip for Python 2.6 e.g.
+
+```
+$ python2.6 -m pip -V
+/usr/bin/python2.6: No module named pip
+
+$ python2.7 -m pip -V
+pip 9.0.1 from /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg (python 2.7)
+```
+
+Note, Python 2.6 has been removed from the later High Sierra.  I am testing on Sierra.
+
