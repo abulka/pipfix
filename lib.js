@@ -302,7 +302,7 @@ class Brain {
     this.pip_default
     this.visualisation = ''
 
-    this.find_python('ls')
+    this.find_python('/usr/bin/python')
     this.find_python('/usr/local/bin/python')
     this.find_python('/usr/local/bin/python3')
     for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/python?"))
