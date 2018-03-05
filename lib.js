@@ -304,14 +304,15 @@ class Brain {
     this.find_python('/usr/bin/python')
     this.find_python('/usr/local/bin/python')
     this.find_python('/usr/local/bin/python3')
-    for (let file_path of glob.sync("/usr/local/Cellar/python/*/bin/python?"))
+    for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/python?"))
       this.find_python(file_path)
     this.python_default = this.find_default('python', this.pythons, Python)
 
     this.find_pip('/usr/bin/pip')
     this.find_pip('/usr/local/bin/pip')
+    this.find_pip('/usr/local/bin/pip2')
     this.find_pip('/usr/local/bin/pip3')
-    for (let file_path of glob.sync("/usr/local/Cellar/python/*/bin/pip?"))
+    for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/pip?"))
       this.find_pip(file_path)
     this.pip_default = this.find_default('pip', this.pips, Pip)
 

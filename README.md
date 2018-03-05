@@ -765,3 +765,291 @@ Looks like you can.
 
 Invoke with `python3` and use the PATH to put the one you want first.  Or invoke with a full path.  Same with the corresponding `pip3` invocations.
 
+### Update
+
+Looking more closely at pipfix output, it looks like brew Python 3 just clobbered `/usr/loca/bin/pip` which we installed to service the default built in Mac framework Python:
+
+```
+...
+/usr/local/bin/pip ---------- Object {
+  "is_default": true,
+  "path": "/usr/local/bin/pip",
+  "runs_ok": true,
+  "site": "/usr/local/lib/python3.6/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": false,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": true,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+/usr/local/bin/pip2 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/bin/pip2",
+  "runs_ok": true,
+  "site": "/Library/Python/2.7/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": true,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": false,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+...
+```
+
+compare this with what `/usr/loca/bin/pip` used to be
+
+```
+/usr/local/bin/pip ---------- Object {
+  "is_default": true,
+  "path": "/usr/local/bin/pip",
+  "runs_ok": true,
+  "site": "/Library/Python/2.7/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": true,
+  },
+  "version": "9.0.1",
+}
+```
+
+`/usr/loca/bin/pip` used to point to system Python 2, now it points to brew Python 3.
+To 'fix' this situation we can invoke system pip using python itself:
+
+```
+/usr/bin/python -m pip -V
+pip 9.0.1 from /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg (python 2.7)
+```
+
+or remember all the places our initial pip was installed to?  Here is a reminder:
+
+```
+...
+creating /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg
+Extracting pip-9.0.1-py2.7.egg to /Library/Python/2.7/site-packages
+Adding pip 9.0.1 to easy-install.pth file
+Installing pip script to /usr/local/bin
+Installing pip2.7 script to /usr/local/bin
+Installing pip2 script to /usr/local/bin
+
+Installed /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg
+Processing dependencies for pip
+Finished processing dependencies for pip
+```
+
+thus we can simply invoke `pip2.7` or `pip2`
+
+```
+$ pip2.7 -V
+pip 9.0.1 from /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg (python 2.7)
+
+$ pip2 -V
+pip 9.0.1 from /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg (python 2.7)
+
+```
+
+
+
+## Let's add brew Python 2
+
+This will mean we have two brew Python installations (Python 2 and Python 3), as well as the default Mac Python 2 and python.org Python 3.
+
+```
+Andys-Mac:pipfix andy$ brew install python2
+Updating Homebrew...
+==> Auto-updated Homebrew!
+Updated 1 tap (homebrew/core).
+==> Updated Formulae
+glade           gsoap           imagemagick     imagemagick@6   mutt            offlineimap     pre-commit      sip
+
+==> Downloading https://homebrew.bintray.com/bottles/python@2-2.7.14_1.sierra.bottle.tar.gz
+######################################################################## 100.0%
+==> Pouring python@2-2.7.14_1.sierra.bottle.tar.gz
+==> /usr/local/Cellar/python@2/2.7.14_1/bin/python2 -s setup.py --no-user-cfg install --force --verbose --single-version-exter
+==> /usr/local/Cellar/python@2/2.7.14_1/bin/python2 -s setup.py --no-user-cfg install --force --verbose --single-version-exter
+==> /usr/local/Cellar/python@2/2.7.14_1/bin/python2 -s setup.py --no-user-cfg install --force --verbose --single-version-exter
+==> Caveats
+This formula installs a python2 executable to /usr/local/opt/python@2/bin
+If you wish to have this formula's python executable in your PATH then add
+the following to ~/.bash_profile:
+  export PATH="/usr/local/opt/python@2/libexec/bin:$PATH"
+
+Pip and setuptools have been installed. To update them
+  pip2 install --upgrade pip setuptools
+
+You can install Python packages with
+  pip2 install <package>
+
+They will install into the site-package directory
+  /usr/local/lib/python2.7/site-packages
+
+See: https://docs.brew.sh/Homebrew-and-Python
+
+This formula is keg-only, which means it was not symlinked into /usr/local,
+because this is an alternate version of another formula.
+
+If you need to have this software first in your PATH run:
+  echo 'export PATH="/usr/local/opt/python@2/bin:$PATH"' >> ~/.bash_profile
+```
+
+Let's see what pipfix makes of this this:
+
+```
+$ npm start
+
+> pipfix@1.0.0 start /Users/andy/pipfix
+> node pipfix.js
+
+pipfix is analysing...
+/usr/bin/python ---------- Object {
+  "is_default": true,
+  "path": "/usr/bin/python",
+  "pip": Object {
+    "installed": true,
+    "site": "/Library/Python/2.7/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "13 entries",
+  "version": "2.7.10",
+}
+/usr/local/bin/python3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/bin/python3",
+  "pip": Object {
+    "installed": true,
+    "site": "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "5 entries",
+  "version": "3.6.4",
+}
+/usr/local/Cellar/python@2/2.7.14_1/bin/python2 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/Cellar/python@2/2.7.14_1/bin/python2",
+  "pip": Object {
+    "installed": true,
+    "site": "/usr/local/lib/python2.7/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "11 entries",
+  "version": "2.7.14",
+}
+/usr/local/Cellar/python/3.6.4_3/bin/python3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/Cellar/python/3.6.4_3/bin/python3",
+  "pip": Object {
+    "installed": true,
+    "site": "/usr/local/lib/python3.6/site-packages",
+    "version": "9.0.1",
+  },
+  "runs_ok": true,
+  "sys.path": "6 entries",
+  "version": "3.6.4",
+}
+/usr/local/bin/pip ---------- Object {
+  "is_default": true,
+  "path": "/usr/local/bin/pip",
+  "runs_ok": true,
+  "site": "/usr/local/lib/python3.6/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": false,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": true,
+    "/usr/local/Cellar/python@2/2.7.14_1/bin/python2": false,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+/usr/local/bin/pip2 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/bin/pip2",
+  "runs_ok": true,
+  "site": "/Library/Python/2.7/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": true,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": false,
+    "/usr/local/Cellar/python@2/2.7.14_1/bin/python2": false,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+/usr/local/bin/pip3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/bin/pip3",
+  "runs_ok": true,
+  "site": "/usr/local/lib/python3.6/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": false,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": true,
+    "/usr/local/Cellar/python@2/2.7.14_1/bin/python2": false,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+/usr/local/Cellar/python@2/2.7.14_1/bin/pip2 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/Cellar/python@2/2.7.14_1/bin/pip2",
+  "runs_ok": true,
+  "site": "/usr/local/lib/python2.7/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": false,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": false,
+    "/usr/local/Cellar/python@2/2.7.14_1/bin/python2": true,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+/usr/local/Cellar/python/3.6.4_3/bin/pip3 ---------- Object {
+  "is_default": false,
+  "path": "/usr/local/Cellar/python/3.6.4_3/bin/pip3",
+  "runs_ok": true,
+  "site": "/usr/local/lib/python3.6/site-packages",
+  "site_relationships": Object {
+    "/usr/bin/python": false,
+    "/usr/local/Cellar/python/3.6.4_3/bin/python3": true,
+    "/usr/local/Cellar/python@2/2.7.14_1/bin/python2": false,
+    "/usr/local/bin/python3": false,
+  },
+  "version": "9.0.1",
+}
+
+Recommendations (4 pythons found, 5 pips found)
+---------------
+/usr/bin/python
+   - ok
+
+/usr/local/bin/python3
+   - ok
+
+/usr/local/Cellar/python@2/2.7.14_1/bin/python2
+   - ok
+
+/usr/local/Cellar/python/3.6.4_3/bin/python3
+   - ok
+
+/usr/local/bin/pip
+   - ok
+
+/usr/local/bin/pip2
+   - ok
+
+/usr/local/bin/pip3
+   - ok
+
+/usr/local/Cellar/python@2/2.7.14_1/bin/pip2
+   - ok
+
+/usr/local/Cellar/python/3.6.4_3/bin/pip3
+   - ok
+
+```
+
+we invoke this brew Python2 with
+
+```
+$ /usr/local/Cellar/python@2/2.7.14_1/bin/python2 -V
+Python 2.7.14
+```
+
