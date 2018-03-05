@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Pipfix Visualisation</h1>
+<p>Blue lines are pip's pointing to pythons.  
+    Square boxes are site packages directories. 
+    Dotted lines are pointers to site package locations.</p>
+
+
+<img src='https://g.gravizo.com/svg?
+ digraph G {
+   "/Library/Python/2.7/site-packages" [shape=box];
+   "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages" [shape=box];
+   "/usr/local/lib/python3.6/site-packages" [shape=box];
+   "/usr/local/Cellar/python/3.6.4_3/bin/python3" [shape=box];
+   "/usr/local/lib/python2.7/site-packages" [shape=box];
+   "/usr/bin/python" -> "/Library/Python/2.7/site-packages" [style=dotted];
+   "/usr/local/bin/python3" -> "/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages" [style=dotted];
+   "/usr/local/Cellar/python@2/2.7.14_1/bin/python2" -> "/usr/local/lib/python2.7/site-packages" [style=dotted];
+   "/usr/local/Cellar/python/3.6.4_3/bin/python3" -> "/usr/local/lib/python3.6/site-packages" [style=dotted];
+   "/usr/local/bin/pip" -> "/usr/local/lib/python3.6/site-packages" [style=dotted];
+   "/usr/local/bin/pip" -> "/usr/local/Cellar/python/3.6.4_3/bin/python3" [color=blue];
+   "/usr/local/bin/pip2" -> "/Library/Python/2.7/site-packages" [style=dotted];
+   "/usr/local/bin/pip2" -> "/usr/bin/python" [color=blue];
+   "/usr/local/bin/pip3" -> "/usr/local/lib/python3.6/site-packages" [style=dotted];
+   "/usr/local/bin/pip3" -> "/usr/local/Cellar/python/3.6.4_3/bin/python3" [color=blue];
+   "/usr/local/Cellar/python@2/2.7.14_1/bin/pip2" -> "/usr/local/lib/python2.7/site-packages" [style=dotted];
+   "/usr/local/Cellar/python@2/2.7.14_1/bin/pip2" -> "/usr/local/Cellar/python@2/2.7.14_1/bin/python2" [color=blue];
+   "/usr/local/Cellar/python/3.6.4_3/bin/pip3" -> "/usr/local/lib/python3.6/site-packages" [style=dotted];
+   "/usr/local/Cellar/python/3.6.4_3/bin/pip3" -> "/usr/local/Cellar/python/3.6.4_3/bin/python3" [color=blue];
+ }
+'/>
+
+
+<pre style="display: none">
+ digraph G {
+   main -> parse -> execute;
+   main -> init;
+   main -> cleanup;
+   execute -> make_string;
+   execute -> printf
+   init -> make_string;
+   main -> printf;
+   execute -> compare;
+ }
+'/>
+</pre>
+
+</body>
+</html>
+
+

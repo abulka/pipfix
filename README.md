@@ -1,5 +1,7 @@
 # pipfix
-Python and pip installation analyser.
+Python and pip installation analyser and visualiser
+
+![visualisation of pipfix results](images/graph00.png "visualisation pic")
 
 Ever been confused about:
 - How many versions of `python` you have installed on your mac?
@@ -848,7 +850,15 @@ pip 9.0.1 from /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg (python 2.7
 
 ```
 
+### /usr/local/bin/pip3 clobbered too
 
+And it also seems that `/usr/local/bin/pip3` has been clobbered by brew's pip3.  We can see this from the visualisation
+
+![visualisation of pipfix results](images/graph01.png "visualisation of which pip points to which python")
+
+Notice there is no pip pointing to `/usr/local/bin/pip3` anymore.
+
+Yikes!  Of course you can still invoke pip via the `/usr/local/bin/python -m pip` technique.  Pipfix is evolving to find any other pips or hardlinks to pips that may be lying around, stay tuned...
 
 ## Let's add brew Python 2
 
