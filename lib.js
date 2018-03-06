@@ -323,10 +323,9 @@ class Brain {
     this.find_default('pip3', this.pips, Pip)
     this.pip_default = this.find_default('pip', this.pips, Pip)
 
-    this.find_anacondas()
-    this.analyse_relationships()  // inform all pips of all other pythons
-    this.report()
-    this.visualise()
+    // this.find_anacondas()
+    // this.analyse_relationships()  // inform all pips of all other pythons
+    // this.report()
   }
 
   report() {
@@ -334,29 +333,6 @@ class Brain {
       python.report()
     for (let pip of this.pips)
       pip.report()
-  }
-
-  visualise() {
-    // let sites = []
-    let sites = ''
-    let result = ''
-    let s
-    for (let python of this.pythons) {
-      result += `  "${python.path}" -> "${python.pip_module_site_package_path}" [style=dotted];\n`
-      sites += `  "${python.pip_module_site_package_path}" [shape=box];\n`  // todo should put into a set and not repeat
-    }
-    for (let pip of this.pips) {
-      result += `  "${pip.path}" -> "${pip.site_package_path}" [style=dotted];\n`
-      sites += `  "${pip.site_package_path}" [shape=box];\n`  // todo should put into a set and not repeat
-
-      let relationship
-      Object.keys(pip.site_relationships).forEach( key => {
-        if (pip.site_relationships[key])
-          result += `  "${pip.path}" -> "${key}" [color=blue];\n`  // pip to python relationship
-      });
-
-    }
-    this.visualisation = `digraph G {\n${sites}\n${result}\n}`
   }
 
   find_anacondas() {
@@ -368,7 +344,8 @@ class Brain {
           virt_env_dirs.add(envs_dir)
       }
     }
-    // console.log('need to scan...', virt_env_dirs)
+    if (virt_env_dirs.length > 0)
+      console.log(`${virt_env_dirs.length} Anacondas found in`, virt_env_dirs, 'scanning...')
 
     for (let env_path of virt_env_dirs) {
       let pythons = glob.sync(path.join(env_path, '*/bin/python*(2|3)'))  // * matches zero or more, ? matches exactly one

@@ -64,6 +64,7 @@ sys.path = [
     let {Brain, Python} = require('../lib.js')
     let spy1 = sinon.spy(Python.prototype, 'analyse_site_info')
     let brain = new Brain()
+    brain.analyse_relationships()
     sinon.assert.callCount(spy1, 1)  // Ensure analyse_site_info() was called within Python class
     brain.pythons.length.should.be.equal(1)
     brain.pips.length.should.be.equal(1)
@@ -113,6 +114,7 @@ sys.path = [
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
     let brain = new Brain()
+    brain.analyse_relationships()
     brain.get_pip('/usr/local/bin/pip').site_relationships['/usr/bin/python'].should.be.false()
   })
 
@@ -156,6 +158,7 @@ sys.path = [
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain} = require('../lib.js')
     let brain = new Brain()
+    brain.analyse_relationships()
     let pip = brain.get_pip('/Users/Andy/miniconda/bin/pip')
     // console.log(pip.site_relationships, pip.site_package_path)
     pip.site_relationships['/Users/Andy/miniconda/bin/python'].should.be.true()
