@@ -249,8 +249,13 @@ describe('class Python', function() {
     p.runs_ok.should.be.true()  // note python >= 3.5 returns version in stdout
   });
 
-  it('brain multiple same pythons', function() {
+  // new brain tests
 
+  it('brain multiple same pythons', function() {
+    // .find_default() python finds the python we already have, check we don't create a duplicate.
+    //
+    // P.S. no way to test duplicate elimination when using .find_python() cos we explicitly call 
+    //    find_python() on specific paths, which are all different, thus by definition cannot have duplicates.
     class SpawnMock extends BaseSpawnMockBehaviour {
       ls() {
         super.ls()
@@ -263,9 +268,8 @@ describe('class Python', function() {
             break
         }
       }
-      version() {
-        super.version()
-        this.result.stdout = 'Python 3.6.4'
+      which_python() {
+        this.select('which_python_usr_bin')
       }
     }
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })

@@ -36,6 +36,14 @@
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Brain, Python} = require('../lib.js')
 
+  How it all works
+  ----------------
+  The function make_mock_spawn_func(HelperClass) takes a helper class from the test and returns a function which 
+  is a replacement for spawnSync.
+  The replacement function has an instance of the helper class and simply calls process_possible_commands() on it
+  which looks at the cmd + params being attempted and calls some handy result setting functions like ls(), which_python() etc.
+  which are defined in the base class (i.e. BaseSpawnMockBehaviour) of the helper class.  If more specific result behaviour
+  is needed by the test, it overrides the handy result setting function like which_python() and sets more specific results.
  */
 
 var assert = require('assert');     // https://nodejs.org/api/assert.html
@@ -108,8 +116,8 @@ class BaseSpawnMockBehaviour{
   select(key) {
     // Select a mock result from the data structure of possibilities found in 'SPAWN_RESULTS'
     this.result = Object.assign({}, SPAWN_RESULTS[key])  // clone
-    this.result['cmd'] = this.cmd
-    this.result['params'] = this.params
+    this.result['cmd'] = this.cmd         // this doesn't really exist on the real SpawnSync, shouldn't really be doing this
+    this.result['params'] = this.params   // this doesn't really exist on the real SpawnSync, shouldn't really be doing this
   }
 
   spawn_result() {
@@ -139,16 +147,16 @@ class BaseSpawnMockBehaviour{
       this.pip_version_via_python()
     else if (this.params[0] == '-m' && this.params[1] == 'site')
       this.python_m_site()
-    else if (this.cmd == 'which' && this.params[0] == 'python')
+    else if (this.cmd == 'which' && ['python', 'python2', 'python3'].includes(this.params[0]))
       this.which_python()
-    else if (this.cmd == 'which' && this.params[0] == 'pip')
+    else if (this.cmd == 'which' && ['pip', 'pip2', 'pip3'].includes(this.params[0]))
       this.which_pip()
     else if (this.cmd == 'stat' && this.params[0] == '-F')
       this.stat()
     // else if (this.cmd == 'wc' && this.params[0] == '-c')
     //   this.size()
     else
-      throw new UserException(`Unknown Spawn case, not sure how to mock "${this.cmd}" with params "${this.params}"`)
+      throw new UserException(`Unknown pip fix testing mock Spawn case, not sure how to mock "${this.cmd}" with params "${this.params}"`)
 
     return this.spawn_result()
   }
