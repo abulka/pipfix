@@ -48,7 +48,7 @@
                 "999999",
                 "--colors",
                 "--fgrep",
-                "pip runs ok but is empty - edge case"
+                "one usr/bin/python - and is default"
             ],
             "internalConsoleOptions": "openOnSessionStart"
         },

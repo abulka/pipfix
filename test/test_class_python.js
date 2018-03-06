@@ -249,4 +249,29 @@ describe('class Python', function() {
     p.runs_ok.should.be.true()  // note python >= 3.5 returns version in stdout
   });
 
+  it('brain multiple same pythons', function() {
+
+    class SpawnMock extends BaseSpawnMockBehaviour {
+      ls() {
+        super.ls()
+        switch (this.params[1]) {
+          case '/usr/bin/python':
+            this.select('ls_success')
+            break
+          default:
+            this.select('ls_fail')
+            break
+        }
+      }
+      version() {
+        super.version()
+        this.result.stdout = 'Python 3.6.4'
+      }
+    }
+    mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
+    let {Python, Brain} = require('../lib.js')
+    let brain = new Brain()
+    brain.pythons.length.should.equal(1)
+  });
+
 });
