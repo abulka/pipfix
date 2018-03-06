@@ -308,6 +308,8 @@ class Brain {
     for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/python?"))
       this.find_python(file_path)
     this.python_default = this.find_default('python', this.pythons, Python)
+    this.python_default = this.find_default('python2', this.pythons, Python)
+    this.python_default = this.find_default('python3', this.pythons, Python)
 
     this.find_pip('/usr/bin/pip')
     this.find_pip('/usr/local/bin/pip')
@@ -316,6 +318,8 @@ class Brain {
     for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/pip?"))
       this.find_pip(file_path)
     this.pip_default = this.find_default('pip', this.pips, Pip)
+    this.pip_default = this.find_default('pip2', this.pips, Pip)
+    this.pip_default = this.find_default('pip3', this.pips, Pip)
 
     this.analyse_relationships()  // inform all pips of all other pythons
     this.report()
