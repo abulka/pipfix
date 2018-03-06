@@ -4,6 +4,7 @@ let glob = require("glob")
 let spawn = require( 'child_process' ).spawnSync
 const {run_async} = require('./run_async.js')
 let {UserException} = require('./util.js')
+const path = require('path');
 
 const SIMPLE_WARNINGS = true
 
@@ -305,7 +306,7 @@ class Brain {
     this.find_python('/usr/bin/python')
     this.find_python('/usr/local/bin/python')
     this.find_python('/usr/local/bin/python3')
-    for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/python?"))
+    for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/python*(2|3)"))
       this.find_python(file_path)
     this.python_default = this.find_default('python', this.pythons, Python)
     this.python_default = this.find_default('python2', this.pythons, Python)
@@ -315,12 +316,13 @@ class Brain {
     this.find_pip('/usr/local/bin/pip')
     this.find_pip('/usr/local/bin/pip2')
     this.find_pip('/usr/local/bin/pip3')
-    for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/pip?"))
+    for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/pip*(2|3)"))
       this.find_pip(file_path)
     this.pip_default = this.find_default('pip', this.pips, Pip)
     this.pip_default = this.find_default('pip2', this.pips, Pip)
     this.pip_default = this.find_default('pip3', this.pips, Pip)
 
+    this.find_anacondas()
     this.analyse_relationships()  // inform all pips of all other pythons
     this.report()
     this.visualise()
@@ -354,6 +356,44 @@ class Brain {
 
     }
     this.visualisation = `digraph G {\n${sites}\n${result}\n}`
+  }
+
+  find_anacondas() {
+    let virt_env_dirs = new Set();
+    for (let python of this.pythons) {
+      if (python.version.includes('Anaconda, Inc.')) {
+        let envs_dir = this.find_envs_dir(python.path)
+        if (envs_dir != undefined)
+          virt_env_dirs.add(envs_dir)
+      }
+    }
+    // console.log('need to scan...', virt_env_dirs)
+
+    for (let env_path of virt_env_dirs) {
+      let pythons = glob.sync(path.join(env_path, '*/bin/python*(2|3)'))  // * matches zero or more, ? matches exactly one
+      let pips = glob.sync(path.join(env_path, '*/bin/pip*(2|3)'))
+      // console.log('FOUND', pythons, pips)
+
+      for (let file_path of pythons)
+        this.find_python(file_path)
+      for (let file_path of pips)
+        this.find_pip(file_path)
+      
+    }
+  }
+
+  find_envs_dir(path_) {
+    // scan upwards till find the root of all the virtual envs
+    // '/Users/Andy/miniconda/envs/py36/bin/python'
+    let path_obj = path.parse(path_)
+    let dir = path_obj.dir // '/Users/Andy/miniconda/envs/py36/bin'
+    let basename = path.parse(dir)
+    if (basename.base == 'bin') {
+      let parent = path.parse(basename.dir)
+      return parent.dir
+    }
+    else
+      return undefined
   }
 
   find_python(path) {
