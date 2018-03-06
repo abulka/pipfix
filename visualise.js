@@ -1,6 +1,8 @@
 var fs = require('fs');
 var opn = require('opn');
 
+const OUT_FILENAME = "out.html"
+
 function visualise_digraph(brain) {
   // let sites = []
   let sites = ''
@@ -59,8 +61,6 @@ function write_to_file(digraph_text) {
 }
 
 function visualise(brain) {
-  const OUT_FILENAME = "out.html"
-
   digraph_text = visualise_digraph(brain)
   console.log(digraph_text)
   

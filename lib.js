@@ -302,6 +302,7 @@ class Brain {
     this.python_default
     this.pip_default
     this.visualisation = ''
+    this.verbose = true
 
     this.find_python('/usr/bin/python')
     this.find_python('/usr/local/bin/python')
@@ -344,7 +345,7 @@ class Brain {
           virt_env_dirs.add(envs_dir)
       }
     }
-    if (virt_env_dirs.length > 0)
+    if (virt_env_dirs.size > 0)
       console.log(`${virt_env_dirs.length} Anacondas found in`, virt_env_dirs, 'scanning...')
 
     for (let env_path of virt_env_dirs) {
@@ -376,14 +377,20 @@ class Brain {
 
   find_python(path) {
     let python = new Python(path)
-    if (python.exists)
+    if (python.exists) {
       this.pythons.push(python)
+      if (this.verbose)
+        console.log(python.path)
+    }
   }
 
   find_pip(path) {
     let pip = new Pip(path)
-    if (pip.exists)
+    if (pip.exists) {
       this.pips.push(pip)
+      if (this.verbose)
+        console.log(pip.path)
+    }
   }
 
   find_default(cmd, collection, Class) {
@@ -413,6 +420,8 @@ class Brain {
       }
     let another = new Class(path_default)
     collection.push(another)  // default python is a totally new python we found e.g. miniconda
+    if (this.verbose)
+      console.log(another.path)
     another.is_default = true
     return another
   }

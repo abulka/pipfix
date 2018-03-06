@@ -96,6 +96,15 @@
             "args": [
                 "--visualise",
             ],        
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program --anacondas",
+            "program": "${workspaceFolder}/pipfix.js",
+            "args": [
+                "--anacondas",
+            ],        
         }
     ]
 }

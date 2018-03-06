@@ -29,12 +29,12 @@ prog
       for (let el of [...brain.pythons, ...brain.pips])
         console.log(`${el.path} ---------- ${format(el.report_obj)}`)
     }
-    
+
     if (! options.noadvice)
       advice(brain)
 
     if (options.visualise)
-      advice(brain)
+      visualise(brain)
 
     console.log('DONE ')
   });
