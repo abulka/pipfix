@@ -32,7 +32,8 @@
     "mockery": "^2.0.0",
     "opn": "^5.2.0",
     "should": "^11.2.0",
-    "sinon": "^5.0.0"
+    "sinon": "^5.0.0",
+    "vis": "^4.21.0"
   },
   "dependencies": {
     "caporal": "^0.3.0",
