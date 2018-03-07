@@ -10,11 +10,11 @@ prog
   .version('1.0.0')
   .description('Reports python installed and any related pips')
   .option('--noadvice', 'Suppress advice', prog.BOOL)
-  .option('--noreport', 'Suppress json report', prog.BOOL)
+  .option('--report', 'Generate JSON report', prog.BOOL)
   .option('--visualise', 'Visualise as graph in browser', prog.BOOL)
   .option('--anacondas', 'Scan for multiple virtual Anaconda pythons (may be slow if you have a lot)', prog.BOOL)
   .action(function(args, options, logger) {
-    logger.info("pipfix is analysing...", options)
+    logger.debug("pipfix is analysing...", options)
 
     let brain = new Brain(logger)  // pass winston logger to brain, no such thing as options.verbose - verbose just sets logging level to debug rather than info
 
@@ -23,7 +23,7 @@ prog
           
     brain.analyse_relationships()  // inform all pips of all other pythons
 
-    if (! options.noreport) {
+    if (options.noreport) {
       brain.report()
       for (let el of [...brain.pythons, ...brain.pips])
         console.log(`${el.path} ---------- ${format(el.report_obj)}`)
@@ -35,7 +35,7 @@ prog
     if (options.visualise)
       visualise(brain)
 
-    console.log('DONE ')
+      logger.debug('DONE ')
   });
 
 prog.parse(process.argv);
