@@ -28,7 +28,7 @@ function visualise_digraph(brain) {
   return `digraph G {\n${result}\n}`
 }
 
-function write_to_file(digraph_text) {
+function viz1(digraph_text) {
   let template = `<html>
     <body>
     
@@ -45,7 +45,11 @@ function write_to_file(digraph_text) {
     </body>
     </html>
     `
-  fs.writeFile(OUT_FILENAME, template, function(err) {
+    return template
+}
+
+function write_to_file(html_text) {
+  fs.writeFile(OUT_FILENAME, html_text, function(err) {
       if(err) {
           return console.log(err);
       }
@@ -63,10 +67,11 @@ function write_to_file(digraph_text) {
 }
 
 function visualise(brain) {
-  digraph_text = visualise_digraph(brain)
-  console.log(digraph_text)
+  let digraph_text = visualise_digraph(brain)
+  // console.log(digraph_text)
+  let html = viz1(digraph_text)
+  write_to_file(html)
   
-  write_to_file(digraph_text)
 }
 
 exports.visualise = visualise
