@@ -145,9 +145,9 @@ function write_to_file(html_text) {
   });
 }
 
-function visualise(brain) {
+function visualise(brain, logger) {
   let digraph_text = visualise_digraph(brain)
-  console.log(digraph_text)
+  logger.debug(digraph_text)  // verbose
   let html = viz1(digraph_text)
   write_to_file(html)
   

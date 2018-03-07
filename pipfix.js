@@ -33,7 +33,7 @@ prog
       advice(brain)
 
     if (options.visualise)
-      visualise(brain)
+      visualise(brain, logger)
 
       logger.debug('DONE ')
   });
