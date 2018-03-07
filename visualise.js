@@ -112,8 +112,22 @@ function viz2(digraph_text) {
           //highlight: 'yellow',
           //border: 'black',
         },
-      }
-    };
+      },
+      layout: {
+        // hierarchical: {
+        //     direction: 'UD'
+        // }
+        // randomSeed: 2,
+        // improvedLayout: false,
+      },
+      physics: {
+        barnesHut: {
+          avoidOverlap: 0.5,
+          centralGravity: 0.3,
+        }
+      },
+    
+  };
     var network = new vis.Network(container, data, options);
 
     network.on('click', function (info) {
@@ -148,7 +162,7 @@ function write_to_file(html_text) {
 function visualise(brain, logger) {
   let digraph_text = visualise_digraph(brain)
   logger.debug(digraph_text)  // verbose
-  let html = viz1(digraph_text)
+  let html = viz2(digraph_text)
   write_to_file(html)
   
 }
