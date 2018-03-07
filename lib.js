@@ -4,7 +4,8 @@ let glob = require("glob")
 let spawn = require( 'child_process' ).spawnSync
 const {run_async} = require('./run_async.js')
 let {UserException} = require('./util.js')
-const path = require('path');
+const path = require('path')
+let winston = require('winston')
 
 const SIMPLE_WARNINGS = true
 
@@ -19,7 +20,7 @@ function cmd_had_error(result_shell_obj) {
   return (result_shell_obj.stderr.length > 0)
 }
 
-function prt(cmd, verbose=true) {
+function prt(cmd) {
   let result = {}
 
   result.command = cmd.args.join(' ')
@@ -56,7 +57,6 @@ class Base {
     this.version
     this.size
     this.warnings = []
-    this.interpret_stderr_as_stdout_for_getting_version_info = false  // subclass to set if needed
     this.report_obj = {}
   }
 
@@ -379,8 +379,7 @@ class Brain {
     let python = new Python(path)
     if (python.exists) {
       this.pythons.push(python)
-      if (this.verbose)
-        console.log(python.path)
+      this.logger.debug(python.path)
     }
   }
 
@@ -388,8 +387,7 @@ class Brain {
     let pip = new Pip(path)
     if (pip.exists) {
       this.pips.push(pip)
-      if (this.verbose)
-        console.log(pip.path)
+      this.logger.debug(pip.path)
     }
   }
 
@@ -420,8 +418,7 @@ class Brain {
       }
     let another = new Class(path_default)
     collection.push(another)  // default python is a totally new python we found e.g. miniconda
-    if (this.verbose)
-      console.log(another.path)
+    this.logger.debug(another.path)
     another.is_default = true
     return another
   }

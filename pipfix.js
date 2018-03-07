@@ -1,6 +1,5 @@
 'use strict';
 
-// const format = require('pretty-format')  // https://github.com/facebook/jest/tree/master/packages/pretty-format
 const format = require('pretty-format')  // https://github.com/facebook/jest/tree/master/packages/pretty-format
 const prog = require('caporal');  // https://github.com/mattallty/Caporal.js
 let {Brain} = require('./lib.js')
@@ -17,7 +16,7 @@ prog
   .action(function(args, options, logger) {
     logger.info("pipfix is analysing...", options)
 
-    let brain = new Brain()
+    let brain = new Brain(logger)  // pass winston logger to brain, no such thing as options.verbose - verbose just sets logging level to debug rather than info
 
     if (options.anacondas)
       brain.find_anacondas()
