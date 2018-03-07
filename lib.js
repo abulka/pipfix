@@ -149,7 +149,6 @@ class Base {
 class Python extends Base {
   constructor(path) {
     super(path)
-    this.interpret_stderr_as_stdout_for_getting_version_info = true  // cope with python 2 bug which reports python version via stderr rather than stdout
     this.result_shell_site_info
     this.result_shell_run_pip_as_module
     this.sys_path = []
@@ -296,7 +295,8 @@ class Pip extends Base {
 
 
 class Brain {
-  constructor() {
+  constructor(logger) {
+    this.logger = (logger == undefined) ? winston : logger  // logger may come from CLI invocation, otherwise use default winston logger
     this.pythons = []
     this.pips = []
     this.python_default
