@@ -23,7 +23,7 @@ prog
           
     brain.analyse_relationships()  // inform all pips of all other pythons
 
-    if (options.noreport) {
+    if (options.report) {
       brain.report()
       for (let el of [...brain.pythons, ...brain.pips])
         console.log(`${el.path} ---------- ${format(el.report_obj)}`)
