@@ -5,16 +5,16 @@ const OUT_FILENAME = "out.html"
 
 function visualise_digraph(brain) {
   // let sites = []
-  let sites = ''
+  let sites = new Set()
   let result = ''
   let s
   for (let python of brain.pythons) {
     result += `  "${python.path}" -> "${python.pip_module_site_package_path}" [style=dotted];\n`
-    sites += `  "${python.pip_module_site_package_path}" [shape=box];\n`  // todo should put into a set and not repeat
+    sites.add(python.pip_module_site_package_path)
   }
   for (let pip of brain.pips) {
     result += `  "${pip.path}" -> "${pip.site_package_path}" [style=dotted];\n`
-    sites += `  "${pip.site_package_path}" [shape=box];\n`  // todo should put into a set and not repeat
+    sites.add(pip.site_package_path)
 
     let relationship
     Object.keys(pip.site_relationships).forEach( key => {
@@ -23,7 +23,9 @@ function visualise_digraph(brain) {
     });
 
   }
-  return `digraph G {\n${sites}\n${result}\n}`
+  for (let site of sites)
+    result += `  "${site}" [shape=box];\n`
+  return `digraph G {\n${result}\n}`
 }
 
 function write_to_file(digraph_text) {

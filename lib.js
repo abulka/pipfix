@@ -337,7 +337,7 @@ class Brain {
   }
 
   find_anacondas() {
-    let virt_env_dirs = new Set();
+    let virt_env_dirs = new Set()
     for (let python of this.pythons) {
       if (python.runs_ok && python.version.includes('Anaconda, Inc.')) {
         let envs_dir = this.find_envs_dir(python.path)
@@ -346,7 +346,7 @@ class Brain {
       }
     }
     if (virt_env_dirs.size > 0)
-      console.log(`${virt_env_dirs.length} Anacondas found in`, virt_env_dirs, 'scanning...')
+      console.log(`${virt_env_dirs.size} Anacondas found in`, virt_env_dirs, 'scanning...')
 
     for (let env_path of virt_env_dirs) {
       let pythons = glob.sync(path.join(env_path, '*/bin/python*(2|3)'))  // * matches zero or more, ? matches exactly one
