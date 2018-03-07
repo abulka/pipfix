@@ -4,28 +4,35 @@ var opn = require('opn');
 const OUT_FILENAME = "out.html"
 
 function visualise_digraph(brain) {
-  // let sites = []
   let sites = new Set()
   let result = ''
-  let s
+  let site_dot = '[shape=box,color=grey,fillcolor=lightgrey,fontcolor=Red]'
   for (let python of brain.pythons) {
-    result += `  "${python.path}" -> "${python.pip_module_site_package_path}" [style=dotted];\n`
-    sites.add(python.pip_module_site_package_path)
+    result += `  "${r(python.path)}" [shape=box,color=green,fillcolor=lightgreen,fontsize=18]\n`
+    result += `  "${r(python.path)}" -> "${r(python.pip_module_site_package_path)}"\n`
+    sites.add(r(python.pip_module_site_package_path))
   }
   for (let pip of brain.pips) {
-    result += `  "${pip.path}" -> "${pip.site_package_path}" [style=dotted];\n`
-    sites.add(pip.site_package_path)
+    result += `  "${r(pip.path)}" [shape=box]\n`
+    result += `  "${r(pip.path)}" -> "${r(pip.site_package_path)}"\n`
+    sites.add(r(pip.site_package_path))
 
     let relationship
     Object.keys(pip.site_relationships).forEach( key => {
       if (pip.site_relationships[key])
-        result += `  "${pip.path}" -> "${key}" [color=blue];\n`  // pip to python relationship
+        result += `  "${r(pip.path)}" -> "${r(key)}" [color=blue]\n`  // pip to python relationship
     });
 
   }
   for (let site of sites)
-    result += `  "${site}" [shape=box];\n`
+    result += `  "${r(site)}" ${site_dot};\n`
   return `digraph G {\n${result}\n}`
+}
+
+function r(s) {
+  // return s.replace(/\//g, ' / ')
+  // return s.replace(/\/usr/g, '/usr\n')
+  return s
 }
 
 function viz1(digraph_text) {
@@ -88,6 +95,7 @@ function viz2(digraph_text) {
       nodes: parsedData.nodes,
       edges: parsedData.edges
     }
+    console.log(data)
     // create a network
     var container = document.getElementById('mynetwork');
     var options = {
@@ -95,6 +103,15 @@ function viz2(digraph_text) {
         dragNodes: true,
         zoomView: false,
         navigationButtons: true,
+      },
+      nodes: {
+        widthConstraint: { maximum: 170 },
+        borderWidth: 3,
+        color: {
+          //background: 'white',
+          //highlight: 'yellow',
+          //border: 'black',
+        },
       }
     };
     var network = new vis.Network(container, data, options);
@@ -130,8 +147,8 @@ function write_to_file(html_text) {
 
 function visualise(brain) {
   let digraph_text = visualise_digraph(brain)
-  // console.log(digraph_text)
-  let html = viz2(digraph_text)
+  console.log(digraph_text)
+  let html = viz1(digraph_text)
   write_to_file(html)
   
 }
