@@ -22,43 +22,32 @@
     Create a simple network with some nodes and edges.
   </p>
 
+  <div id="visualization">
+    <div class="menu">
+        <input type="button" id="zoomIn" value="Zoom in"/>
+        <input type="button" id="zoomOut" value="Zoom out"/>
+        <input type="button" id="moveLeft" value="Move left"/>
+        <input type="button" id="moveRight" value="Move right"/>
+        <input type="button" id="toggleRollingMode" value="toggleRollingMode"/>
+    </div>
+</div>
+
   <div id="mynetwork"></div>
 
   <script type="text/javascript">
 
     var DOTstring = `
-digraph G {
+    digraph G {
   "/Library/Python/2.7/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [shape=box];
   "/Users/Andy/miniconda/lib/python2.7/site-packages" [shape=box];
   "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [shape=box];
   "/Users/Andy/miniconda/envs/py27/lib/python2.7/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py27/lib/python2.7/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py2k/lib/python2.7/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py2k/lib/python2.7/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py2kosqa/lib/python2.7/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py2kosqa/lib/python2.7/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py34k/lib/python3.4/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py34k/lib/python3.4/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py3ch2/lib/python3.4/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py3ch2/lib/python3.4/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/ultimate_django_2/lib/python2.7/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/ultimate_django_2/lib/python2.7/site-packages" [shape=box];
-  "/Library/Python/2.7/site-packages" [shape=box];
-  "/Library/Python/2.7/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py27/lib/python2.7/site-packages" [shape=box];
   "/Users/Andy/miniconda/envs/py2k/lib/python2.7/site-packages" [shape=box];
   "/Users/Andy/miniconda/envs/py2kosqa/lib/python2.7/site-packages" [shape=box];
   "/Users/Andy/miniconda/envs/py34k/lib/python3.4/site-packages" [shape=box];
-  "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [shape=box];
   "/Users/Andy/miniconda/envs/py3ch2/lib/python3.4/site-packages" [shape=box];
   "/Users/Andy/miniconda/envs/ultimate_django_2/lib/python2.7/site-packages" [shape=box];
-
   "/usr/bin/python" -> "/Library/Python/2.7/site-packages" [style=dotted];
-  "/Users/Andy/miniconda/envs/py36/bin/python" -> "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [style=dotted];
   "/Users/Andy/miniconda/bin/python2" -> "/Users/Andy/miniconda/lib/python2.7/site-packages" [style=dotted];
   "/Users/Andy/miniconda/envs/py36/bin/python3" -> "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [style=dotted];
   "/Users/Andy/miniconda/envs/py27/bin/python" -> "/Users/Andy/miniconda/envs/py27/lib/python2.7/site-packages" [style=dotted];
@@ -80,8 +69,8 @@ digraph G {
   "/usr/local/bin/pip2" -> "/Library/Python/2.7/site-packages" [style=dotted];
   "/usr/local/bin/pip2" -> "/usr/bin/python" [color=blue];
   "/Users/Andy/miniconda/envs/py36/bin/pip" -> "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [style=dotted];
-  "/Users/Andy/miniconda/envs/py36/bin/pip" -> "/Users/Andy/miniconda/envs/py36/bin/python" [color=blue];
   "/Users/Andy/miniconda/envs/py36/bin/pip" -> "/Users/Andy/miniconda/envs/py36/bin/python3" [color=blue];
+  "/Users/Andy/miniconda/envs/py36/bin/pip" -> "/Users/Andy/miniconda/envs/py36/bin/python" [color=blue];
   "/Users/Andy/miniconda/envs/py27/bin/pip" -> "/Users/Andy/miniconda/envs/py27/lib/python2.7/site-packages" [style=dotted];
   "/Users/Andy/miniconda/envs/py27/bin/pip" -> "/Users/Andy/miniconda/envs/py27/bin/python" [color=blue];
   "/Users/Andy/miniconda/envs/py27/bin/pip" -> "/Users/Andy/miniconda/envs/py27/bin/python2" [color=blue];
@@ -95,15 +84,14 @@ digraph G {
   "/Users/Andy/miniconda/envs/py34k/bin/pip" -> "/Users/Andy/miniconda/envs/py34k/bin/python" [color=blue];
   "/Users/Andy/miniconda/envs/py34k/bin/pip" -> "/Users/Andy/miniconda/envs/py34k/bin/python3" [color=blue];
   "/Users/Andy/miniconda/envs/py36/bin/pip" -> "/Users/Andy/miniconda/envs/py36/lib/python3.6/site-packages" [style=dotted];
-  "/Users/Andy/miniconda/envs/py36/bin/pip" -> "/Users/Andy/miniconda/envs/py36/bin/python" [color=blue];
   "/Users/Andy/miniconda/envs/py36/bin/pip" -> "/Users/Andy/miniconda/envs/py36/bin/python3" [color=blue];
+  "/Users/Andy/miniconda/envs/py36/bin/pip" -> "/Users/Andy/miniconda/envs/py36/bin/python" [color=blue];
   "/Users/Andy/miniconda/envs/py3ch2/bin/pip" -> "/Users/Andy/miniconda/envs/py3ch2/lib/python3.4/site-packages" [style=dotted];
   "/Users/Andy/miniconda/envs/py3ch2/bin/pip" -> "/Users/Andy/miniconda/envs/py3ch2/bin/python" [color=blue];
   "/Users/Andy/miniconda/envs/py3ch2/bin/pip" -> "/Users/Andy/miniconda/envs/py3ch2/bin/python3" [color=blue];
   "/Users/Andy/miniconda/envs/ultimate_django_2/bin/pip" -> "/Users/Andy/miniconda/envs/ultimate_django_2/lib/python2.7/site-packages" [style=dotted];
   "/Users/Andy/miniconda/envs/ultimate_django_2/bin/pip" -> "/Users/Andy/miniconda/envs/ultimate_django_2/bin/python" [color=blue];
   "/Users/Andy/miniconda/envs/ultimate_django_2/bin/pip" -> "/Users/Andy/miniconda/envs/ultimate_django_2/bin/python2" [color=blue];
-
 }
 `
 
@@ -117,8 +105,34 @@ digraph G {
 
     // create a network
     var container = document.getElementById('mynetwork');
-    var options = {};
+    var options = {
+      interaction: {
+        dragNodes: true,
+        zoomView: false,
+        navigationButtons: true,
+      }
+    };
     var network = new vis.Network(container, data, options);
+
+
+    // attach events to the navigation buttons
+    document.getElementById('zoomIn').onclick    = function () { network.zoomIn( 0.2); };
+    document.getElementById('zoomOut').onclick   = function () { network.zoomOut( 0.2); };
+    document.getElementById('moveLeft').onclick  = function () { move( 0.2); };
+    document.getElementById('moveRight').onclick = function () { move(-0.2); };
+    // document.getElementById('toggleRollingMode').onclick = function () { timeline.toggleRollingMode() };
+
+    network.on('zoom', function (params) {
+      if (params.scale > 1.0) {
+        network.body.view.scale = 1.0;
+      }
+    });
+    network.on('click', function (info) {
+      console.log(info)
+    });
+
+    network.focusOnNode(1,{scale: 1, offset:{x: -(200/3)}});
+
   </script>
 
 
