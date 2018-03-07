@@ -29,7 +29,8 @@ function visualise_digraph(brain) {
 }
 
 function viz1(digraph_text) {
-  let template = `<html>
+  let template = `
+    <html>
     <body>
     
     <h1>Pipfix Visualisation</h1>
@@ -42,6 +43,67 @@ function viz1(digraph_text) {
       ${digraph_text}
     '/>
 
+    </body>
+    </html>
+    `
+    return template
+}
+
+function viz2(digraph_text) {
+  let template = `
+  <html>
+
+  <head>
+    <title>Pipfix Visualisation</title>
+  
+    <script type="text/javascript" src="vis.min.js"></script>
+    <link href="vis.min.css" rel="stylesheet" type="text/css" />
+  
+    <style type="text/css">
+      #mynetwork {
+        width: 80%;
+        height: 1400px;
+        border: 1px solid lightgray;
+      }
+    </style>
+  </head>
+  
+  <body>
+    
+    <h1>Pipfix Visualisation</h1>
+
+    <p>Blue lines are pip's pointing to pythons.  
+    Square boxes are site packages directories. 
+    Dotted lines are pointers to site package locations.</p>
+
+    <div id="mynetwork"></div>
+
+    <script type="text/javascript">
+    var DOTstring = \`
+    ${digraph_text}
+    \`
+
+    var parsedData = vis.network.convertDot(DOTstring);
+    var data = {
+      nodes: parsedData.nodes,
+      edges: parsedData.edges
+    }
+    // create a network
+    var container = document.getElementById('mynetwork');
+    var options = {
+      interaction: {
+        dragNodes: true,
+        zoomView: false,
+        navigationButtons: true,
+      }
+    };
+    var network = new vis.Network(container, data, options);
+
+    network.on('click', function (info) {
+      console.log(info)
+    });
+
+    </script>
     </body>
     </html>
     `
@@ -69,7 +131,7 @@ function write_to_file(html_text) {
 function visualise(brain) {
   let digraph_text = visualise_digraph(brain)
   // console.log(digraph_text)
-  let html = viz1(digraph_text)
+  let html = viz2(digraph_text)
   write_to_file(html)
   
 }
