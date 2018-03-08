@@ -9,12 +9,12 @@ function visualise_digraph(brain) {
   let site_dot = '[shape=box,color=grey,fillcolor=lightgrey,fontcolor=Red]'
   for (let python of brain.pythons) {
     result += `  "${r(python.path)}" [shape=box,color=green,fillcolor=lightgreen,fontsize=18]\n`
-    result += `  "${r(python.path)}" -> "${r(python.pip_module_site_package_path)}"\n`
+    result += `  "${r(python.path)}" -> "${r(python.pip_module_site_package_path)}" [style=dotted]\n`
     sites.add(r(python.pip_module_site_package_path))
   }
   for (let pip of brain.pips) {
     result += `  "${r(pip.path)}" [shape=box]\n`
-    result += `  "${r(pip.path)}" -> "${r(pip.site_package_path)}"\n`
+    result += `  "${r(pip.path)}" -> "${r(pip.site_package_path)}" [style=dotted]\n`
     sites.add(r(pip.site_package_path))
 
     let relationship
@@ -162,7 +162,7 @@ function write_to_file(html_text) {
 function visualise(brain, logger) {
   let digraph_text = visualise_digraph(brain)
   logger.debug(digraph_text)  // verbose
-  let html = viz2(digraph_text)
+  let html = viz1(digraph_text)
   write_to_file(html)
   
 }
