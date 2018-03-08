@@ -4,11 +4,11 @@ const format = require('pretty-format')  // https://github.com/facebook/jest/tre
 const path = require('path')
 
 const OUT_FILENAME = "out.html"
+const site_dot = '[shape=box,color=grey,fontcolor=dimgrey]'
 
 function visualise_digraph(brain) {
   let sites = new Set()
   let result = ''
-  let site_dot = '[shape=box,color=grey,fillcolor=lightgrey,fontcolor=Red]'
   for (let python of brain.pythons) {
     result += `  "${r(python.path)}" [shape=box,color=green,fillcolor=lightgreen,fontsize=18]\n`
     result += `  "${r(python.path)}" -> "${r(python.pip_module_site_package_path)}" [style=dotted]\n`
@@ -33,11 +33,10 @@ function visualise_digraph(brain) {
 function visualise_digraphs(brain) {
   // returns multiple digraphs in a list of dicts
   let results = []
-  let site_dot = '[shape=box,color=grey,fillcolor=lightgrey,fontcolor=Red]'
   for (let python of brain.pythons) {
     let sites = new Set()
     let result = ''
-    result += `  "${r(python.path)}" [shape=box,color=green,fillcolor=lightgreen,fontsize=18]\n`
+    result += `  "${r(python.path)}" [shape=component,style="bold",color=green,fillcolor=lightgreen,fontsize=18]\n`
     result += `  "${r(python.path)}" -> "${r(python.pip_module_site_package_path)}" [style=dotted]\n`
     sites.add(r(python.pip_module_site_package_path))
 
