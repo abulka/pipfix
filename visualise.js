@@ -193,6 +193,34 @@ function viz3(digraph_text) {
     return template
 }
 
+function viz3_multiple(digraph_texts) {
+  let template = `
+  <!doctype html>
+  <html>
+  <head>
+    <title>Pipfix Visualisation</title>
+    <script type="text/javascript" src="viz.js"></script>
+  </head>
+  <body>
+    <h1>
+      Pipfix Report
+    </h1>
+  <script>
+      document.body.innerHTML += "<p>Here are the Pythons and Pips detected on your system.</p>";
+    `
+  for (digraph_text of digraph_texts)
+    template += `
+        document.body.innerHTML += Viz(\`${digraph_text}\`, "svg");
+        document.body.innerHTML += '<hr>'
+      `
+  template += `
+    </script>
+  </body>
+  </html>
+    `
+  return template
+}
+
 
 function write_to_file(html_text) {
   fs.writeFile(OUT_FILENAME, html_text, function(err) {
@@ -225,9 +253,8 @@ function visualise(brain, logger) {
   for (let digraph_text of digraph_texts) {
     logger.debug(digraph_text)  // verbose
   }
-  // let html = viz3(digraph_text)
-  // write_to_file(html)
-  
+  let html = viz3_multiple(digraph_texts)
+  write_to_file(html)
 }
 
 exports.visualise = visualise
