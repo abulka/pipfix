@@ -141,6 +141,30 @@ function viz2(digraph_text) {
     return template
 }
 
+
+function viz3(digraph_text) {
+  let template = `
+  <!doctype html>
+  <html>
+  <head>
+    <title>Viz</title>
+    <script type="text/javascript" src="viz.js"></script>
+  </head>
+  <body>
+    <p>
+      Hi
+    </p>
+  <script>
+      document.body.innerHTML += "<p>Sample addition.</p>";
+      document.body.innerHTML += Viz(\`${digraph_text}\`, "svg");
+    </script>
+  </body>
+  </html>
+    `
+    return template
+}
+
+
 function write_to_file(html_text) {
   fs.writeFile(OUT_FILENAME, html_text, function(err) {
       if(err) {
@@ -162,7 +186,7 @@ function write_to_file(html_text) {
 function visualise(brain, logger) {
   let digraph_text = visualise_digraph(brain)
   logger.debug(digraph_text)  // verbose
-  let html = viz1(digraph_text)
+  let html = viz3(digraph_text)
   write_to_file(html)
   
 }
