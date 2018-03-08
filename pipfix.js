@@ -14,7 +14,7 @@ prog
   .option('--visualise', 'Visualise as graph in browser', prog.BOOL)
   .option('--anacondas', 'Scan for multiple virtual Anaconda pythons (may be slow if you have a lot)', prog.BOOL)
   .action(function(args, options, logger) {
-    logger.debug("pipfix is analysing...", options)
+    logger.debug("pipfix is analysing...", options, '\n')
 
     let brain = new Brain(logger)  // pass winston logger to brain, no such thing as options.verbose - verbose just sets logging level to debug rather than info
 

@@ -1,5 +1,7 @@
 var fs = require('fs');
 var opn = require('opn');
+const format = require('pretty-format')  // https://github.com/facebook/jest/tree/master/packages/pretty-format
+const path = require('path')
 
 const OUT_FILENAME = "out.html"
 
@@ -29,7 +31,7 @@ function visualise_digraph(brain) {
   return `digraph G {\n${result}\n}`
 }
 function visualise_digraphs(brain) {
-  // returns multiple digraphs in a list
+  // returns multiple digraphs in a list of dicts
   let results = []
   let site_dot = '[shape=box,color=grey,fillcolor=lightgrey,fontcolor=Red]'
   for (let python of brain.pythons) {
@@ -53,7 +55,11 @@ function visualise_digraphs(brain) {
     }
     for (let site of sites)
       result += `  "${r(site)}" ${site_dot};\n`
-      results.push( `digraph G {\n${result}\n}` )
+
+    let final_obj = {}
+    final_obj.digraph = `digraph G {\n${result}\n}`
+    final_obj.python = python
+    results.push( final_obj )
   }
   return results
 }
@@ -193,13 +199,14 @@ function viz3(digraph_text) {
     return template
 }
 
-function viz3_multiple(digraph_texts) {
+function viz3_multiple(digraph_objs) {
   let template = `
   <!doctype html>
   <html>
   <head>
     <title>Pipfix Visualisation</title>
     <script type="text/javascript" src="viz.js"></script>
+    <link href="out.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
     <h1>
@@ -208,11 +215,18 @@ function viz3_multiple(digraph_texts) {
   <script>
       document.body.innerHTML += "<p>Here are the Pythons and Pips detected on your system.</p>";
     `
-  for (digraph_text of digraph_texts)
+  for (digraph_obj of digraph_objs) {
     template += `
-        document.body.innerHTML += Viz(\`${digraph_text}\`, "svg");
-        document.body.innerHTML += '<hr>'
+        document.body.innerHTML += '<h2>${digraph_obj.python.version}</h2>'
+        document.body.innerHTML += Viz(\`${digraph_obj.digraph}\`, "svg")
+        document.body.innerHTML += \`<pre>${format(digraph_obj.python.report_obj)}</pre>\`
+        // document.body.innerHTML += '<br>'
       `
+    if (digraph_obj.python.report_obj.is_default)
+      template += `
+        document.body.innerHTML += '<p>This is the <b>default</b> ${path.basename(digraph_obj.python.report_obj.path)}</p>'
+      `
+  }
   template += `
     </script>
   </body>
@@ -249,11 +263,11 @@ function visualise_all_in_one(brain, logger) {
 }
 
 function visualise(brain, logger) {
-  let digraph_texts = visualise_digraphs(brain)
-  for (let digraph_text of digraph_texts) {
-    logger.debug(digraph_text)  // verbose
+  let digraph_objs = visualise_digraphs(brain)
+  for (let digraph_obj of digraph_objs) {
+    logger.debug(digraph_objs.digraph)  // verbose
   }
-  let html = viz3_multiple(digraph_texts)
+  let html = viz3_multiple(digraph_objs)
   write_to_file(html)
 }
 
