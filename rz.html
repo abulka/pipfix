@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+  <title>Viz</title>
+  <script type="text/javascript" src="viz.js"></script>
+</head>
+<body>
+  <p>
+    Hi
+  </p>
+<script>
+    document.body.innerHTML += "<p>Sample addition.</p>";
+    document.body.innerHTML += Viz("digraph { a -> b; }", "svg");
+  </script>
+</body>
+</html>

@@ -34,11 +34,13 @@
     "should": "^11.2.0",
     "sinon": "^5.0.0",
     "vis": "^4.21.0",
+    "viz": "0.0.1",
     "winston": "^2.4.0"
   },
   "dependencies": {
     "caporal": "^0.3.0",
     "fmt-obj": "^1.0.0",
+    "npm": "^5.7.1",
     "pretty-format": "^18.1.0"
   }
 }
