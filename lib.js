@@ -376,6 +376,9 @@ class Brain {
   }
 
   find_python(path) {
+    for (let python of this.pythons)
+      if (this.paths_same(path, python.path))  // prevent duplicates
+        return
     let python = new Python(path)
     if (python.exists) {
       this.pythons.push(python)
@@ -384,6 +387,9 @@ class Brain {
   }
 
   find_pip(path) {
+    for (let pip of this.pips)
+      if (this.paths_same(path, pip.path))  // prevent duplicates
+        return
     let pip = new Pip(path)
     if (pip.exists) {
       this.pips.push(pip)
