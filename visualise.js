@@ -28,6 +28,35 @@ function visualise_digraph(brain) {
     result += `  "${r(site)}" ${site_dot};\n`
   return `digraph G {\n${result}\n}`
 }
+function visualise_digraphs(brain) {
+  // returns multiple digraphs in a list
+  let results = []
+  let site_dot = '[shape=box,color=grey,fillcolor=lightgrey,fontcolor=Red]'
+  for (let python of brain.pythons) {
+    let sites = new Set()
+    let result = ''
+    result += `  "${r(python.path)}" [shape=box,color=green,fillcolor=lightgreen,fontsize=18]\n`
+    result += `  "${r(python.path)}" -> "${r(python.pip_module_site_package_path)}" [style=dotted]\n`
+    sites.add(r(python.pip_module_site_package_path))
+
+    for (let pip of brain.pips) {  
+      let relationship
+      Object.keys(pip.site_relationships).forEach( key => {
+        if (key == python.path && pip.site_relationships[key]) {
+          result += `  "${r(pip.path)}" [shape=box]\n`
+          result += `  "${r(pip.path)}" -> "${r(pip.site_package_path)}" [style=dotted]\n`
+          sites.add(r(pip.site_package_path))
+    
+          result += `  "${r(pip.path)}" -> "${r(key)}" [color=blue]\n`  // pip to python relationship
+        }
+      });
+    }
+    for (let site of sites)
+      result += `  "${r(site)}" ${site_dot};\n`
+      results.push( `digraph G {\n${result}\n}` )
+  }
+  return results
+}
 
 function r(s) {
   // return s.replace(/\//g, ' / ')
@@ -183,11 +212,21 @@ function write_to_file(html_text) {
   });
 }
 
-function visualise(brain, logger) {
+function visualise_all_in_one(brain, logger) {
   let digraph_text = visualise_digraph(brain)
   logger.debug(digraph_text)  // verbose
   let html = viz3(digraph_text)
   write_to_file(html)
+  
+}
+
+function visualise(brain, logger) {
+  let digraph_texts = visualise_digraphs(brain)
+  for (let digraph_text of digraph_texts) {
+    logger.debug(digraph_text)  // verbose
+  }
+  // let html = viz3(digraph_text)
+  // write_to_file(html)
   
 }
 
