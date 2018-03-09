@@ -237,16 +237,16 @@ class Python extends Base {
     if (this.pip_module_version == undefined) this.add_warning(`pip module not installed`, this.result_shell_run_pip_as_module)
   }
 
-  get pips_default() {  // proposed
-    // Which pips are default, default2 or default3 (i.e. invocable from the command line by typing pip, pip2 or pip3).
-    // cos if this list is empty, then whilst there may be a theoretical pip for this python, it cannot be invoked except
-    // via explicit path, or via "python -m pip" (which always works).
-    let result = []
-    for (let pip of this.pips)
-      if (pip.is_default || pip.is_default2 || pip.is_default3)
-        result.push(pip)
-    return result
-  }  
+  // get pips_default() {  // proposed
+  //   // Which pips are default, default2 or default3 (i.e. invocable from the command line by typing pip, pip2 or pip3).
+  //   // cos if this list is empty, then whilst there may be a theoretical pip for this python, it cannot be invoked except
+  //   // via explicit path, or via "python -m pip" (which always works).
+  //   let result = []
+  //   for (let pip of this.pips)
+  //     if (pip.is_default || pip.is_default2 || pip.is_default3)
+  //       result.push(pip)
+  //   return result
+  // }  
 
   report() {
     super.report()
@@ -260,7 +260,7 @@ class Python extends Base {
       this.report_obj.pip.path = this.path + ' -m pip'
 
       this.report_obj.pips = this.pips.map(el => el.path)
-      this.report_obj.pips_default = this.pips_default.map(el => el.path)
+      // this.report_obj.pips_default = this.pips_default.map(el => el.path)
 
       this.report_obj.is_default_for = []
       if (this.is_default) this.report_obj.is_default_for.push('python')
@@ -406,7 +406,7 @@ class Brain {
     } )
     
     // Python and Pips
-    
+
     for (let python of this.pythons)
       python.report()
     for (let pip of this.pips)
@@ -520,8 +520,11 @@ class Brain {
     if (path1 == path2)
       return true
 
+    // console.log('COMPARING path1 == path2 symbolically which may only be a partial match??', path1, path2)
     let path2_symbolic = this.symbolic_path(path2)
-    if (path2_symbolic != undefined && (path2_symbolic.indexOf(path1) != -1))
+    // if (path2_symbolic != undefined && (path2_symbolic.indexOf(path1) != -1))
+    // console.log('SYMBOLIC COMPARE path1 == path2 symbolically which may only be a partial match??', path1, path2_symbolic)
+    if (path2_symbolic != undefined && (path2_symbolic == path1))
       return true
 
     return false
@@ -533,8 +536,36 @@ class Brain {
     if (result_shell_stat.stderr.length != 0)
       throw new UserException(`"stat" failed with error "${result_shell_stat.stderr.toString()}" thus cannot determine symbolic link behind "${path}"`)
 
-    let symbolic_path = result_shell_stat.stdout.toString()  // TODO parse this properly and get the pure absolute path
-    return symbolic_path
+    let symbolic_path = result_shell_stat.stdout.toString()
+    
+    // parse this properly and get the pure absolute path
+
+    // e.g. might get a result like this:
+    // lrwxr-xr-x 1 Andy staff 9 Jan 11 14:21:49 2018 /Users/Andy/miniconda/envs/py36/bin/python3@ -> python3.6
+    // what bit do we want, the full path or the short path?  let go for the full
+    let regex = /.*?(\/.*)\s->\s(.*)/
+    let match = regex.exec(symbolic_path)
+    if (match != null) {
+      let left = match[1]  // left -> right
+      let right = match[2]
+      left = left.replace('@', '')
+      // console.log('should be matching exactly on', left)
+      return left
+    }
+
+    // try again, might get
+    // -rwxr-xr-x 1 root wheel 66880 Jan 19 18:37:24 2018 /usr/bin/python*
+    regex = /.*?(\/.*)/
+    match = regex.exec(symbolic_path)
+    if (match != null) {
+      let left = match[1]
+      left = left.replace('*', '')
+      // console.log('(attempt 2) should be matching exactly on', left)
+      return left
+    }
+
+    throw new UserException(`should never get here - the match above should have worked on ${symbolic_path}`)
+    // return symbolic_path
   }
 
   get_python(path) {
