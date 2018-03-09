@@ -302,16 +302,6 @@ class Pip extends Base {
     // this.site_package_path_is_non_system_python = (match != null) {
   }
 
-  // inform_about(python) {
-  //   // Figure out if pip and this python share a site
-  //   let are_associated = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
-  //   if (are_associated) {
-  //     python.pips.push(this)
-  //     this.pythons.push(python)
-  //   }
-  //   this.site_relationships[python.path] = are_associated
-  // }
-
   report() {
     super.report()
     this.report_obj.site = this.site_package_path
@@ -326,6 +316,13 @@ class Pip extends Base {
   }
 }
 
+class Site {
+  constructor(path) {
+    this.path = path
+    this.pythons = new Set()
+    this.pips = new Set()
+  }
+}
 
 class Brain {
   constructor(logger) {
@@ -340,7 +337,8 @@ class Brain {
     this.pip3_default
     this.visualisation = ''
     this.verbose = true
-    this.sites = new Set()
+    this.report_obj = {}
+    this.sites = {}
 
     this.symbolic_path = lodash.memoize(this.symbolic_path)  // cache
 
@@ -376,7 +374,8 @@ class Brain {
     this.report_obj = {}
     this.report_obj.pythons = this.pythons.map(el => el.path)
     this.report_obj.pips = this.pips.map(el => el.path)
-    this.report_obj.sites = this.sites
+    
+    this.report_obj.sites = Object.entries(this.sites).map( el => el[1].path ) // get list of k,v tuples, then then iterate using map 
     
     function python_info(python) {
       let res = python.pips.map(el => el.path)
@@ -398,6 +397,13 @@ class Brain {
       python.report()
     for (let pip of this.pips)
       pip.report()
+  }
+
+  get_site(path) {
+    // returns a Site object
+    if (this.sites[path] == undefined)
+      this.sites[path] = new Site(path)
+    return this.sites[path]
   }
 
   find_anacondas() {
@@ -541,10 +547,12 @@ class Brain {
     pip.site_relationships[python.path] = are_associated
 
     // update brain's master site knowledge
-    this.sites.add(python.pip_module_site_package_path)
-    this.sites.add(pip.site_package_path)
+    let site = this.get_site(python.pip_module_site_package_path)
+    site.pythons.add(python)
+    site = this.get_site(pip.site_package_path)
+    site.pips.add(pip)
   }
-  
+
   analyse_relationships() {
     // inform all pips of all other pythons
     for (let pip of this.pips)
