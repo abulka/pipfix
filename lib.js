@@ -360,7 +360,7 @@ class Brain {
       }
     }
     if (virt_env_dirs.size > 0)
-      console.log(`${virt_env_dirs.size} Anacondas found in`, virt_env_dirs, 'scanning...')
+      console.log(`${virt_env_dirs.size} Anaconda dirs containing virtual environments found:`, virt_env_dirs, 'scanning...')
 
     for (let env_path of virt_env_dirs) {
       let pythons = glob.sync(path.join(env_path, '*/bin/python*(2|3)'))  // * matches zero or more, ? matches exactly one
