@@ -241,8 +241,8 @@ class Python extends Base {
     // Which pips are default, default2 or default3 (i.e. invocable from the command line by typing pip, pip2 or pip3).
     // cos if this list is empty, then whilst there may be a theoretical pip for this python, it cannot be invoked except
     // via explicit path, or via "python -m pip" (which always works).
-    result = []
-    for (pip of this.pips)
+    let result = []
+    for (let pip of this.pips)
       if (pip.is_default || pip.is_default2 || pip.is_default3)
         result.push(pip)
     return result
@@ -257,6 +257,10 @@ class Python extends Base {
       this.report_obj.pip.installed = this.pip_module_version != undefined
       this.report_obj.pip.version = this.pip_module_version
       this.report_obj.pip.site = this.pip_module_site_package_path
+      this.report_obj.pip.path = this.path + ' -m pip'
+
+      this.report_obj.pips = this.pips.map(el => el.path)
+      this.report_obj.pips_default = this.pips_default.map(el => el.path)
     }
   }
 }
@@ -297,7 +301,10 @@ class Pip extends Base {
     this.pythons.push(python)
 
     // Figure out if pip and this python share a site
-    this.site_relationships[python.path] = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
+    let are_associated = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
+    if (are_associated)
+      python.pips.push(this)
+    this.site_relationships[python.path] = are_associated
   }
 
   report() {
