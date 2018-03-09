@@ -5,6 +5,8 @@ const path = require('path')
 
 const OUT_FILENAME = "out.html"
 const site_dot = '[shape=box,color=grey,fontcolor=dimgrey]'
+const python_dot = '[shape=component,style="bold",color=green,fillcolor=lightgreen,fontsize=18]'
+const pip_dot = '[shape=box]'
 
 function visualise_digraph(brain) {
   let sites = new Set()
@@ -30,7 +32,7 @@ function visualise_digraph(brain) {
     result += `  "${r(site)}" ${site_dot};\n`
   return `digraph G {\n${result}\n}`
 }
-function visualise_digraphs(brain) {
+function visualise_digraphs_OLD(brain) {
   // returns multiple digraphs in a list of dicts
   let results = []
   for (let python of brain.pythons) {
@@ -60,6 +62,76 @@ function visualise_digraphs(brain) {
     final_obj.python = python
     results.push( final_obj )
   }
+  return results
+}
+
+function visualise_digraphs(brain) {
+  // returns multiple digraphs in a list of dicts
+  let results = []
+  Object.keys(brain.sites).forEach( key => {
+    let result = ''
+
+    // Add site
+    let site = brain.sites[key]
+    result += `  "${r(site.path)}" ${site_dot};\n`
+
+    for (let python of site.pythons) {
+      // Add python
+      result += `  "${r(python.path)}" ${python_dot}\n`
+      // Add python -> site
+      result += `  "${r(python.path)}" -> "${r(site.path)}" [style=dotted]\n`
+      // Add python -> pip (redundant)
+      // for (let pip of python.pips)
+      //   result += `  "${r(pip.path)}" -> "${r(python.path)}" [color=red]\n`
+    }
+    
+    for (let pip of site.pips) {
+      // Add pip
+      result += `  "${r(pip.path)}" ${pip_dot}\n`
+      // Add pip -> site
+      result += `  "${r(pip.path)}" -> "${r(site.path)}" [style=dotted]\n`
+      // Add pip -> python
+      for (let python of pip.pythons)
+        result += `  "${r(pip.path)}" -> "${r(python.path)}" [color=blue]\n`
+    }
+
+    // Push result
+    let final_obj = {}
+    final_obj.digraph = `digraph G {\n${result}\n}`
+    final_obj.pythons = [...site.pythons]
+    final_obj.pips = [...site.pips]
+    results.push( final_obj )    
+  })
+
+/*
+  for (let site of brain.sites) {
+    let sites = new Set()
+    let result = ''
+    result += `  "${r(python.path)}" [shape=component,style="bold",color=green,fillcolor=lightgreen,fontsize=18]\n`
+    result += `  "${r(python.path)}" -> "${r(python.pip_module_site_package_path)}" [style=dotted]\n`
+    sites.add(r(python.pip_module_site_package_path))
+
+    for (let pip of brain.pips) {  
+      let relationship
+      Object.keys(pip.site_relationships).forEach( key => {
+        if (key == python.path && pip.site_relationships[key]) {
+          result += `  "${r(pip.path)}" [shape=box]\n`
+          result += `  "${r(pip.path)}" -> "${r(pip.site_package_path)}" [style=dotted]\n`
+          sites.add(r(pip.site_package_path))
+    
+          result += `  "${r(pip.path)}" -> "${r(key)}" [color=blue]\n`  // pip to python relationship
+        }
+      });
+    }
+    for (let site of sites)
+      result += `  "${r(site)}" ${site_dot};\n`
+
+    let final_obj = {}
+    final_obj.digraph = `digraph G {\n${result}\n}`
+    final_obj.python = python
+    results.push( final_obj )
+  }
+  */
   return results
 }
 
@@ -220,30 +292,44 @@ function viz3_multiple(brain, digraph_objs) {
       document.body.innerHTML += \`<pre>${format(brain.report_obj)}</pre>\`
       `
 
-  for (digraph_obj of digraph_objs) {
+  for (let digraph_obj of digraph_objs) {
     template += `
-        document.body.innerHTML += '<h2>${digraph_obj.python.version}</h2>'
+        document.body.innerHTML += '<h2>${digraph_obj.pythons[0].version}</h2>'
         document.body.innerHTML += Viz(\`${digraph_obj.digraph}\`, "svg")
         `
 
-        if (digraph_obj.python.report_obj != {})
-          template += `
-            document.body.innerHTML += '<h3>analysis</h3>'
-            document.body.innerHTML += \`<pre>${format(digraph_obj.python.report_obj)}</pre>\`
+    for (let python of digraph_obj.pythons) {
+
+      if (python.report_obj != {})
+        template += `
+            document.body.innerHTML += '<h3>Python Analysis</h3>'
+            document.body.innerHTML += \`<pre>${format(python.report_obj)}</pre>\`
             `
 
-        if (digraph_obj.python.report_obj != {})
-          template += `
-            document.body.innerHTML += '<h3>sys path</h3>'
-            document.body.innerHTML += \`<pre>${format(digraph_obj.python.sys_path)}</pre>\`
+      if (python.report_obj != {})
+        template += `
+            document.body.innerHTML += '<h4>sys path</h4>'
+            document.body.innerHTML += \`<pre>${format(python.sys_path)}</pre>\`
             `
 
-        if (digraph_obj.python.report_obj.is_default)
-          template += `
-            document.body.innerHTML += '<h3>advice</h3>'
-            document.body.innerHTML += '<p>This is the <b>default</b> ${path.basename(digraph_obj.python.report_obj.path)}</p>'
+      if (python.report_obj.is_default)
+        template += `
+            document.body.innerHTML += '<h4>python advice</h4>'
+            document.body.innerHTML += '<p>This is the <b>default</b> ${path.basename(python.report_obj.path)}</p>'
             `
+    }
+
+    for (let pip of digraph_obj.pips) {
+
+      if (pip.report_obj != {})
+        template += `
+            document.body.innerHTML += \`<h3>${pip.path}</h3>\`
+            document.body.innerHTML += \`<pre>${format(pip.report_obj)}</pre>\`
+            `
+    }
+
   }
+
   template += `
     </script>
   </body>

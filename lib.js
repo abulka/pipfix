@@ -381,7 +381,7 @@ class Brain {
     Object.keys(this.sites).forEach( key => {
       this.report_obj.site_relationships[key] = {}
       let site = this.sites[key]
-      console.log(site)
+      // console.log(site)
       this.report_obj.site_relationships[key].pythons = [...site.pythons].map(el => el.path)
       this.report_obj.site_relationships[key].pips = [...site.pips].map(el => el.path)
     } )
