@@ -40,6 +40,7 @@
   "dependencies": {
     "caporal": "^0.3.0",
     "fmt-obj": "^1.0.0",
+    "lodash": "^4.17.5",
     "npm": "^5.7.1",
     "pretty-format": "^18.1.0"
   }

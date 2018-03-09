@@ -6,6 +6,7 @@ const {run_async} = require('./run_async.js')
 let {UserException} = require('./util.js')
 const path = require('path')
 let winston = require('winston')
+let lodash = require('lodash/function')  // https://lodash.com/docs/4.17.5#memoize
 
 const SIMPLE_WARNINGS = true
 
@@ -329,6 +330,8 @@ class Brain {
     this.visualisation = ''
     this.verbose = true
 
+    this.symbolic_path = lodash.memoize(this.symbolic_path)  // cache
+
     this.find_python('/usr/bin/python')
     this.find_python('/usr/local/bin/python')
     this.find_python('/usr/local/bin/python2')
@@ -481,7 +484,6 @@ class Brain {
 
   symbolic_path(path) {
     // get the real underlying path
-    winston.warn('stat WASTED CALL', path)
     let result_shell_stat = spawn_xtra('stat', ['-F', path])
     if (result_shell_stat.stderr.length != 0)
       throw new UserException(`"stat" failed with error "${result_shell_stat.stderr.toString()}" thus cannot determine symbolic link behind "${path}"`)
