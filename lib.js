@@ -302,15 +302,15 @@ class Pip extends Base {
     // this.site_package_path_is_non_system_python = (match != null) {
   }
 
-  inform_about(python) {
-    // Figure out if pip and this python share a site
-    let are_associated = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
-    if (are_associated) {
-      python.pips.push(this)
-      this.pythons.push(python)
-    }
-    this.site_relationships[python.path] = are_associated
-  }
+  // inform_about(python) {
+  //   // Figure out if pip and this python share a site
+  //   let are_associated = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
+  //   if (are_associated) {
+  //     python.pips.push(this)
+  //     this.pythons.push(python)
+  //   }
+  //   this.site_relationships[python.path] = are_associated
+  // }
 
   report() {
     super.report()
@@ -529,11 +529,21 @@ class Brain {
     return undefined
   }
 
+  inform_about(pip, python) {
+    // Figure out if pip and this python share a site
+    let are_associated = python.sys_path.length > 0 && python.sys_path.indexOf(pip.site_package_path) >= 0
+    if (are_associated) {
+      python.pips.push(pip)
+      pip.pythons.push(python)
+    }
+    pip.site_relationships[python.path] = are_associated
+  }
+  
   analyse_relationships() {
     // inform all pips of all other pythons
     for (let pip of this.pips)
       for (let python of this.pythons)
-        pip.inform_about(python)
+        this.inform_about(pip, python)
 
     // tell each pip and python its standing as a default, default2 or default3
     for (let python of this.pythons) {
