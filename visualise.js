@@ -23,6 +23,12 @@ function visualise_digraphs(brain) {
       result += `  "${r(python.path)}" ${python_dot}\n`
       // Add python -> site
       result += `  "${r(python.path)}" -> "${r(site.path)}" [style=dotted]\n`
+
+      if (python.pips.length == 0) {
+        // Add ?? pip
+        result += `  "${r('?? no pip in path')}" ${pip_dot}\n`
+        result += `  "${r('?? no pip in path')}" -> "${r(python.path)}" [style=dotted,color=red]\n`
+    }
       // Add python -> pip (redundant)
       // for (let pip of python.pips)
       //   result += `  "${r(pip.path)}" -> "${r(python.path)}" [color=red]\n`
