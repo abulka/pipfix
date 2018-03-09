@@ -8,6 +8,7 @@ const site_dot = '[shape=box,color=grey,fontcolor=dimgrey]'
 const python_dot = '[shape=component,style="bold",color=green,fillcolor=lightgreen,fontsize=18]'
 const pip_dot = '[shape=box]'
 const default_python_dot = '[style=dashed,color=green]'
+const default_pip_dot = '[style=dashed,color=blue]'
 
 function visualise_digraphs(brain) {
   // returns multiple digraphs in a list of dicts
@@ -19,6 +20,7 @@ function visualise_digraphs(brain) {
     let site = brain.sites[key]
     result += `  "${r(site.path)}" ${site_dot};\n`
 
+    // Pythons
     for (let python of site.pythons) {
       // Add python
       result += `  "${r(python.path)}" ${python_dot}\n`
@@ -27,16 +29,16 @@ function visualise_digraphs(brain) {
 
       if (python.pips.length == 0) {
         // Add ?? pip
-        result += `  "${r('?? no pip in path')}" ${pip_dot}\n`
-        result += `  "${r('?? no pip in path')}" -> "${r(python.path)}" [style=dotted,color=red]\n`
+        result += `  "${'?? no pip in path'}" ${pip_dot}\n`
+        result += `  "${'?? no pip in path'}" -> "${r(python.path)}" [style=dotted,color=red]\n`
       }
 
       // Digram the default python invocations
       if (python.report_obj) {
         if (python.report_obj.is_default_for.length == 0) {
           // Add ?? no default
-          result += `  "${r('?? no python in path will invoke')}" ${default_python_dot}\n`
-          result += `  "${r('?? no python in path will invoke')}" -> "${r(python.path)}" [style=dashed,color=green]\n`
+          result += `  "${'?? no python in path will invoke'}" ${default_python_dot}\n`
+          result += `  "${'?? no python in path will invoke'}" -> "${r(python.path)}" [style=dashed,color=green]\n`
         }
         else        
           for (let default_python_name of python.report_obj.is_default_for) {
@@ -44,12 +46,9 @@ function visualise_digraphs(brain) {
             result += `  "${default_python_name}" -> "${r(python.path)}" [style=solid,color=green]\n`
           }
       }
-
-      // Add python -> pip (redundant)
-      // for (let pip of python.pips)
-      //   result += `  "${r(pip.path)}" -> "${r(python.path)}" [color=red]\n`
     }
     
+    // Pips
     for (let pip of site.pips) {
       // Add pip
       result += `  "${r(pip.path)}" ${pip_dot}\n`
@@ -58,6 +57,22 @@ function visualise_digraphs(brain) {
       // Add pip -> python (could have looped through python.pips instead)
       for (let python of pip.pythons)
         result += `  "${r(pip.path)}" -> "${r(python.path)}" [color=blue]\n`
+
+
+      // Digram the default pip invocations
+      if (pip.report_obj) {
+        if (pip.report_obj.is_default_for.length == 0) {
+          // Add ?? no default
+          result += `  "${'?? no pip in path will invoke'}" ${default_pip_dot}\n`
+          result += `  "${'?? no pip in path will invoke'}" -> "${r(pip.path)}" [style=dashed,color=blue]\n`
+        }
+        else        
+          for (let default_pip_name of pip.report_obj.is_default_for) {
+            result += `  "${default_pip_name}" ${default_pip_dot}\n`
+            result += `  "${default_pip_name}" -> "${r(pip.path)}" [style=solid,color=blue]\n`
+          }
+      }
+
     }
 
     // Push result
