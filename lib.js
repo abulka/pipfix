@@ -346,7 +346,7 @@ class Brain {
     this.report_obj = {}
     this.sites = {}
 
-    this.symbolic_path = lodash.memoize(this.symbolic_path)  // cache
+    // this.symbolic_path = lodash.memoize(this.symbolic_path)  // cache
 
     this.find_python('/usr/bin/python')
     this.find_python('/usr/local/bin/python')
@@ -490,26 +490,30 @@ class Brain {
        'collection' is e.g. this.pythons or this.pips
        'Class' is Python or Pip class
      Returns:
-       The Python or Pip instance which is the default, which you should assign to this.python_default or this.pip_default
+       The Python or Pip instance which is invoked when 'cmd' is issued
      */
     let result_shell_which = spawn_xtra('which', [cmd])
     if (result_shell_which.stderr.length != 0)
       throw new UserException(`which ${cmd} failed with error "${result_shell_which.stderr.toString()}" thus cannot determine default ${cmd}`)
     let path_default = result_shell_which.stdout.toString().trim()
 
-    if (path_default == '')  // 'which python' command found no default python
+    if (path_default == '')  // 'which python' command found no default python or pip
       return undefined
 
-    for (let el of collection)
+    for (let el of collection) {
+      console.log('')
+      console.log(`are paths sameL: '${path_default}'`)
+      console.log(`are paths sameR: '${el.path}'`)      
       if (this.paths_same(path_default, el.path)) {
-        // this.python_default = el
-        el.is_default = true
+        console.log(`---------- yes --`)
         return el  // default python pip is an existing one
       }
+      else
+        console.log(`---------- no --`)
+    }
     let another = new Class(path_default)
     collection.push(another)  // default python is a totally new python we found e.g. miniconda
     this.logger.debug(another.path)
-    // another.is_default = true
     return another
   }
 
@@ -520,10 +524,7 @@ class Brain {
     if (path1 == path2)
       return true
 
-    // console.log('COMPARING path1 == path2 symbolically which may only be a partial match??', path1, path2)
     let path2_symbolic = this.symbolic_path(path2)
-    // if (path2_symbolic != undefined && (path2_symbolic.indexOf(path1) != -1))
-    // console.log('SYMBOLIC COMPARE path1 == path2 symbolically which may only be a partial match??', path1, path2_symbolic)
     if (path2_symbolic != undefined && (path2_symbolic == path1))
       return true
 
@@ -541,6 +542,7 @@ class Brain {
     if (result_shell_stat.stderr.length != 0)
       throw new UserException(`"stat" failed with error "${result_shell_stat.stderr.toString()}" thus cannot determine symbolic link behind "${path}"`)
     let symbolic_path = result_shell_stat.stdout.toString()
+    console.log(`SYMBOLIC: '${symbolic_path.trimRight()}'`)      
 
     // parse this properly and get the pure absolute path
 
@@ -554,13 +556,15 @@ class Brain {
       return left
     }
 
-    // Case 2, probably should not do this, since the result is the same as the incoming 'path' anyway
+    // Case 2, probably should not do this, since the result is the same as the incoming 'path' anyway    DEPRECATED CODE - REMOVE
     //  -rwxr-xr-x 1 root wheel 66880 Jan 19 18:37:24 2018 /usr/bin/python*
     regex = /.*?(\/.*)/
     match = regex.exec(symbolic_path)
     if (match != null) {
       let left = match[1]
       left = left.replace('*', '')  // strip the executable symbol
+      if (left == path)
+        console.log(`REDUNDANT SYMBOLIC COMPARE '${left}' and '${path}'`)
       if (left != path)
         throw new UserException(`Error '${left}' and '${path}' should be the same`)
       return left
