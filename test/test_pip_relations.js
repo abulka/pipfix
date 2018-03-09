@@ -78,7 +78,7 @@ sys.path = [
     // console.log(brain.report_obj)
 
     // OLD
-    pip_usr_local_bin.site_relationships['/usr/bin/python'].should.be.true()
+    // pip_usr_local_bin.site_relationships['/usr/bin/python'].should.be.true()
 
     // NEW (technique 1)
     pip_usr_local_bin.pythons.should.containEql(python_usr_bin)

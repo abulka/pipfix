@@ -274,7 +274,6 @@ class Pip extends Base {
   constructor(path) {
     super(path);
     this.site_package_path
-    this.site_relationships = {}  // hash where keys are python paths, values are boolean
     this.pythons = []
     this.analyse()
   }
@@ -305,8 +304,6 @@ class Pip extends Base {
   report() {
     super.report()
     this.report_obj.site = this.site_package_path
-    this.report_obj.site_relationships = this.site_relationships
-    
     this.report_obj.pythons = this.pythons.map(el => el.path)
 
     this.report_obj.is_default_for = []
@@ -555,7 +552,6 @@ class Brain {
       python.pips.push(pip)
       pip.pythons.push(python)
     }
-    pip.site_relationships[python.path] = are_associated
 
     // update brain's master site knowledge
     let site = this.get_site(python.pip_module_site_package_path)
