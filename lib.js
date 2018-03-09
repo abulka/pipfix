@@ -340,6 +340,7 @@ class Brain {
     this.pip3_default
     this.visualisation = ''
     this.verbose = true
+    this.sites = new Set()
 
     this.symbolic_path = lodash.memoize(this.symbolic_path)  // cache
 
@@ -369,13 +370,14 @@ class Brain {
   }
 
   report() {
-    this.report_obj = {}
-    this.report_obj.pythons = this.pythons.map(el => el.path)
-    this.report_obj.pips = this.pips.map(el => el.path)
-    this.report_obj.sites = 'TODO'
     const NO_PIP_ASSOCATED = '?? no associated pip, pip2 or pip3 found in path'
     const NO_PIP = 'not found in path'
 
+    this.report_obj = {}
+    this.report_obj.pythons = this.pythons.map(el => el.path)
+    this.report_obj.pips = this.pips.map(el => el.path)
+    this.report_obj.sites = this.sites
+    
     function python_info(python) {
       let res = python.pips.map(el => el.path)
       return `${python.path} <-- ${res.length ? res : NO_PIP_ASSOCATED}`  // might be more than one pip...
@@ -537,6 +539,10 @@ class Brain {
       pip.pythons.push(python)
     }
     pip.site_relationships[python.path] = are_associated
+
+    // update brain's master site knowledge
+    this.sites.add(python.pip_module_site_package_path)
+    this.sites.add(pip.site_package_path)
   }
   
   analyse_relationships() {

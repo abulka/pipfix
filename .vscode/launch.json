@@ -100,6 +100,16 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch Program --visualise --report",
+            "program": "${workspaceFolder}/pipfix.js",
+            "args": [
+                "--visualise",
+                "--report",
+            ],        
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch Program --report",
             "program": "${workspaceFolder}/pipfix.js",
             "args": [
