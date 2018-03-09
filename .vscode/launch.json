@@ -100,6 +100,15 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch Program --report",
+            "program": "${workspaceFolder}/pipfix.js",
+            "args": [
+                "--report",
+            ],        
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch Program --anacondas",
             "program": "${workspaceFolder}/pipfix.js",
             "args": [

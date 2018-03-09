@@ -335,8 +335,8 @@ class Brain {
     this.find_python('/usr/local/bin/python3')
     for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/python*(2|3)"))
       this.find_python(file_path)
-    this.python_default3 = this.find_default('python3', this.pythons, Python)
-    this.python_default2 = this.find_default('python2', this.pythons, Python)
+    this.python3_default = this.find_default('python3', this.pythons, Python)
+    this.python2_default = this.find_default('python2', this.pythons, Python)
     this.python_default = this.find_default('python', this.pythons, Python)
 
     this.find_pip('/usr/bin/pip')
@@ -345,8 +345,8 @@ class Brain {
     this.find_pip('/usr/local/bin/pip3')
     for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/pip*(2|3)"))
       this.find_pip(file_path)
-    this.pip_default3 = this.find_default('pip3', this.pips, Pip)
-    this.pip_default2 = this.find_default('pip2', this.pips, Pip)
+    this.pip3_default = this.find_default('pip3', this.pips, Pip)
+    this.pip2_default = this.find_default('pip2', this.pips, Pip)
     this.pip_default = this.find_default('pip', this.pips, Pip)
 
     // this.find_anacondas()
@@ -461,7 +461,7 @@ class Brain {
     let another = new Class(path_default)
     collection.push(another)  // default python is a totally new python we found e.g. miniconda
     this.logger.debug(another.path)
-    another.is_default = true
+    // another.is_default = true
     return another
   }
 
@@ -481,6 +481,7 @@ class Brain {
 
   symbolic_path(path) {
     // get the real underlying path
+    winston.warn('stat WASTED CALL', path)
     let result_shell_stat = spawn_xtra('stat', ['-F', path])
     if (result_shell_stat.stderr.length != 0)
       throw new UserException(`"stat" failed with error "${result_shell_stat.stderr.toString()}" thus cannot determine symbolic link behind "${path}"`)
@@ -508,6 +509,19 @@ class Brain {
     for (let pip of this.pips)
       for (let python of this.pythons)
         pip.inform_about(python)
+
+    // tell each pip and python its standing as a default, default2 or default3
+    for (let python of this.pythons) {
+      python.is_default = this.python_default ? this.paths_same(python.path, this.python_default.path) : false
+      python.is_default2 = this.python2_default ? this.paths_same(python.path, this.python2_default.path) : false
+      python.is_default3 = this.python3_default ? this.paths_same(python.path, this.python3_default.path) : false
+    }
+    for (let pip of this.pips) {
+      pip.is_default = this.pip_default ? this.paths_same(pip.path, this.pip_default.path) : false
+      pip.is_default2 = this.pip2_default ? this.paths_same(pip.path, this.pip2_default.path) : false
+      pip.is_default3 = this.pip3_default ? this.paths_same(pip.path, this.pip3_default.path) : false
+    }
+      
   }
 }
 
