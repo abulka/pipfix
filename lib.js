@@ -531,41 +531,42 @@ class Brain {
   }
 
   symbolic_path(path) {
-    // get the real underlying path
+    /*
+    Strips symbolic reference symbols and other rubbish from path, just in case the path returned by 'ls' is a symbolic link or an executable.
+    Note we don't follow the symbolic path to its destination.
+    */
+
+    // Get more info about the path
     let result_shell_stat = spawn_xtra('stat', ['-F', path])
     if (result_shell_stat.stderr.length != 0)
       throw new UserException(`"stat" failed with error "${result_shell_stat.stderr.toString()}" thus cannot determine symbolic link behind "${path}"`)
-
     let symbolic_path = result_shell_stat.stdout.toString()
-    
+
     // parse this properly and get the pure absolute path
 
-    // e.g. might get a result like this:
-    // lrwxr-xr-x 1 Andy staff 9 Jan 11 14:21:49 2018 /Users/Andy/miniconda/envs/py36/bin/python3@ -> python3.6
-    // what bit do we want, the full path or the short path?  let go for the full
+    // Case 1, the lhs of the ->
+    //  lrwxr-xr-x 1 Andy staff 9 Jan 11 14:21:49 2018 /Users/Andy/miniconda/envs/py36/bin/python3@ -> python3.6
     let regex = /.*?(\/.*)\s->\s(.*)/
     let match = regex.exec(symbolic_path)
     if (match != null) {
-      let left = match[1]  // left -> right
-      let right = match[2]
-      left = left.replace('@', '')
-      // console.log('should be matching exactly on', left)
+      let left = match[1]
+      left = left.replace('@', '')  // strip thesymbolic link indicator symbol '@'
       return left
     }
 
-    // try again, might get
-    // -rwxr-xr-x 1 root wheel 66880 Jan 19 18:37:24 2018 /usr/bin/python*
+    // Case 2, probably should not do this, since the result is the same as the incoming 'path' anyway
+    //  -rwxr-xr-x 1 root wheel 66880 Jan 19 18:37:24 2018 /usr/bin/python*
     regex = /.*?(\/.*)/
     match = regex.exec(symbolic_path)
     if (match != null) {
       let left = match[1]
-      left = left.replace('*', '')
-      // console.log('(attempt 2) should be matching exactly on', left)
+      left = left.replace('*', '')  // strip the executable symbol
+      if (left != path)
+        throw new UserException(`Error '${left}' and '${path}' should be the same`)
       return left
     }
 
-    throw new UserException(`should never get here - the match above should have worked on ${symbolic_path}`)
-    // return symbolic_path
+    throw new UserException(`Could not parse '${path}' stat info '${symbolic_path}'`)
   }
 
   get_python(path) {
