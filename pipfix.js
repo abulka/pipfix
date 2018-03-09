@@ -22,9 +22,9 @@ prog
       brain.find_anacondas()
           
     brain.analyse_relationships()  // inform all pips of all other pythons
+    brain.report()  // always do this, cos visualisations also now rely on some report_obj info
 
     if (options.report) {
-      brain.report()
       for (let el of [...brain.pythons, ...brain.pips])
         console.log(`${el.path} ---------- ${format(el.report_obj)}`)
       console.log(`Site Relationships Detail: ---------- ${format(brain.report_obj_site_relationships)}`)
@@ -37,7 +37,7 @@ prog
     if (options.visualise)
       visualise(brain, logger)
 
-      logger.debug('DONE ')
+    logger.debug('DONE ')
   });
 
 prog.parse(process.argv);
