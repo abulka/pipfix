@@ -198,7 +198,7 @@ function viz3(digraph_text) {
     return template
 }
 
-function viz3_multiple(digraph_objs) {
+function viz3_multiple(brain, digraph_objs) {
   let template = `
   <!doctype html>
   <html>
@@ -214,21 +214,30 @@ function viz3_multiple(digraph_objs) {
   <script>
       document.body.innerHTML += "<p>Here are the Pythons and Pips detected on your system.</p>";
     `
+
+  template += `
+      document.body.innerHTML += '<h2>Overall</h2>'
+      document.body.innerHTML += \`<pre>${format(brain.report_obj)}</pre>\`
+      `
+
   for (digraph_obj of digraph_objs) {
     template += `
         document.body.innerHTML += '<h2>${digraph_obj.python.version}</h2>'
         document.body.innerHTML += Viz(\`${digraph_obj.digraph}\`, "svg")
         `
+
         if (digraph_obj.python.report_obj != {})
           template += `
             document.body.innerHTML += '<h3>analysis</h3>'
             document.body.innerHTML += \`<pre>${format(digraph_obj.python.report_obj)}</pre>\`
             `
+
         if (digraph_obj.python.report_obj != {})
           template += `
             document.body.innerHTML += '<h3>sys path</h3>'
             document.body.innerHTML += \`<pre>${format(digraph_obj.python.sys_path)}</pre>\`
             `
+
         if (digraph_obj.python.report_obj.is_default)
           template += `
             document.body.innerHTML += '<h3>advice</h3>'
@@ -275,7 +284,7 @@ function visualise(brain, logger) {
   for (let digraph_obj of digraph_objs) {
     logger.debug(digraph_objs.digraph)  // verbose
   }
-  let html = viz3_multiple(digraph_objs)
+  let html = viz3_multiple(brain, digraph_objs)
   write_to_file(html)
 }
 

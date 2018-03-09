@@ -321,7 +321,11 @@ class Brain {
     this.pythons = []
     this.pips = []
     this.python_default
+    this.python2_default
+    this.python3_default
     this.pip_default
+    this.pip2_default
+    this.pip3_default
     this.visualisation = ''
     this.verbose = true
 
@@ -331,8 +335,8 @@ class Brain {
     this.find_python('/usr/local/bin/python3')
     for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/python*(2|3)"))
       this.find_python(file_path)
-    this.find_default('python2', this.pythons, Python)
-    this.find_default('python3', this.pythons, Python)
+    this.python_default3 = this.find_default('python3', this.pythons, Python)
+    this.python_default2 = this.find_default('python2', this.pythons, Python)
     this.python_default = this.find_default('python', this.pythons, Python)
 
     this.find_pip('/usr/bin/pip')
@@ -341,8 +345,8 @@ class Brain {
     this.find_pip('/usr/local/bin/pip3')
     for (let file_path of glob.sync("/usr/local/Cellar/python*/*/bin/pip*(2|3)"))
       this.find_pip(file_path)
-    this.find_default('pip2', this.pips, Pip)
-    this.find_default('pip3', this.pips, Pip)
+    this.pip_default3 = this.find_default('pip3', this.pips, Pip)
+    this.pip_default2 = this.find_default('pip2', this.pips, Pip)
     this.pip_default = this.find_default('pip', this.pips, Pip)
 
     // this.find_anacondas()
@@ -351,6 +355,17 @@ class Brain {
   }
 
   report() {
+    this.report_obj = {}
+    this.report_obj.pythons = this.pythons.map(el => el.path)
+    this.report_obj.pips = this.pips.map(el => el.path)
+    this.report_obj.sites = 'TODO'
+    this.report_obj.python_default = this.python_default ? this.python_default.path : ''
+    this.report_obj.python2_default = this.python2_default ? this.python2_default.path : ''
+    this.report_obj.python3_default = this.python3_default ? this.python3_default.path : ''
+    this.report_obj.pip_default = this.pip_default ? this.pip_default.path : ''
+    this.report_obj.pip2_default = this.pip2_default ? this.pip2_default.path : ''
+    this.report_obj.pip3_default = this.pip3_default ? this.pip3_default.path : ''
+    
     for (let python of this.pythons)
       python.report()
     for (let pip of this.pips)

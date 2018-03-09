@@ -9,7 +9,7 @@ let {visualise} = require('./visualise.js')
 prog
   .version('1.0.0')
   .description('Reports python installed and any related pips')
-  .option('--noadvice', 'Suppress advice', prog.BOOL)
+  .option('--advice', 'Generate advice', prog.BOOL)
   .option('--report', 'Generate JSON report', prog.BOOL)
   .option('--visualise', 'Visualise as graph in browser', prog.BOOL)
   .option('--anacondas', 'Scan for multiple virtual Anaconda pythons (may be slow if you have a lot)', prog.BOOL)
@@ -27,9 +27,10 @@ prog
       brain.report()
       for (let el of [...brain.pythons, ...brain.pips])
         console.log(`${el.path} ---------- ${format(el.report_obj)}`)
+      console.log(`Overall: ---------- ${format(brain.report_obj)}`)
     }
 
-    if (! options.noadvice)
+    if (options.advice)
       advice(brain)
 
     if (options.visualise)
