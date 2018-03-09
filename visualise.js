@@ -218,13 +218,22 @@ function viz3_multiple(digraph_objs) {
     template += `
         document.body.innerHTML += '<h2>${digraph_obj.python.version}</h2>'
         document.body.innerHTML += Viz(\`${digraph_obj.digraph}\`, "svg")
-        document.body.innerHTML += \`<pre>${format(digraph_obj.python.report_obj)}</pre>\`
-        // document.body.innerHTML += '<br>'
-      `
-    if (digraph_obj.python.report_obj.is_default)
-      template += `
-        document.body.innerHTML += '<p>This is the <b>default</b> ${path.basename(digraph_obj.python.report_obj.path)}</p>'
-      `
+        `
+        if (digraph_obj.python.report_obj != {})
+          template += `
+            document.body.innerHTML += '<h3>analysis</h3>'
+            document.body.innerHTML += \`<pre>${format(digraph_obj.python.report_obj)}</pre>\`
+            `
+        if (digraph_obj.python.report_obj != {})
+          template += `
+            document.body.innerHTML += '<h3>sys path</h3>'
+            document.body.innerHTML += \`<pre>${format(digraph_obj.python.sys_path)}</pre>\`
+            `
+        if (digraph_obj.python.report_obj.is_default)
+          template += `
+            document.body.innerHTML += '<h3>advice</h3>'
+            document.body.innerHTML += '<p>This is the <b>default</b> ${path.basename(digraph_obj.python.report_obj.path)}</p>'
+            `
   }
   template += `
     </script>

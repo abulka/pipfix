@@ -51,6 +51,8 @@ class Base {
   constructor(path) {
     this.path = path
     this.is_default = false
+    this.is_default2 = false  // proposed
+    this.is_default3 = false  // proposed
     this.result_shell_ls
     this.result_shell_version
     this.result_shell_file_size
@@ -154,6 +156,7 @@ class Python extends Base {
     this.sys_path = []
     this.pip_module_version
     this.pip_module_site_package_path
+    this.pips = []          // proposed
     this.analyse()
   }
 
@@ -234,6 +237,17 @@ class Python extends Base {
     if (this.pip_module_version == undefined) this.add_warning(`pip module not installed`, this.result_shell_run_pip_as_module)
   }
 
+  get pips_default() {  // proposed
+    // Which pips are default, default2 or default3 (i.e. invocable from the command line by typing pip, pip2 or pip3).
+    // cos if this list is empty, then whilst there may be a theoretical pip for this python, it cannot be invoked except
+    // via explicit path, or via "python -m pip" (which always works).
+    result = []
+    for (pip of this.pips)
+      if (pip.is_default || pip.is_default2 || pip.is_default3)
+        result.push(pip)
+    return result
+  }  
+
   report() {
     super.report()
     if (this.runs_ok) {
@@ -289,7 +303,7 @@ class Pip extends Base {
   report() {
     super.report()
     this.report_obj.site = this.site_package_path
-    this.report_obj.site_relationships = this.site_relationships  // TODO rename 'associations' to 'site_relationships'
+    this.report_obj.site_relationships = this.site_relationships
   }
 }
 
