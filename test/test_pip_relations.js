@@ -73,12 +73,8 @@ sys.path = [
     python_usr_bin.exists.should.be.true()
     python_usr_bin.runs_ok.should.be.true()
     pip_usr_local_bin.exists.should.be.true()
-
     // brain.report()
     // console.log(brain.report_obj)
-
-    // OLD
-    // pip_usr_local_bin.site_relationships['/usr/bin/python'].should.be.true()
 
     // NEW (technique 1)
     pip_usr_local_bin.pythons.should.containEql(python_usr_bin)
@@ -130,17 +126,12 @@ sys.path = [
     let {Brain} = require('../lib.js')
     let brain = new Brain()
     brain.analyse_relationships()
-
-    // OLD
-    // brain.get_pip('/usr/local/bin/pip').site_relationships['/usr/bin/python'].should.be.false()
-
     // NEW (technique 1)
     let pip = brain.get_pip('/usr/local/bin/pip')
     pip.pythons.should.not.containEql(brain.get_python('/usr/bin/python'))
     // NEW (technique 2)
     let site = brain.sites[pip.site_package_path]
     site.pips.should.containEql(pip)
-    
   })
 
 
@@ -185,13 +176,6 @@ sys.path = [
     let brain = new Brain()
     brain.analyse_relationships()
     let pip = brain.get_pip('/Users/Andy/miniconda/bin/pip')
-    // console.log(pip.site_relationships, pip.site_package_path)
-
-    // OLD
-    // pip.site_relationships['/Users/Andy/miniconda/bin/python'].should.be.true()
-    // Object.keys(pip.site_relationships).length.should.be.equal(1)
-    // assert(brain.get_pip('/Users/Andy/miniconda/bin/pip').site_relationships['/usr/bin/python'] == undefined)
-
     // NEW (technique 1)
     let python = brain.get_python('/Users/Andy/miniconda/bin/python')
     let python_usr_bin = brain.get_python('/usr/bin/python')
@@ -201,8 +185,6 @@ sys.path = [
     // NEW (technique 2)
     let site = brain.sites[python.pip_module_site_package_path]
     site.pythons.should.containEql(python)
-    
-    
   })
 
 });

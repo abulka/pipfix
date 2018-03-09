@@ -322,6 +322,15 @@ class Site {
 }
 
 class Brain {
+  /*
+  Create an instance of this and all the scanning will be done.
+  To optionally look for anacondas call .find_anacondas()
+  When ready to see the results call .analyse_relationships() 
+  Then call .report() to generate a .report_obj which can be pretty printed. 
+    Each python and pip in .pythons and .pips will also have a .report_obj which can be pretty printed. 
+    Also .report_obj_site_relationships is available separately, because it is so verbose
+  */
+
   constructor(logger) {
     this.logger = (logger == undefined) ? winston : logger  // logger may come from CLI invocation, otherwise use default winston logger
     this.pythons = []
@@ -358,10 +367,6 @@ class Brain {
     this.pip3_default = this.find_default('pip3', this.pips, Pip)
     this.pip2_default = this.find_default('pip2', this.pips, Pip)
     this.pip_default = this.find_default('pip', this.pips, Pip)
-
-    // this.find_anacondas()
-    // this.analyse_relationships()  // inform all pips of all other pythons
-    // this.report()
   }
 
   report() {
@@ -374,17 +379,6 @@ class Brain {
     
     this.report_obj.sites = Object.entries(this.sites).map( el => el[1].path ) // get list of k,v tuples, then then iterate using map 
 
-    this.report_obj.site_relationships = {}
-    Object.keys(this.sites).forEach( key => {
-      this.report_obj.site_relationships[key] = {}
-      let site = this.sites[key]
-      // console.log(site)
-      this.report_obj.site_relationships[key].pythons = [...site.pythons].map(el => el.path)
-      this.report_obj.site_relationships[key].pips = [...site.pips].map(el => el.path)
-    } )
-    
-    Object.entries(this.sites).map( el => el[1].path ) // get list of k,v tuples, then then iterate using map 
-    
     function python_info(python) {
       let res = python.pips.map(el => el.path)
       return `${python.path} <-- ${res.length ? res : NO_PIP_ASSOCATED}`  // might be more than one pip...
@@ -400,6 +394,18 @@ class Brain {
     this.report_obj.defaults.pip = this.pip_default ? pip_info(this.pip_default) : NO_PIP
     this.report_obj.defaults.pip2 = this.pip2_default ? pip_info(this.pip2_default) : NO_PIP
     this.report_obj.defaults.pip3 = this.pip3_default ? pip_info(this.pip3_default) : NO_PIP
+
+    // Detail
+
+    this.report_obj_site_relationships = {}
+    Object.keys(this.sites).forEach( key => {
+      this.report_obj_site_relationships[key] = {}
+      let site = this.sites[key]
+      this.report_obj_site_relationships[key].pythons = [...site.pythons].map(el => el.path)
+      this.report_obj_site_relationships[key].pips = [...site.pips].map(el => el.path)
+    } )
+    
+    // Python and Pips
     
     for (let python of this.pythons)
       python.report()

@@ -291,6 +291,10 @@ function viz3_multiple(brain, digraph_objs) {
       document.body.innerHTML += '<h2>Overall</h2>'
       document.body.innerHTML += \`<pre>${format(brain.report_obj)}</pre>\`
       `
+  template += `
+      document.body.innerHTML += '<h3>Site Relationships Detail</h3>'
+      document.body.innerHTML += \`<pre>${format(brain.report_obj_site_relationships)}</pre>\`
+      `
 
   for (let digraph_obj of digraph_objs) {
     template += `

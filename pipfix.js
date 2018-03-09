@@ -27,6 +27,7 @@ prog
       brain.report()
       for (let el of [...brain.pythons, ...brain.pips])
         console.log(`${el.path} ---------- ${format(el.report_obj)}`)
+      console.log(`Site Relationships Detail: ---------- ${format(brain.report_obj_site_relationships)}`)
       console.log(`Overall: ---------- ${format(brain.report_obj)}`)
     }
 
