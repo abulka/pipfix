@@ -303,12 +303,12 @@ class Pip extends Base {
   }
 
   inform_about(python) {
-    this.pythons.push(python)
-
     // Figure out if pip and this python share a site
     let are_associated = python.sys_path.length > 0 && python.sys_path.indexOf(this.site_package_path) >= 0
-    if (are_associated)
+    if (are_associated) {
       python.pips.push(this)
+      this.pythons.push(python)
+    }
     this.site_relationships[python.path] = are_associated
   }
 
@@ -316,6 +316,8 @@ class Pip extends Base {
     super.report()
     this.report_obj.site = this.site_package_path
     this.report_obj.site_relationships = this.site_relationships
+    
+    this.report_obj.pythons = this.pythons.map(el => el.path)
 
     this.report_obj.is_default_for = []
     if (this.is_default) this.report_obj.is_default_for.push('pip')
@@ -371,14 +373,24 @@ class Brain {
     this.report_obj.pythons = this.pythons.map(el => el.path)
     this.report_obj.pips = this.pips.map(el => el.path)
     this.report_obj.sites = 'TODO'
+    const NO_PIP_ASSOCATED = '?? no associated pip, pip2 or pip3 found in path'
+    const NO_PIP = 'not found in path'
 
+    function python_info(python) {
+      let res = python.pips.map(el => el.path)
+      return `${python.path} <-- ${res.length ? res : NO_PIP_ASSOCATED}`  // might be more than one pip...
+    }
+    function pip_info(pip) {
+      let res = pip.pythons.map(el => el.path)
+      return `${pip.path} --> ${res.length ? res : '??'}`  // should only be one python, but just in case...
+    }
     this.report_obj.defaults = {}
-    this.report_obj.defaults.python = this.python_default ? this.python_default.path : ''
-    this.report_obj.defaults.python2 = this.python2_default ? this.python2_default.path : ''
-    this.report_obj.defaults.python3 = this.python3_default ? this.python3_default.path : ''
-    this.report_obj.defaults.pip = this.pip_default ? this.pip_default.path : ''
-    this.report_obj.defaults.pip2 = this.pip2_default ? this.pip2_default.path : ''
-    this.report_obj.defaults.pip3 = this.pip3_default ? this.pip3_default.path : ''
+    this.report_obj.defaults.python = this.python_default ? python_info(this.python_default) : ''
+    this.report_obj.defaults.python2 = this.python2_default ? python_info(this.python2_default) : ''
+    this.report_obj.defaults.python3 = this.python3_default ? python_info(this.python3_default) : ''
+    this.report_obj.defaults.pip = this.pip_default ? pip_info(this.pip_default) : NO_PIP
+    this.report_obj.defaults.pip2 = this.pip2_default ? pip_info(this.pip2_default) : NO_PIP
+    this.report_obj.defaults.pip3 = this.pip3_default ? pip_info(this.pip3_default) : NO_PIP
     
     for (let python of this.pythons)
       python.report()
