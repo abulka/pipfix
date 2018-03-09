@@ -376,6 +376,17 @@ class Brain {
     this.report_obj.pips = this.pips.map(el => el.path)
     
     this.report_obj.sites = Object.entries(this.sites).map( el => el[1].path ) // get list of k,v tuples, then then iterate using map 
+
+    this.report_obj.site_relationships = {}
+    Object.keys(this.sites).forEach( key => {
+      this.report_obj.site_relationships[key] = {}
+      let site = this.sites[key]
+      console.log(site)
+      this.report_obj.site_relationships[key].pythons = [...site.pythons].map(el => el.path)
+      this.report_obj.site_relationships[key].pips = [...site.pips].map(el => el.path)
+    } )
+    
+    Object.entries(this.sites).map( el => el[1].path ) // get list of k,v tuples, then then iterate using map 
     
     function python_info(python) {
       let res = python.pips.map(el => el.path)
