@@ -52,8 +52,8 @@ class Base {
   constructor(path) {
     this.path = path
     this.is_default = false
-    this.is_default2 = false  // proposed
-    this.is_default3 = false  // proposed
+    this.is_default2 = false
+    this.is_default3 = false
     this.result_shell_ls
     this.result_shell_version
     this.result_shell_file_size
@@ -139,7 +139,6 @@ class Base {
     this.report_obj = {}
     this.report_obj.path = this.path
     // this.report_obj['exists'] = this.exists
-    this.report_obj.is_default = this.is_default
     if (this.exists) {
       this.report_obj.runs_ok = this.runs_ok
       this.report_obj.version = this.version
@@ -262,6 +261,11 @@ class Python extends Base {
 
       this.report_obj.pips = this.pips.map(el => el.path)
       this.report_obj.pips_default = this.pips_default.map(el => el.path)
+
+      this.report_obj.is_default_for = []
+      if (this.is_default) this.report_obj.is_default_for.push('python')
+      if (this.is_default2) this.report_obj.is_default_for.push('python2')
+      if (this.is_default3) this.report_obj.is_default_for.push('python3')
     }
   }
 }
@@ -312,6 +316,11 @@ class Pip extends Base {
     super.report()
     this.report_obj.site = this.site_package_path
     this.report_obj.site_relationships = this.site_relationships
+
+    this.report_obj.is_default_for = []
+    if (this.is_default) this.report_obj.is_default_for.push('pip')
+    if (this.is_default2) this.report_obj.is_default_for.push('pip2')
+    if (this.is_default3) this.report_obj.is_default_for.push('pip3')    
   }
 }
 
@@ -362,12 +371,14 @@ class Brain {
     this.report_obj.pythons = this.pythons.map(el => el.path)
     this.report_obj.pips = this.pips.map(el => el.path)
     this.report_obj.sites = 'TODO'
-    this.report_obj.python_default = this.python_default ? this.python_default.path : ''
-    this.report_obj.python2_default = this.python2_default ? this.python2_default.path : ''
-    this.report_obj.python3_default = this.python3_default ? this.python3_default.path : ''
-    this.report_obj.pip_default = this.pip_default ? this.pip_default.path : ''
-    this.report_obj.pip2_default = this.pip2_default ? this.pip2_default.path : ''
-    this.report_obj.pip3_default = this.pip3_default ? this.pip3_default.path : ''
+
+    this.report_obj.defaults = {}
+    this.report_obj.defaults.python = this.python_default ? this.python_default.path : ''
+    this.report_obj.defaults.python2 = this.python2_default ? this.python2_default.path : ''
+    this.report_obj.defaults.python3 = this.python3_default ? this.python3_default.path : ''
+    this.report_obj.defaults.pip = this.pip_default ? this.pip_default.path : ''
+    this.report_obj.defaults.pip2 = this.pip2_default ? this.pip2_default.path : ''
+    this.report_obj.defaults.pip3 = this.pip3_default ? this.pip3_default.path : ''
     
     for (let python of this.pythons)
       python.report()
