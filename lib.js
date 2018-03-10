@@ -59,6 +59,8 @@ function real_path(path) {
 
   // Realpath gets the real path, -e ensures it exists
   let result_shell_realpath = spawn_xtra('realpath', ['-e', path])
+  if (result_shell_realpath.stderr == null)
+    throw new UserException(`Command 'realpath' not found, please install. Ubuntu: "sudo apt-get install coreutils" OS X: "brew install coreutils"`)
   if (result_shell_realpath.stderr.length != 0) {
     // console.log(`"realpath" failed with error "${result_shell_realpath.stderr.toString()}" thus cannot determine realpath behind "${path}"`)
     return path  // just return the same path

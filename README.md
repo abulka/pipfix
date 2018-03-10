@@ -25,10 +25,18 @@ this tool will also (in time) report if you have conda technology python install
 - git clone https://github.com/abulka/pipfix.git
 - ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 - brew install node
+- brew install graphviz
+- brew install coreutils
 - cd pipfix
 - npm install
 - npm test
 - npm start
+
+Ubuntu: brew would be replaced with
+- sudo apt-get install coreutils
+- etc.
+
+Then simply node `pipfix.js --visualise`
 
 ## Details ##
 
