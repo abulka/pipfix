@@ -5,7 +5,7 @@ Python and pip installation analyser and visualiser.
 ![visualisation of pipfix results](images/graph00.png "visualisation pic")
 
 *Visualisation of the default Python installation on a Mac in Sierra, 
-following the installation of `pip` using `brew install pip`:*
+following the installation of `pip` using `brew install pip`*
 
 ## Introduction
 
