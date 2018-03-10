@@ -103,6 +103,10 @@ sys.path = [
     'stdout': '/usr/bin/python',
     'stderr': ''
   },
+  'realpath_1': {  // realpath -e some/path
+    'stdout': '',
+    'stderr': 'some error happens cos tests not testing this yet'
+  },
 }
 
 class BaseSpawnMockBehaviour{
@@ -153,6 +157,8 @@ class BaseSpawnMockBehaviour{
       this.which_pip()
     else if (this.cmd == 'stat' && this.params[0] == '-F')
       this.stat()
+    else if (this.cmd == 'realpath')
+      this.realpath()
     // else if (this.cmd == 'wc' && this.params[0] == '-c')
     //   this.size()
     else
@@ -201,6 +207,11 @@ class BaseSpawnMockBehaviour{
   stat() {
     this.select('stat_1')
     this.result['stdout'] = '-rwxr-xr-x 1 root wheel 66576 Dec 13 22:22:22 2017 ' + this.params[1]  // for now just make stat path the exact same as path
+    assert(this.result != undefined)
+  }
+
+  realpath() {
+    this.select('realpath_1')
     assert(this.result != undefined)
   }
 

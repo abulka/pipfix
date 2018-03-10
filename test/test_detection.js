@@ -42,6 +42,7 @@ describe('detection of one or more pip and python', function() {
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Brain} = require('../lib.js')
       let brain = new Brain()
+      brain.analyse_relationships()
       brain.pythons.length.should.equal(0)
     });
 
@@ -67,6 +68,7 @@ describe('detection of one or more pip and python', function() {
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Brain} = require('../lib.js')
       let brain = new Brain()
+      brain.analyse_relationships()
       brain.pythons.length.should.equal(1)
     })
 
@@ -92,6 +94,7 @@ describe('detection of one or more pip and python', function() {
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Brain} = require('../lib.js')
       let brain = new Brain()
+      brain.analyse_relationships()
       brain.pythons.length.should.equal(1)
     })
 
@@ -117,6 +120,7 @@ describe('detection of one or more pip and python', function() {
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Brain} = require('../lib.js')
       let brain = new Brain()
+      brain.analyse_relationships()
       brain.pythons.length.should.equal(2)
     })
 
@@ -143,6 +147,7 @@ describe('detection of one or more pip and python', function() {
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Brain} = require('../lib.js')
       let brain = new Brain()
+      brain.analyse_relationships()
       brain.pythons.length.should.equal(3)
     })
 
@@ -171,6 +176,7 @@ describe('detection of one or more pip and python', function() {
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Brain} = require('../lib.js')
       let brain = new Brain()
+      brain.analyse_relationships()
       brain.pips.length.should.equal(0)
     });
 
@@ -196,6 +202,7 @@ describe('detection of one or more pip and python', function() {
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Brain} = require('../lib.js')
       let brain = new Brain()
+      brain.analyse_relationships()
       brain.pips.length.should.equal(1)
     });
 
@@ -222,6 +229,7 @@ describe('detection of one or more pip and python', function() {
       mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
       let {Brain} = require('../lib.js')
       let brain = new Brain()
+      brain.analyse_relationships()
       brain.pips.length.should.equal(2)
     });
 

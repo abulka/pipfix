@@ -6,9 +6,10 @@ const path = require('path')
 const OUT_FILENAME = "out.html"
 const site_dot = '[shape=box,color=grey,fontcolor=dimgrey]'
 const python_dot = '[shape=component,style="bold",color=green,fillcolor=lightgreen,fontsize=18]'
-const pip_dot = '[shape=box]'
+const pip_dot = '[shape=box,color=blue]'
 const default_python_dot = '[style=dashed,color=green]'
 const default_pip_dot = '[style=dashed,color=blue]'
+const aka_python_dot = '[shape=component,color=green,fontsize=10,width=0.5]'
 
 function visualise_digraphs(brain) {
   // returns multiple digraphs in a list of dicts
@@ -45,7 +46,20 @@ function visualise_digraphs(brain) {
             result += `  "${default_python_name}" ${default_python_dot}\n`
             result += `  "${default_python_name}" -> "${r(python.path)}" [style=solid,color=green]\n`
           }
+
+        // Diagram the extra pythons which are really the same python
+        for (let aka_python_path of python.report_obj.paths_all) {
+          if (aka_python_path == python.path)
+            continue
+          // Add aka python
+          result += `  "${r(aka_python_path)}" ${aka_python_dot}\n`
+          // Add aka python -> python
+          result += `  "${r(python.path)}" -> "${r(aka_python_path)}" [style=solid,color=green,dir=none]\n`
+          // Add aka python -> site
+          result += `  "${r(aka_python_path)}" -> "${r(site.path)}" [style=dotted]\n`
+        }
       }
+
     }
     
     // Pips

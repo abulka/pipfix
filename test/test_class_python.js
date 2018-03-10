@@ -275,6 +275,7 @@ describe('class Python', function() {
     mockery.registerMock('child_process', { spawnSync: make_mock_spawn_func(SpawnMock) })
     let {Python, Brain} = require('../lib.js')
     let brain = new Brain()
+    brain.analyse_relationships()
     brain.pythons.length.should.equal(1)
   });
 

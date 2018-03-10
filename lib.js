@@ -48,9 +48,30 @@ function spawn_xtra(cmd, arg_list) {
   return result_shell_obj
 }
 
+function real_path(path) {
+  /*
+  Strips symbolic reference symbols and other rubbish from path, just in case the path returned by 'ls' is a symbolic link or an executable.
+  Note we don't follow the symbolic path to its destination.
+
+  If the stat simply shows the file is pure file, perhaps with a '*' to indicate it is executable, then no match, and we return empty
+  because we already have the pure file path, don't need it again.
+  */
+
+  // Realpath gets the real path, -e ensures it exists
+  let result_shell_realpath = spawn_xtra('realpath', ['-e', path])
+  if (result_shell_realpath.stderr.length != 0) {
+    // console.log(`"realpath" failed with error "${result_shell_realpath.stderr.toString()}" thus cannot determine realpath behind "${path}"`)
+    return path  // just return the same path
+  }
+  return result_shell_realpath.stdout.toString().trimRight()
+}
+
+real_path = lodash.memoize(real_path)  // cache
+
 class Base {
   constructor(path) {
     this.path = path
+    this.paths_all = new Set()
     this.is_default = false
     this.is_default2 = false
     this.is_default3 = false
@@ -79,6 +100,8 @@ class Base {
     if (this.exists) {
       this.result_shell_version = spawn_xtra(this.path, ['--version'])
       this.result_shell_file_size = spawn_xtra('wc', ['-c', this.path])
+      this.paths_all.add(this.path)
+      this.paths_all.add(real_path(this.path))
     }
 
     // console.log(`Base analyse() for ${this.path} ls stderr "${this.result_shell_ls.stderr.toString()}" version stderr "${this.result_shell_version.stderr.toString()}"`)
@@ -138,6 +161,7 @@ class Base {
   report() {
     this.report_obj = {}
     this.report_obj.path = this.path
+    this.report_obj.paths_all = [...this.paths_all]
     // this.report_obj['exists'] = this.exists
     if (this.exists) {
       this.report_obj.runs_ok = this.runs_ok
@@ -461,8 +485,11 @@ class Brain {
 
   find_python(path) {
     for (let python of this.pythons)
-      if (this.paths_same(path, python.path))  // prevent duplicates
+      if (this.paths_same(path, python.path)) {  // prevent duplicates
+        python.paths_all.add(path)
+        python.paths_all.add(real_path(path))
         return
+      }
     let python = new Python(path)
     if (python.exists) {
       this.pythons.push(python)
@@ -472,8 +499,11 @@ class Brain {
 
   find_pip(path) {
     for (let pip of this.pips)
-      if (this.paths_same(path, pip.path))  // prevent duplicates
+      if (this.paths_same(path, pip.path)) {  // prevent duplicates
+        pip.paths_all.add(path)
+        pip.paths_all.add(real_path(path))
         return
+      }
     let pip = new Pip(path)
     if (pip.exists) {
       this.pips.push(pip)
@@ -501,15 +531,12 @@ class Brain {
       return undefined
 
     for (let el of collection) {
-      console.log('')
-      console.log(`are paths sameL: '${path_default}'`)
-      console.log(`are paths sameR: '${el.path}'`)      
+      el.paths_all.add(real_path(el.path))
       if (this.paths_same(path_default, el.path)) {
-        console.log(`---------- yes --`)
+        el.paths_all.add(path_default)
+        el.paths_all.add(real_path(path_default))
         return el  // default python pip is an existing one
       }
-      else
-        console.log(`---------- no --`)
     }
     let another = new Class(path_default)
     collection.push(another)  // default python is a totally new python we found e.g. miniconda
@@ -518,59 +545,14 @@ class Brain {
   }
 
   paths_same(path1, path2) {
-    // See if the paths are the same.
-    // Also check against the 'stat' version of path2, just in case its a symbolic link
-
+    // See if the paths are the same.  
+    // Looks at all possibilites of path and any symbolic link target paths, for both path1 and path2
     if (path1 == path2)
       return true
-
-    let path2_symbolic = this.symbolic_path(path2)
-    if (path2_symbolic != undefined && (path2_symbolic == path1))
-      return true
-
-    return false
-  }
-
-  symbolic_path(path) {
-    /*
-    Strips symbolic reference symbols and other rubbish from path, just in case the path returned by 'ls' is a symbolic link or an executable.
-    Note we don't follow the symbolic path to its destination.
-    */
-
-    // Get more info about the path
-    let result_shell_stat = spawn_xtra('stat', ['-F', path])
-    if (result_shell_stat.stderr.length != 0)
-      throw new UserException(`"stat" failed with error "${result_shell_stat.stderr.toString()}" thus cannot determine symbolic link behind "${path}"`)
-    let symbolic_path = result_shell_stat.stdout.toString()
-    console.log(`SYMBOLIC: '${symbolic_path.trimRight()}'`)      
-
-    // parse this properly and get the pure absolute path
-
-    // Case 1, the lhs of the ->
-    //  lrwxr-xr-x 1 Andy staff 9 Jan 11 14:21:49 2018 /Users/Andy/miniconda/envs/py36/bin/python3@ -> python3.6
-    let regex = /.*?(\/.*)\s->\s(.*)/
-    let match = regex.exec(symbolic_path)
-    if (match != null) {
-      let left = match[1]
-      left = left.replace('@', '')  // strip thesymbolic link indicator symbol '@'
-      return left
-    }
-
-    // Case 2, probably should not do this, since the result is the same as the incoming 'path' anyway    DEPRECATED CODE - REMOVE
-    //  -rwxr-xr-x 1 root wheel 66880 Jan 19 18:37:24 2018 /usr/bin/python*
-    regex = /.*?(\/.*)/
-    match = regex.exec(symbolic_path)
-    if (match != null) {
-      let left = match[1]
-      left = left.replace('*', '')  // strip the executable symbol
-      if (left == path)
-        console.log(`REDUNDANT SYMBOLIC COMPARE '${left}' and '${path}'`)
-      if (left != path)
-        throw new UserException(`Error '${left}' and '${path}' should be the same`)
-      return left
-    }
-
-    throw new UserException(`Could not parse '${path}' stat info '${symbolic_path}'`)
+    let paths1 = new Set([path1, real_path(path1)])
+    let paths2 = new Set([path2, real_path(path2)])
+    let intersect = new Set([...paths1].filter(i => paths2.has(i)))
+    return intersect.size > 0 ? true : false
   }
 
   get_python(path) {
