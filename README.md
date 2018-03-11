@@ -46,6 +46,8 @@ A html page will be launched in your browser with reports and graphs.
 ### Tips
 Pipfix looks at the environment it is launched from, so by activating a virtual environment or changing $PATH, you will potentially get different results.
 
+**Pipfix currently doesn't actually fix anything** and is harmless to run.  It only shows graphs and reports - which should be enough for you to see what is going on in your machine and make informed decisions. There is an option to give advice, which is in its infancy.
+
 ![visualisation of pipfix results](images/graph02.png "visualisation of which pip points to which python")
 
 *Visualisation of a Python 3 installation on a virgin Mac (Sierra)*
