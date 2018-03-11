@@ -14,14 +14,6 @@ not actually do anything.  The --visualisation option is the most useful thing t
 
 `pipfix.js --visualise`
 
-## This tool runs in node.  Why?
-
-Two reasons:
-
-1. I didn't want to run python when trying to report on python and pip - let's get an outsider's point of view
-2. I will probably turn this into an electron web app which will allow a nice UI way to display all the information.  
-election uses nodejs / javascript technology.
-
 # Running tests and debugging
 
 The Node Inspector npm package is a debugger interface for Node.js but is deprecated, instead we now use the built in 
@@ -820,7 +812,7 @@ pip 9.0.1 from /Library/Python/2.7/site-packages/pip-9.0.1-py2.7.egg (python 2.7
 
 And it also seems that `/usr/local/bin/pip3` has been clobbered by brew's pip3.  We can see this from the visualisation
 
-![visualisation of pipfix results](images/graph01.png "visualisation of which pip points to which python")
+![visualisation of pipfix results](../images/graph01.png "visualisation of which pip points to which python")
 
 Notice there is no pip pointing to `/usr/local/bin/pip3` anymore.
 

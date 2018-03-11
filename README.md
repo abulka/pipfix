@@ -83,6 +83,8 @@ Sample report output [Go to this page](doco/sample1.pdf)
 
 ## Discussion
 
+This tool runs in node.  Why?  I didn't want to run python when trying to report on python. :-)
+
 Some packages e.g. `wxpython` don't work unless you have framework Python installed, which I think means a Python from python.org. So what if you have a Python already installed using `brew`?  Can these python installations co-exist?  What will the /usr/local/pip point to?  
 
 This is why `pipfix` was created, to analyse and report and then for Python developers to look at the results and give some advice re what will happen if you install a particular python distribution.  
@@ -90,4 +92,3 @@ This is why `pipfix` was created, to analyse and report and then for Python deve
 This advice will hopefully make its way into `pipfix` so that the tool will warn you about what is likely to happen if you plan to install brew python3 on a system that already has python.org python2/3 on it.
 
 For a discussion of the problem of getting `pipfix` reports for all possible Python installation scenarios [Go to this page](doco/mac_results.md)
-
