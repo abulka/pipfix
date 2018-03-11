@@ -1,0 +1,72 @@
+#bgColor: white
+
+[ Base |  path : path
+  paths_all : Set
+  is_default : false
+  is_default2 : false
+  is_default3 : false
+  result_shell_ls
+  result_shell_version
+  result_shell_file_size
+  version
+  size
+  warnings : list
+  report_obj : {}
+  |
+  get exists();
+  analyse();
+  report()
+  |
+  [beard]--[parrot]
+  [beard]-:>[foul mouth]  
+]
+
+[ Python |
+    result_shell_site_info
+    result_shell_run_pip_as_module
+    sys_path : list
+    pip_module_version
+    pip_module_site_package_path
+    pips: list
+    |
+    analyse()
+]
+
+[ Pip |
+  site_package_paths
+  pythons : list |
+  analyse()
+  analyse_version()
+  report()
+]
+
+[ Brain |
+    pythons = list
+    pips = list
+    python_default
+    python2_default
+    python3_default
+    pip_default
+    pip2_default
+    pip3_default
+    visualisation = ''
+    verbose = true
+    report_obj = {}
+    sites = {}
+]
+
+[ Site |
+    path = path
+    pythons = Set
+    pips = Set
+]
+
+ [Python]-:>[Base]
+ [Pip]-:>[Base]
+ [Brain] sites -> *[Site]
+ [Brain] pythons ->*[Python]
+ [Brain] pips ->*[Pip]
+
+ [Brain]--[<note>See doco;at this website
+http://nomnoml.com/
+]

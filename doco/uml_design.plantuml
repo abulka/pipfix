@@ -1,0 +1,105 @@
+Visual Studio Code PlantUML
+---------------------------
+
+configure plantuml plugin, set:
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_92.jdk/Contents/Home/
+export PLANTUML_JAR=/usr/local/bin/plantuml.jar
+export GRAPHVIZ_DOT=/usr/local/Cellar/graphviz/2.40.1/bin/dot
+
+verify things are working:
+$JAVA_HOME/bin/java -jar $PLANTUML_JAR -verbose a
+
+launch:
+CMD-SHIFT-P type:
+PlantUML Preview
+
+@startuml
+
+class Base  {
+    path = path
+    paths_all = Set
+    is_default = false
+    is_default2 = false
+    is_default3 = false
+    result_shell_ls
+    result_shell_version
+    result_shell_file_size
+    version
+    size
+    warnings = []
+    report_obj = {}
+    ---
+    get exists()
+    analyse()
+    report()
+}
+
+class Python  #Lavender {
+    result_shell_site_info
+    result_shell_run_pip_as_module
+    sys_path = []
+    pip_module_version
+    pip_module_site_package_path
+    pips = []
+    analyse()
+    ---
+    analyse()
+}
+
+class Pip {
+    site_package_path
+    pythons = []
+    ---
+    analyse()
+    analyse_version()
+    report()
+}
+
+class Brain {
+    pythons = []
+    pips = []
+    python_default
+    python2_default
+    python3_default
+    pip_default
+    pip2_default
+    pip3_default
+    visualisation = ''
+    verbose = true
+    report_obj = {}
+    sites = {}
+}
+
+
+class Site {
+    path = path
+    pythons = Set
+    pips = Set
+}
+
+Python --|> Base
+Pip --|> Base
+
+Brain -> "*" Site : sites
+Brain -> "*" Python : pythons
+Brain -> "*" Pip : pips
+
+note as N1
+Brain's attributes
+    python_default, python2_default, python3_default
+    pip_default, pip2_default, pip3_default
+get stored into the Brain's report objects'
+    defaults = {}
+    defaults.python
+    defaults.python2
+    defaults.python3
+    defaults.pip
+    defaults.pip2
+    defaults.pip3
+attributes, respectively.
+end note
+
+N1 ... Brain
+
+@enduml
+
