@@ -54,15 +54,22 @@ function visualise_digraphs(brain) {
           }
 
         // Diagram the extra pythons which are really the same python
-        for (let aka_python_path of python.report_obj.paths_all) {
-          if (aka_python_path == python.path)
-            continue
-          // Add aka python
-          result += `  "${r(aka_python_path)}" ${aka_python_dot}\n`
-          // Add aka python -> python
-          result += `  "${r(python.path)}" -> "${r(aka_python_path)}" [style=solid,color=green,dir=none]\n`
+        if (python.report_obj.paths_all.length > 1) {
+          let aka_paths_msg = ''
+          for (let aka_python_path of python.report_obj.paths_all) {
+            if (aka_python_path == python.path) {
+              msg_paths = aka_python_path
+              continue
+            }
+            // Add another aka python into the same box
+            aka_paths_msg += '\n' + aka_python_path
+          }
+          // Add aka pythons
+          result += `  "${aka_paths_msg}" ${aka_python_dot}\n`
+          // Add aka pythons -> python
+          result += `  "${python.path}" -> "${aka_paths_msg}" [style=solid,color=green,dir=none]\n`
           // Add aka python -> site
-          result += `  "${r(aka_python_path)}" -> "${r(site.path)}" [style=dotted]\n`
+          result += `  "${aka_paths_msg}" -> "${r(site.path)}" [style=dotted]\n`
         }
       }
 
