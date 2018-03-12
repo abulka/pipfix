@@ -12,6 +12,15 @@ const default_python_dot = '[style=dashed,color=green]'
 const default_pip_dot = '[style=dashed,color=blue]'
 const aka_python_dot = '[shape=component,color=green,fontsize=10,width=0.5]'
 
+function sort_by_length(arr) {
+  arr.sort(function(a, b){
+    // ASC  -> a.length - b.length
+    // DESC -> b.length - a.length
+    return b.length - a.length;
+  }).reverse()
+  return arr
+}
+
 function visualise_digraphs(brain) {
   // returns multiple digraphs in a list of dicts
   let results = []
@@ -55,21 +64,22 @@ function visualise_digraphs(brain) {
 
         // Diagram the extra pythons which are really the same python
         if (python.report_obj.paths_all.length > 1) {
-          let aka_paths_msg = ''
+          let aka_paths_arr = []
           for (let aka_python_path of python.report_obj.paths_all) {
             if (aka_python_path == python.path) {
               msg_paths = aka_python_path
               continue
             }
             // Add another aka python into the same box
-            aka_paths_msg += '\n' + aka_python_path
+            aka_paths_arr.push(aka_python_path)
           }
+          let aka_paths = sort_by_length(aka_paths_arr).join('\n')
           // Add aka pythons
-          result += `  "${aka_paths_msg}" ${aka_python_dot}\n`
+          result += `  "${aka_paths}" ${aka_python_dot}\n`
           // Add aka pythons -> python
-          result += `  "${python.path}" -> "${aka_paths_msg}" [style=solid,color=green,dir=none]\n`
+          result += `  "${python.path}" -> "${aka_paths}" [style=solid,color=green,dir=none]\n`
           // Add aka python -> site
-          result += `  "${aka_paths_msg}" -> "${r(site.path)}" [style=dotted]\n`
+          result += `  "${aka_paths}" -> "${r(site.path)}" [style=dotted]\n`
         }
       }
 
