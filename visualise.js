@@ -7,6 +7,7 @@ const OUT_FILENAME = "out.html"
 const site_dot = '[shape=box,color=grey,fontcolor=dimgrey]'
 const python_dot = '[shape=component,style="bold",color=green,fillcolor=lightgreen,fontsize=18]'
 const pip_dot = '[shape=box,color=blue]'
+const pip_dot_warn = '[shape=invhouse,color=blue,fillcolor=red,style=filled]'
 const default_python_dot = '[style=dashed,color=green]'
 const default_pip_dot = '[style=dashed,color=blue]'
 const aka_python_dot = '[shape=component,color=green,fontsize=10,width=0.5]'
@@ -32,6 +33,11 @@ function visualise_digraphs(brain) {
         // Add ?? pip
         result += `  "${'?? no pip in path'}" ${pip_dot}\n`
         result += `  "${'?? no pip in path'}" -> "${r(python.path)}" [style=dotted,color=red]\n`
+      }
+      if (python.pip_module_version == undefined) {
+        // Add !! pip if not installed for this python
+        result += `  "${'!! pip not installed'}" ${pip_dot_warn}\n`
+        result += `  "${'!! pip not installed'}" -> "${r(python.path)}" [style=dotted,color=red]\n`
       }
 
       // Digram the default python invocations
