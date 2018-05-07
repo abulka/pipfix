@@ -217,7 +217,7 @@ function write_to_file(html_text, logger) {
 function visualise(brain, logger) {
   let digraph_objs = visualise_digraphs(brain)
   for (let digraph_obj of digraph_objs) {
-    logger.debug(digraph_objs.digraph)  // pipfix --verbose sets logger to debug level, thus we would see this
+    logger.debug(digraph_obj.digraph)  // pipfix --verbose sets logger to debug level, thus we would see this
   }
   let html = viz3_multiple(brain, digraph_objs)
   write_to_file(html, logger)
