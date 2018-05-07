@@ -10,9 +10,11 @@ following the installation of `pip` using `brew install pip`*
 ## Introduction
 
 Ever been confused about your Python environment?
+
 ![cartoon of the problem](https://imgs.xkcd.com/comics/python_environment.png "cartoon of the problem")
 Cartoon courtesy of https://xkcd.com/1987/
 
+Do you know:
 - How many versions of `python` do you have installed on your mac?
 - How many versions of `pip` are there installed?
 - Can you mix python.org Python 3 and brew Python 3?
