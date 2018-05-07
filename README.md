@@ -9,9 +9,11 @@ following the installation of `pip` using `brew install pip`*
 
 ## Introduction
 
+Ever been confused about your Python environment?
+![cartoon of the problem](https://imgs.xkcd.com/comics/python_environment.png "cartoon of the problem")
+Cartoon courtesy of https://xkcd.com/1987/
 
-Ever been confused about:
-- How many versions of `python` you have installed on your mac?
+- How many versions of `python` do you have installed on your mac?
 - How many versions of `pip` are there installed?
 - Can you mix python.org Python 3 and brew Python 3?
 - How to have pip for mac system python and pip for python.org python co-existing at the same time?
@@ -19,7 +21,7 @@ Ever been confused about:
 - Which site-package locations are being used by which python and pip?
 - Are any site-package locations (and thus packages) being shared between pythons?
 
-Run this report tool and find out your python installation and pip installation situation.
+__Solution:__ Run this 'pipfix' report tool and find out your python installation and pip installation situation.  This will help you diagnose any problems.
 
 # Installation
 
