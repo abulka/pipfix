@@ -12,7 +12,8 @@ following the installation of `pip` using `brew install pip`*
 Ever been confused about your Python environment?
 
 ![cartoon of the problem](https://imgs.xkcd.com/comics/python_environment.png "cartoon of the problem")
-Cartoon courtesy of https://xkcd.com/1987/
+
+*Cartoon courtesy of https://xkcd.com/1987/*
 
 Do you know:
 - How many versions of `python` do you have installed on your mac?
